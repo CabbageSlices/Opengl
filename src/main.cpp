@@ -1,10 +1,51 @@
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <vector>
 #include "glad/glad.h"
 #include "SFML/OpenGL.hpp"
 #include "SFML/Window.hpp"
 
 using std::cout;
 using std::endl;
+using std::string;
+using std::fstream;
+using std::vector;
+
+string loadFileToString(const string & filename) {
+
+	fstream file(filename);
+	string fileAsString{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+	return fileAsString;
+}
+
+GLuint compileShader() {
+
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	GLuint program = glCreateProgram();
+
+	string vertexShaderSource = loadFileToString("src/shaders/vertex.vert");
+	auto vertexShaderPtr = vertexShaderSource.c_str();
+
+	string fragmentShaderSource = loadFileToString("src/shaders/fragment.frag");
+	auto fragmentShaderPtr = fragmentShaderSource.c_str();
+
+	glShaderSource(vertexShader, 1, &vertexShaderPtr, NULL);
+	glCompileShader(vertexShader);
+
+	glShaderSource(fragmentShader, 1, &fragmentShaderPtr, NULL);
+	glCompileShader(fragmentShader);
+
+	glAttachShader(program, vertexShader);
+	glAttachShader(program, fragmentShader);
+	glLinkProgram(program);
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	return program;
+}
 
 int main(int argc, char const *argv[])
 {
@@ -22,9 +63,15 @@ int main(int argc, char const *argv[])
 		exit(-1);
 	}
 
-	cout << GLVersion.major << " " << GLVersion.minor << endl;
-
 	bool isRunning = true;
+
+	GLuint shaderProgram = compileShader();
+	glUseProgram(shaderProgram);
+
+	GLuint vao;
+	glCreateVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glPointSize(20);
 
 	while(isRunning) {
 
@@ -35,6 +82,10 @@ int main(int argc, char const *argv[])
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		GLfloat clearColor[] = {0, 1, 0, 1};
+		glClearBufferfv(GL_COLOR, 0, clearColor);
+		glDrawArrays(GL_POINTS, 0, 1);
 		window.display();
 	}
 	return 0;

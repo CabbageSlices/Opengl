@@ -8,7 +8,7 @@ OBJECTS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(wildcard $(SRC_DIR)/
 DEPS := $(OBJECTS:.o=.d)
 
 CPP = g++
-CPP_FLAGS = -I$(INCLUDE_DIR) -MMD -MP -std=c++11
+CPP_FLAGS = -I$(INCLUDE_DIR) -MMD -MP -std=c++14
 LINKER_FLAGS = -L$(LIB_DIR) -lsfml-graphics -lsfml-window -lsfml-system -lopengl32
 
 all : $(OBJECTS)
