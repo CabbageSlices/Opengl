@@ -6,29 +6,29 @@
 #include "SFML/OpenGL.hpp"
 #include "SFML/Window.hpp"
 
+#include "./headers/Shader.hpp"
+#include "./headers/loadFileToString.h"
+
 using std::cout;
 using std::endl;
 using std::string;
 using std::fstream;
 using std::vector;
 
-string loadFileToString(const string & filename) {
-
-	fstream file(filename);
-	string fileAsString{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-	return fileAsString;
-}
-
 GLuint compileShader() {
 
+	Shader shader;
+	shader.loadAndCompileShader("shaders/vertex.vert", Shader::Type::Vertex);
+
+	
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	GLuint program = glCreateProgram();
 
-	string vertexShaderSource = loadFileToString("src/shaders/vertex.vert");
+	string vertexShaderSource = loadFileToString("shaders/vertex.vert");
 	auto vertexShaderPtr = vertexShaderSource.c_str();
 
-	string fragmentShaderSource = loadFileToString("src/shaders/fragment.frag");
+	string fragmentShaderSource = loadFileToString("shaders/fragment.frag");
 	auto fragmentShaderPtr = fragmentShaderSource.c_str();
 
 	glShaderSource(vertexShader, 1, &vertexShaderPtr, NULL);
@@ -47,13 +47,23 @@ GLuint compileShader() {
 	return program;
 }
 
+GLuint createBuffer() {
+
+	GLuint buffer = 0;
+
+	glCreateBuffers(1, &buffer);
+	glNamedBufferStorage(buffer, sizeof(float) * 3 * 10, nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+	return buffer;
+}
+
 int main(int argc, char const *argv[])
 {
 	
 	//setup opengl context with version 4.5 core
 	sf::Window window(sf::VideoMode(800, 600), "OpenGL",
 		sf::Style::Default, sf::ContextSettings(24, 8, 4, 4, 5, sf::ContextSettings::Core));
-
+	
 	//activte the context
 	window.setActive(true);
 
@@ -73,6 +83,8 @@ int main(int argc, char const *argv[])
 	glBindVertexArray(vao);
 	glPointSize(20);
 
+
+	cout << "HI!!!!" << endl;
 	while(isRunning) {
 
 		sf::Event event;
