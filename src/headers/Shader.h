@@ -2,7 +2,11 @@
 #define _SHADER_HPP_INCLUDED
 
 #include "glad/glad.h"
-#include "string"
+#include <string>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 /**
  * @brief      Class to store opengl shader objects.
@@ -29,6 +33,7 @@ public:
 
 	void deleteShaderObject() {
 		glDeleteShader(shaderObject);
+		shaderObject = 0;
 	}
   
   /**
@@ -43,7 +48,11 @@ public:
 		return data == 1;
 	}
 
-	bool loadAndCompileShader(const std::string &filename, const Type &type);
+	const GLuint getShaderObject() {
+		return shaderObject;
+	}
+
+	bool loadAndCompileShader(const Type &type, const std::string &filename);
 
 private:
 

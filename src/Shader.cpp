@@ -1,6 +1,6 @@
 #include <vector>
 #include <iostream>
-#include "./headers/Shader.hpp"
+#include "./headers/Shader.h"
 #include "./headers/loadFileToString.h"
 
 using std::vector;
@@ -8,10 +8,12 @@ using std::string;
 using std::cout;
 using std::endl;
 
-bool Shader::loadAndCompileShader(const string &filename, const Shader::Type &type) {
+bool Shader::loadAndCompileShader(const Type &type, const std::string &filename) {
 
-	if(shaderObject != 0)
+	if(shaderObject != 0) {
+		cout << "Shader object already created, ERROR" << endl;
 		return false;
+	}
 
 	shaderObject = glCreateShader((GLuint)type);
 
@@ -27,6 +29,8 @@ bool Shader::loadAndCompileShader(const string &filename, const Shader::Type &ty
 		return true;
 	}
 
+	cout << "Error compiling file: " << filename << endl;
+
 	//failed to compile, print out error log to console.
 	printCompilerError();
 
@@ -36,7 +40,6 @@ bool Shader::loadAndCompileShader(const string &filename, const Shader::Type &ty
 void Shader::printCompilerError(const int &bufferSize) {
 
 	vector<char> buffer(bufferSize, '\0');
-
 	glGetShaderInfoLog(shaderObject, bufferSize, nullptr, buffer.data());
 
 	cout << buffer.data() << endl;

@@ -6,8 +6,13 @@
 #include "SFML/OpenGL.hpp"
 #include "SFML/Window.hpp"
 
-#include "./headers/Shader.hpp"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+
+#include "headers/ShaderProgram.h"
+#include "./headers/Shader.h"
 #include "./headers/loadFileToString.h"
+#include "./headers/loadFromObj.h"
 
 using std::cout;
 using std::endl;
@@ -18,8 +23,7 @@ using std::vector;
 GLuint compileShader() {
 
 	Shader shader;
-	shader.loadAndCompileShader("shaders/vertex.vert", Shader::Type::Vertex);
-
+	shader.loadAndCompileShader( Shader::Type::Vertex, "shaders/vertex.vert");
 	
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -75,16 +79,32 @@ int main(int argc, char const *argv[])
 
 	bool isRunning = true;
 
-	GLuint shaderProgram = compileShader();
-	glUseProgram(shaderProgram);
+	ShaderProgram program1;
+	program1.loadAndCompileShaders({
+		{Shader::Type::Vertex, "shaders/vertex.vert"},
+		{Shader::Type::Fragment, "shaders/fragment.frag"}
+	});
+
+	//use case
+	// create a new mesh object.
+	// load mesh from disk.
+	// Assign a material for each material slot on the mesh
+
+	// Mesh mesh("mesh/cube.fbx");
+	// mesh.setMaterial(materialSlot, shaderProgram.getProgram());
+	// m
+
+	program1.linkProgram();
+	program1.useProgram();
 
 	GLuint vao;
 	glCreateVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	glPointSize(20);
 
+	MeshData data;
+	loadFromObj("untitled.obj", data);
 
-	cout << "HI!!!!" << endl;
 	while(isRunning) {
 
 		sf::Event event;
