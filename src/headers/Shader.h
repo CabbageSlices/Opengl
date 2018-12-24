@@ -54,6 +54,11 @@ public:
 
 	bool loadAndCompileShader(const Type &type, const std::string &filename);
 
+	//binding indices of vertex attribute
+	//always the same for every shader so you don't have to query it everytime
+	static const unsigned int POSITION_ATTRIBUTE_INDEX = 0;
+	static const unsigned int NORMAL_ATTRIBUTE_INDEX = 1;
+	static const unsigned int TEX_COORD_ATTRIBUTE_INDEX = 2;
 private:
 
 	void printCompilerError(const int &bufferSize = 256);

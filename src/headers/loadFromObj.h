@@ -28,6 +28,7 @@ inline bool checkIsEqual(const T &a, const T &b) {
 	return glm::dot(difference, difference) < eplison * eplison;
 }
 
+
 /**
  * @brief      Loads mesh data from obj file
  *
