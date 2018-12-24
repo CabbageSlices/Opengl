@@ -40,6 +40,16 @@ public:
 		glUseProgram(shaderProgram);
 	}
 
+	void setUniform(const GLint &location, const bool &transpose, const glm::mat4 &mat) {
+		glUniformMatrix4fv(location, 1, transpose ? GL_TRUE : GL_FALSE, glm::value_ptr(mat));
+	}
+
+	void setUniform(const GLint &location, const glm::vec4 &vec) {
+		glUniform4fv(location, 1, glm::value_ptr(vec));
+	}
+
+	static const unsigned int WORLD_TO_CLIP_UNIFORM_LOCATION = 0;
+
 private:
 
 	GLuint shaderProgram;

@@ -2,6 +2,8 @@
 #define _SHADER_HPP_INCLUDED
 
 #include "glad/glad.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include <string>
 #include <iostream>
 
@@ -59,6 +61,7 @@ public:
 	static const unsigned int POSITION_ATTRIBUTE_INDEX = 0;
 	static const unsigned int NORMAL_ATTRIBUTE_INDEX = 1;
 	static const unsigned int TEX_COORD_ATTRIBUTE_INDEX = 2;
+
 private:
 
 	void printCompilerError(const int &bufferSize = 256);
