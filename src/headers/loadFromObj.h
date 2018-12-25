@@ -107,7 +107,6 @@ inline bool loadFromObj(std::string filename, MeshData &meshData) {
 	};
 
 	auto mesh = shapes[0].mesh;
-	cout << mesh.indices.size() << endl;
 	for(unsigned i = 0; i < mesh.indices.size(); ++i) {
 
 		auto index = mesh.indices[i];
@@ -119,18 +118,11 @@ inline bool loadFromObj(std::string filename, MeshData &meshData) {
 
 		int matchingPairIndex = findMatchingPositionNormalPair(position, normal);
 
-
-		cout << "Position " << position << endl;
-		cout << "Normal" << normal << endl;
-
 		//pair of position and normal already in the array, use the index of previous entry
 		if(matchingPairIndex != -1) {
 			combinedIndices.push_back(matchingPairIndex);
-		cout << "Index" << matchingPairIndex << endl;
 			continue;
 		}
-
-		cout << "Index" << reorderedPositions.size() << endl;
 
 		//current pair has not been stored yet, add it now and get the current index
 		reorderedPositions.push_back(position);

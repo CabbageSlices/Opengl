@@ -31,6 +31,8 @@ public:
 		meshData.clear();
 	}
 
+	void render();
+
 private:
 
 	MeshData meshData;

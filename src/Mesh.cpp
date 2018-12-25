@@ -18,6 +18,10 @@ bool Mesh::loadFromFile(const std::string &filename) {
 	if(!loadFromObj(filename, meshData))
 		return false;
 
+	//vertex array
+	glCreateVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	//buffers for vertex attributes
 	unsigned positionArraySize = sizeof(glm::vec3) * meshData.positions.size();
 	unsigned normalArraySize = sizeof(glm::vec3) * meshData.normals.size();
@@ -36,11 +40,8 @@ bool Mesh::loadFromFile(const std::string &filename) {
 	unsigned indicesArraySize = sizeof(unsigned int) * meshData.indices.size();
 
 	glCreateBuffers(1, &indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 	glNamedBufferData(indexBuffer, indicesArraySize, meshData.indices.data(), GL_STATIC_DRAW);
-
-	//vertex array
-	glCreateVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 
 	//buffer binding index that correspond to the different vertex attributes
 	const unsigned POSITION_BUFFER_INDEX = 0;
@@ -60,9 +61,18 @@ bool Mesh::loadFromFile(const std::string &filename) {
 	glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE_INDEX);
 	glEnableVertexAttribArray(Shader::NORMAL_ATTRIBUTE_INDEX);
 	
+
+	glBindVertexArray(0);
 	//put into buffers
 	//setup index buffer and shit
 	//setup vertex array object
 	//setup vertex attributes
 	return true;
+}
+
+void Mesh::render() {
+
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, meshData.indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }

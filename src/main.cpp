@@ -9,10 +9,12 @@
 
 #define TINYOBJLOADER_IMPLEMENTATION
 
+#include "headers\Camera.h"
 #include "headers/ShaderProgram.h"
 #include "./headers/Shader.h"
 #include "./headers/loadFileToString.h"
 #include "./headers/loadFromObj.h"
+#include "headers\Mesh.h"
 
 using std::cout;
 using std::endl;
@@ -85,25 +87,22 @@ int main(int argc, char const *argv[])
 		{Shader::Type::Fragment, "shaders/fragment.frag"}
 	});
 
-	//use case
-	// create a new mesh object.
-	// load mesh from disk.
-	// Assign a material for each material slot on the mesh
-
-	// Mesh mesh("mesh/cube.fbx");
-	// mesh.setMaterial(materialSlot, shaderProgram.getProgram());
-	// m
-
 	program1.linkProgram();
 	program1.useProgram();
 
-	GLuint vao;
-	glCreateVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 	glPointSize(20);
 
-	MeshData data;
-	loadFromObj("untitled.obj", data);
+	Mesh mesh;
+	mesh.loadFromFile("untitled.obj");
+
+	Camera camera;
+
+	camera.setPosition(-3, 0, -3);
+	camera.lookAt(0, 0, 0);
+
+	program1.setUniform(ShaderProgram::WORLD_TO_CLIP_UNIFORM_LOCATION, false, camera.calculateWorldToClipMatrix());
+	program1.setUniform(ShaderProgram::WORLD_TO_CAMERA_UNIFORM_LOCATION, false, camera.getWorldToCameraMatrix());
+	program1.setUniform(1, {0.5, 0, 0, 0});
 
 	while(isRunning) {
 
@@ -117,7 +116,7 @@ int main(int argc, char const *argv[])
 
 		GLfloat clearColor[] = {0, 1, 0, 1};
 		glClearBufferfv(GL_COLOR, 0, clearColor);
-		glDrawArrays(GL_POINTS, 0, 1);
+		mesh.render();
 		window.display();
 	}
 	return 0;
