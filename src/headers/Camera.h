@@ -51,10 +51,9 @@ private:
 	//if this returns true you need to calculate a new up vector for hte camera
 	bool avoidAligningForwardToUp(float &horizontalRotationDelta);
 
-	glm::vec3 worldPos;
+	glm::vec3 getForward();
 
-	//basis vectors of camera matrix
-	glm::vec3 forward, up;
+	glm::vec3 worldPos;
 
 	float angleAroundHorizontalAxis;
 

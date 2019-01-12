@@ -31,28 +31,30 @@ glm::vec3 Camera::determineUpVector(const float &angleAroundHorizontalAxis) {
 
 Camera::Camera() :
 	worldPos(0, 0, 0),
-	up(0, 1, 0),
-	forward(0, 0, -1),
 	angleAroundHorizontalAxis(0),
-	focalPoint(0, 0, 0),
+	focalPoint(0, 0, -1),
 	defaultFocalPointDistance(5),
 	fov(45.0f)
 {
-
-	focalPoint = worldPos + forward;
-	projectionMatrix = glm::perspective(fov * 3.1415f/180.0f, 4.0f/3.0f, 0.1f, 10.0f);
+	projectionMatrix = glm::perspective(fov * degToRad, 4.0f/3.0f, 0.1f, 10.0f);
 }
 
 void Camera::setPosition(float x, float y, float z) {
 
+	glm::vec3 previousForwardDirection = getForward();
+
 	worldPos = {x, y, z};
-	focalPoint = worldPos + forward * defaultFocalPointDistance;
+	focalPoint = worldPos + previousForwardDirection * defaultFocalPointDistance;
 }
 
 void Camera::focusOnPoint(float x, float y, float z) {
 
+	//move camera so that the focal point is in the center of the view, but do not rotate camera at all
+	//no rotation means keep the same forward direction
+	glm::vec3 previousForwardDirection = getForward();
+
 	focalPoint = {x, y, z};
-	worldPos = focalPoint - forward * defaultFocalPointDistance;
+	worldPos = focalPoint - previousForwardDirection * defaultFocalPointDistance;
 }
 
 glm::mat4 Camera::calculateWorldToClipMatrix() {
@@ -64,7 +66,7 @@ glm::mat4 Camera::calculateWorldToClipMatrix() {
 
 glm::mat4 Camera::getWorldToCameraMatrix() {
 
-	return glm::lookAt(worldPos, worldPos + forward, up);
+	return glm::lookAt(worldPos, focalPoint, determineUpVector(angleAroundHorizontalAxis));
 }
 
 void Camera::changeFov(const float &fovDeltaRadians) {
@@ -75,7 +77,8 @@ void Camera::changeFov(const float &fovDeltaRadians) {
 
 void Camera::translateIn2DPlane(const glm::vec2 &offset) {
 
-	glm::vec3 right = glm::normalize(glm::cross(up, forward));
+	glm::vec3 up = determineUpVector(angleAroundHorizontalAxis);
+	glm::vec3 right = glm::normalize(glm::cross(up, getForward()));
 
 	glm::vec3 rightDirectionOffset = offset.x * right;
 	glm::vec3 upDirectionOffset = offset.y * up;
@@ -91,8 +94,9 @@ void Camera::rotateAroundTarget(glm::vec2 rotationDelta) {
 		// calculate axis of rotation before calculating new up vector
 		//because new vector doesn't take effect until rotation has already finished
 		//and once the up  vector is changed, the rotation axis will change as well which will result in an incorrect rotation
+		glm::vec3 up = determineUpVector(angleAroundHorizontalAxis);
 		glm::vec3 verticalAxis = up;
-		glm::vec3 horizontalAxis = glm::normalize(glm::cross(up, forward));
+		glm::vec3 horizontalAxis = glm::normalize(glm::cross(verticalAxis, getForward()));
 
 		//rotation was modified to avoid aliging the forward vector to the global y axis
 		//need to disable rotation around vertical axis for now because the vertical axis is going to switch
@@ -115,7 +119,7 @@ void Camera::rotateAroundTarget(glm::vec2 rotationDelta) {
 
 		worldPos = targetToCamera + focalPoint;
 
-		forward = glm::normalize(-targetToCamera);
+		// forward = glm::normalize(-targetToCamera);
 }
 
 void Camera::rotate(glm::vec2 rotationDelta) {
@@ -123,8 +127,9 @@ void Camera::rotate(glm::vec2 rotationDelta) {
 		// calculate axis of rotation before calculating new up vector
 		//because new vector doesn't take effect until rotation has already finished
 		//and once the up  vector is changed, the rotation axis will change as well which will result in an incorrect rotation
+		glm::vec3 up = determineUpVector(angleAroundHorizontalAxis);
 		glm::vec3 verticalAxis = up;
-		glm::vec3 horizontalAxis = glm::normalize(glm::cross(up, forward));
+		glm::vec3 horizontalAxis = glm::normalize(glm::cross(verticalAxis, getForward()));
 
 		//rotation was modified to avoid aliging the forward vector to the global y axis
 		//need to disable rotation around vertical axis for now because the vertical axis is going to switch
@@ -141,13 +146,17 @@ void Camera::rotate(glm::vec2 rotationDelta) {
 		glm::quat yRotator = glm::angleAxis(rotationDelta.y, verticalAxis);
 		glm::quat rotator = glm::normalize(xRotator * yRotator);
 
-		forward = glm::normalize(rotator * forward);
+		// forward = glm::normalize(rotator * forward);
 
-		//calculate new focal point position so that other camera operations function properly since some of htem rely on the focal point
+		//calculate new focal point position once camera has rotated
 		glm::vec3 cameraToTarget = focalPoint - worldPos;
-		float distanceToTarget = cameraToTarget.length();
+		cameraToTarget = rotator * cameraToTarget;
 
-		focalPoint = worldPos + forward * distanceToTarget;
+		focalPoint = worldPos + cameraToTarget;
+
+		// float distanceToTarget = cameraToTarget.length();
+
+		// focalPoint = worldPos + forward * distanceToTarget;
 }
 
 bool Camera::avoidAligningForwardToUp(float &horizontalRotationDelta) {
@@ -175,111 +184,7 @@ bool Camera::avoidAligningForwardToUp(float &horizontalRotationDelta) {
 
 	return false;
 }
+glm::vec3 Camera::getForward() {
 
-
-// void Camera::handleMouseInput(const float &deltaTime) {
-
-// 	if(previousMousePosition.x < 0)
-// 		previousMousePosition = getMousePosition();
-
-// 	glm::vec2 currentMousePos = getMousePosition();
-// 	glm::vec2 mouseDelta = currentMousePos - previousMousePosition;
-
-
-// 	//mouse dragging screen, move camera left right according to it's forward vector
-// 	if(sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
-
-// 		glm::vec3 right = glm::normalize(glm::cross(up, forward));
-
-// 		glm::vec3 rightDirectionOffset = mouseDelta.x * right;
-// 		glm::vec3 upDirectionOffset = mouseDelta.y * up;
-
-// 		// glm::vec3 rightDirectionOffset = mouseDelta.x * getCurrentRight();
-// 		// glm::vec3 upDirectionOffset = mouseDelta.y * getCurrentUp();
-
-// 		glm::vec3 offset = (rightDirectionOffset + upDirectionOffset) / 200.f;
-
-// 		worldPos += offset;
-// 		focalPoint += offset;
-
-// 	}
-
-// 	//mouse dragaging using left mouse button while alt is held, rotate around focal point
-// 	if(sf::Mouse::isButtonPressed(sf::Mouse::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-
-// 		glm::vec2 rotationDelta = mouseDelta * 3.1415f / 180.f / 6.0f;
-
-// 		float PI = 3.141592;
-
-// 		// //axis of rotation
-// 		glm::vec3 verticalAxis = up;
-// 		glm::vec3 horizontalAxis = glm::normalize(glm::cross(up, forward));
-
-// 		if(angleAroundHorizontalAxis < PI / 2 && angleAroundHorizontalAxis + rotationDelta.y >= PI/2) {
-
-// 				rotationDelta.y = (PI / 2 + 0.01) - angleAroundHorizontalAxis;
-// 				up=glm::vec3(0,-1,0);
-// 				rotationDelta.x = 0;
-
-// 				cout << angleAroundHorizontalAxis << "    :    " << glm::asin(forward.y) << endl << "UPSIDE DOWN" << endl;
-// 		} else if (angleAroundHorizontalAxis > PI / 2 && angleAroundHorizontalAxis + rotationDelta.y <= PI / 2) {
-// 				rotationDelta.y = (PI / 2 - 0.01) - angleAroundHorizontalAxis;
-// 				up = glm::vec3(0,1,0);
-// 				rotationDelta.x = 0;
-// 				cout << angleAroundHorizontalAxis << "    :    " << glm::asin(forward.y) << endl << "NORMAL" << endl;
-// 		} else if(angleAroundHorizontalAxis > 3*PI / 2 && angleAroundHorizontalAxis + rotationDelta.y <= 3*PI/2) {
-
-// 				rotationDelta.y = (3*PI / 2 - 0.01) - angleAroundHorizontalAxis;
-// 				up=glm::vec3(0,-1,0);
-// 				rotationDelta.x = 0;
-
-// 				cout << angleAroundHorizontalAxis << "    :    " << glm::asin(forward.y) << endl << "UPSIDE DOWN" << endl;
-// 		} else if (angleAroundHorizontalAxis < 3*PI / 2 && angleAroundHorizontalAxis + rotationDelta.y >= 3*PI / 2) {
-// 				rotationDelta.y = (3*PI / 2 + 0.01) - angleAroundHorizontalAxis;
-// 				up = glm::vec3(0,1,0);
-// 				rotationDelta.x = 0;
-// 				cout << angleAroundHorizontalAxis << "    :    " << glm::asin(forward.y) << endl << "NORMAL" << endl;
-// 		}
-
-// 		angleAroundHorizontalAxis += rotationDelta.y;
-// 		yAngle -= rotationDelta.x;
-
-// 		angleAroundHorizontalAxis = glm::wrapAngle(angleAroundHorizontalAxis);
-// 		yAngle = glm::wrapAngle(yAngle);
-
-// 		glm::vec3 targetToCamera = worldPos - focalPoint;
-
-// 		glm::quat xRotator = glm::angleAxis(rotationDelta.y, horizontalAxis);
-// 		glm::quat yRotator = glm::angleAxis(-rotationDelta.x, verticalAxis);
-
-// 		glm::quat rotator = glm::normalize(xRotator * yRotator);
-
-// 		//calculate new world position of the camera
-// 		targetToCamera = rotator * targetToCamera;
-
-// 		worldPos = targetToCamera + focalPoint;
-
-// 		//calculate new orthonormal basis
-// 		forward = glm::normalize(-targetToCamera);
-// 		// up = glm::normalize(rotator * up);
-// 		// glm::vec3 right = glm::normalize(glm::cross(up, forward));
-// 		// up = glm::normalize(glm::cross(forward, right));
-
-// 		// if(forward.y < -0.99) {
-// 		// 	cout << forward << endl;
-// 		// 	cout << "UP:     "   <<up << endl;
-// 		// 	cout << horizontalAxis << endl;
-// 		// 	cout << angleAroundHorizontalAxis << "  " << yAngle << endl;
-// 		// }
-
-// 		// cout <<	glm::asin(forward.y) << endl;
-
-// 		//if you line up the forward vector with the global z axis then the
-// 		//up and right vectors will not be lined up with the global
-// 		//up and right axis, this is because the camera tilted along the z axis some how
-// 		//calculate the tilt and reverse it
-// 	}
-
-// 	//update the mouse position
-// 	previousMousePosition = getMousePosition();
-// }
+	return glm::normalize(focalPoint - worldPos);
+}
