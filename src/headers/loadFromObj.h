@@ -5,6 +5,7 @@
 #include <iostream>
 #include <tiny_obj_loader.h>
 #include "glm\glm.hpp"
+#include "./PrintVector.hpp"
 #include "MeshData.h"
 
 using std::ostream;
@@ -12,12 +13,6 @@ using std::cout;
 using std::endl;
 using std::vector;
 using std::string;
-
-inline ostream& operator<< (ostream& stream, glm::vec3 val) {
-
-	stream << "x: " << val.x << ", y: " << val.y << ", z: " << val.z;
-	return stream;
-}
 
 template<typename T>
 inline bool checkIsEqual(const T &a, const T &b) {
