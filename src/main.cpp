@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -5,11 +7,18 @@
 #include "glad/glad.h"
 #include "SFML/OpenGL.hpp"
 #include "SFML/Window.hpp"
+#include "SFML\System.hpp"
+#include "glm\gtc\quaternion.hpp"
+#include "glm\ext\quaternion_trigonometric.hpp"
+#include "glm\gtx\vector_angle.hpp"
+#include "headers/PrintVector.hpp"
+#include "glm/gtx/fast_trigonometry.hpp"
 
 
 #define TINYOBJLOADER_IMPLEMENTATION
 
 #include "headers\Camera.h"
+#include "headers\CameraController.h"
 #include "headers/ShaderProgram.h"
 #include "./headers/Shader.h"
 #include "./headers/loadFileToString.h"
@@ -21,47 +30,6 @@ using std::endl;
 using std::string;
 using std::fstream;
 using std::vector;
-
-GLuint compileShader() {
-
-	Shader shader;
-	shader.loadAndCompileShader( Shader::Type::Vertex, "shaders/vertex.vert");
-	
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	GLuint program = glCreateProgram();
-
-	string vertexShaderSource = loadFileToString("shaders/vertex.vert");
-	auto vertexShaderPtr = vertexShaderSource.c_str();
-
-	string fragmentShaderSource = loadFileToString("shaders/fragment.frag");
-	auto fragmentShaderPtr = fragmentShaderSource.c_str();
-
-	glShaderSource(vertexShader, 1, &vertexShaderPtr, NULL);
-	glCompileShader(vertexShader);
-
-	glShaderSource(fragmentShader, 1, &fragmentShaderPtr, NULL);
-	glCompileShader(fragmentShader);
-
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
-	glLinkProgram(program);
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return program;
-}
-
-GLuint createBuffer() {
-
-	GLuint buffer = 0;
-
-	glCreateBuffers(1, &buffer);
-	glNamedBufferStorage(buffer, sizeof(float) * 3 * 10, nullptr, GL_DYNAMIC_STORAGE_BIT);
-
-	return buffer;
-}
 
 int main(int argc, char const *argv[])
 {
@@ -95,26 +63,44 @@ int main(int argc, char const *argv[])
 	Mesh mesh;
 	mesh.loadFromFile("untitled.obj");
 
-	Camera camera;
+	CameraController cameraController;
+	// Camera camera;
 
-	camera.setPosition(-3, 0, -3);
-	camera.lookAt(0, 0, 0);
+	//at the top is error
+	cameraController.camera.setPosition(-4, 0, 10);
+	cameraController.camera.focusOnPoint(0, 0, 0);
 
-	program1.setUniform(ShaderProgram::WORLD_TO_CLIP_UNIFORM_LOCATION, false, camera.calculateWorldToClipMatrix());
-	program1.setUniform(ShaderProgram::WORLD_TO_CAMERA_UNIFORM_LOCATION, false, camera.getWorldToCameraMatrix());
 	program1.setUniform(1, {0.5, 0, 0, 0});
+
+	sf::Clock clock;
+	clock.restart();
+
+	glEnable(GL_DEPTH_TEST);
 
 	while(isRunning) {
 
 		sf::Event event;
+
+		sf::Time elapsedTime = clock.getElapsedTime();
+		clock.restart();
+		float timeInSeconds = elapsedTime.asSeconds();
+
 		while (window.pollEvent(event)) {
 			if(event.type == sf::Event::Closed)
 				isRunning = false;
+
+			cameraController.handleEvent(event, timeInSeconds);
 		}
+
+		cameraController.handleInput(timeInSeconds);
+
+		program1.setUniform(ShaderProgram::WORLD_TO_CLIP_UNIFORM_LOCATION, false, cameraController.camera.calculateWorldToClipMatrix());
+		program1.setUniform(ShaderProgram::WORLD_TO_CAMERA_UNIFORM_LOCATION, false, cameraController.camera.getWorldToCameraMatrix());
+	
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		GLfloat clearColor[] = {0, 1, 0, 1};
+		GLfloat clearColor[] = {1, 1, 0, 1};
 		glClearBufferfv(GL_COLOR, 0, clearColor);
 		mesh.render();
 		window.display();
