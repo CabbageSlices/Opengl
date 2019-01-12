@@ -91,72 +91,24 @@ void Camera::translateIn2DPlane(const glm::vec2 &offset) {
 
 void Camera::rotateAroundTarget(glm::vec2 rotationDelta) {
 
-		// calculate axis of rotation before calculating new up vector
-		//because new vector doesn't take effect until rotation has already finished
-		//and once the up  vector is changed, the rotation axis will change as well which will result in an incorrect rotation
-		glm::vec3 up = determineUpVector(angleAroundHorizontalAxis);
-		glm::vec3 verticalAxis = up;
-		glm::vec3 horizontalAxis = glm::normalize(glm::cross(verticalAxis, getForward()));
+	glm::quat rotator = processRotationDelta(rotationDelta);
 
-		//rotation was modified to avoid aliging the forward vector to the global y axis
-		//need to disable rotation around vertical axis for now because the vertical axis is going to switch
-		//also need to calculate a new up vector since we went from upside down to right side up or vice-verca
-		if(avoidAligningForwardToUp(rotationDelta.x)) {
-			rotationDelta.y = 0;
-			up = determineUpVector(angleAroundHorizontalAxis + rotationDelta.x);
-		}
+	//calculate new world position of the camera
+	glm::vec3 targetToCamera = worldPos - focalPoint;
+	targetToCamera = rotator * targetToCamera;
 
-		angleAroundHorizontalAxis += rotationDelta.x;
-		angleAroundHorizontalAxis = glm::wrapAngle(angleAroundHorizontalAxis);
-
-		glm::quat xRotator = glm::angleAxis(rotationDelta.x, horizontalAxis);
-		glm::quat yRotator = glm::angleAxis(rotationDelta.y, verticalAxis);
-		glm::quat rotator = glm::normalize(xRotator * yRotator);
-
-		//calculate new world position of the camera
-		glm::vec3 targetToCamera = worldPos - focalPoint;
-		targetToCamera = rotator * targetToCamera;
-
-		worldPos = targetToCamera + focalPoint;
-
-		// forward = glm::normalize(-targetToCamera);
+	worldPos = targetToCamera + focalPoint;
 }
 
 void Camera::rotate(glm::vec2 rotationDelta) {
 
-		// calculate axis of rotation before calculating new up vector
-		//because new vector doesn't take effect until rotation has already finished
-		//and once the up  vector is changed, the rotation axis will change as well which will result in an incorrect rotation
-		glm::vec3 up = determineUpVector(angleAroundHorizontalAxis);
-		glm::vec3 verticalAxis = up;
-		glm::vec3 horizontalAxis = glm::normalize(glm::cross(verticalAxis, getForward()));
+	glm::quat rotator = processRotationDelta(rotationDelta);
 
-		//rotation was modified to avoid aliging the forward vector to the global y axis
-		//need to disable rotation around vertical axis for now because the vertical axis is going to switch
-		//also need to calculate a new up vector since we went from upside down to right side up or vice-verca
-		if(avoidAligningForwardToUp(rotationDelta.x)) {
-			rotationDelta.y = 0;
-			up = determineUpVector(angleAroundHorizontalAxis + rotationDelta.x);
-		}
+	//calculate new focal point position once camera has rotated
+	glm::vec3 cameraToTarget = focalPoint - worldPos;
+	cameraToTarget = rotator * cameraToTarget;
 
-		angleAroundHorizontalAxis += rotationDelta.x;
-		angleAroundHorizontalAxis = glm::wrapAngle(angleAroundHorizontalAxis);
-
-		glm::quat xRotator = glm::angleAxis(rotationDelta.x, horizontalAxis);
-		glm::quat yRotator = glm::angleAxis(rotationDelta.y, verticalAxis);
-		glm::quat rotator = glm::normalize(xRotator * yRotator);
-
-		// forward = glm::normalize(rotator * forward);
-
-		//calculate new focal point position once camera has rotated
-		glm::vec3 cameraToTarget = focalPoint - worldPos;
-		cameraToTarget = rotator * cameraToTarget;
-
-		focalPoint = worldPos + cameraToTarget;
-
-		// float distanceToTarget = cameraToTarget.length();
-
-		// focalPoint = worldPos + forward * distanceToTarget;
+	focalPoint = worldPos + cameraToTarget;
 }
 
 bool Camera::avoidAligningForwardToUp(float &horizontalRotationDelta) {
@@ -184,6 +136,32 @@ bool Camera::avoidAligningForwardToUp(float &horizontalRotationDelta) {
 
 	return false;
 }
+
+glm::quat Camera::processRotationDelta(glm::vec2 rotationDelta) {
+
+	// calculate axis of rotation before calculating new up vector
+	//because new vector doesn't take effect until rotation has already finished
+	//and once the up  vector is changed, the rotation axis will change as well which will result in an incorrect rotation
+	glm::vec3 verticalAxis = determineUpVector(angleAroundHorizontalAxis);
+	glm::vec3 horizontalAxis = glm::normalize(glm::cross(verticalAxis, getForward()));
+
+	//rotation was modified to avoid aliging the forward vector to the global y axis
+	//need to disable rotation around vertical axis for now because the vertical axis is going to switch
+	//also need to calculate a new up vector since we went from upside down to right side up or vice-verca
+	if(avoidAligningForwardToUp(rotationDelta.x)) {
+		rotationDelta.y = 0;
+	}
+
+	angleAroundHorizontalAxis += rotationDelta.x;
+	angleAroundHorizontalAxis = glm::wrapAngle(angleAroundHorizontalAxis);
+
+	glm::quat xRotator = glm::angleAxis(rotationDelta.x, horizontalAxis);
+	glm::quat yRotator = glm::angleAxis(rotationDelta.y, verticalAxis);
+	glm::quat rotator = glm::normalize(xRotator * yRotator);
+
+	return rotator;
+}
+
 glm::vec3 Camera::getForward() {
 
 	return glm::normalize(focalPoint - worldPos);

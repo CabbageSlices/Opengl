@@ -51,6 +51,11 @@ private:
 	//if this returns true you need to calculate a new up vector for hte camera
 	bool avoidAligningForwardToUp(float &horizontalRotationDelta);
 
+	//takes the given rotation delta and calculates a quaternion that will represent the given rotation
+	//rotationDelta should be rotation around the horizontal axis, and the up vector
+	//function will ensure the forward vector and global y axis are never aligned
+	glm::quat processRotationDelta(glm::vec2 rotationDelta);
+
 	glm::vec3 getForward();
 
 	glm::vec3 worldPos;
