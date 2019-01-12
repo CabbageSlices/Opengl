@@ -25,6 +25,7 @@ private:
 
 	void handlePlanerTranslation(const float &deltaTime, const glm::vec2 &mouseDelta);
 	void handleRotationAroundTarget(const float &deltaTime, const glm::vec2 &mouseDelta);
+	void handleRotation(const float &deltaTime, const glm::vec2 &mouseDelta);
 
 	bool isMiddleMouseHeld;
 	bool isLeftMouseHeld;

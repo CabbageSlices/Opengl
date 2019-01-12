@@ -59,6 +59,8 @@ void CameraController::handleMouseInput(const float &deltaTime) {
     } else if(sf::Mouse::isButtonPressed(sf::Mouse::Left)
         && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
             handleRotationAroundTarget(deltaTime, mouseDelta);
+    } else if(sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+         handleRotation(deltaTime, mouseDelta);
     }
 
     previousMousePosition = getMousePosition();
@@ -77,4 +79,13 @@ void CameraController::handleRotationAroundTarget(const float &deltaTime, const 
     //horizontal mouse movement is rotation around y axis, vertical movement is around x axis
     //rotation around y axis is inverted so dragging right rotates camera to the left, like in unity
     camera.rotateAroundTarget({rotationDelta.y, -rotationDelta.x});
+}
+
+void CameraController::handleRotation(const float &deltaTime, const glm::vec2 &mouseDelta) {
+
+    const glm::vec2 rotationDelta = mouseDelta * mouseDeltaCameraRotationRatio;
+
+    //horizontal mouse movement is rotation around y axis, vertical movement is around x axis
+    //rotation around y axis is inverted so dragging right rotates camera to the left, like in unity
+    camera.rotate({rotationDelta.y, -rotationDelta.x});
 }

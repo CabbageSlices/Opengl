@@ -64,7 +64,7 @@ glm::mat4 Camera::calculateWorldToClipMatrix() {
 
 glm::mat4 Camera::getWorldToCameraMatrix() {
 
-	return glm::lookAt(worldPos, focalPoint, up);
+	return glm::lookAt(worldPos, worldPos + forward, up);
 }
 
 void Camera::changeFov(const float &fovDeltaRadians) {
@@ -116,6 +116,38 @@ void Camera::rotateAroundTarget(glm::vec2 rotationDelta) {
 		worldPos = targetToCamera + focalPoint;
 
 		forward = glm::normalize(-targetToCamera);
+}
+
+void Camera::rotate(glm::vec2 rotationDelta) {
+
+		// calculate axis of rotation before calculating new up vector
+		//because new vector doesn't take effect until rotation has already finished
+		//and once the up  vector is changed, the rotation axis will change as well which will result in an incorrect rotation
+		glm::vec3 verticalAxis = up;
+		glm::vec3 horizontalAxis = glm::normalize(glm::cross(up, forward));
+
+		//rotation was modified to avoid aliging the forward vector to the global y axis
+		//need to disable rotation around vertical axis for now because the vertical axis is going to switch
+		//also need to calculate a new up vector since we went from upside down to right side up or vice-verca
+		if(avoidAligningForwardToUp(rotationDelta.x)) {
+			rotationDelta.y = 0;
+			up = determineUpVector(angleAroundHorizontalAxis + rotationDelta.x);
+		}
+
+		angleAroundHorizontalAxis += rotationDelta.x;
+		angleAroundHorizontalAxis = glm::wrapAngle(angleAroundHorizontalAxis);
+
+		glm::quat xRotator = glm::angleAxis(rotationDelta.x, horizontalAxis);
+		glm::quat yRotator = glm::angleAxis(rotationDelta.y, verticalAxis);
+		glm::quat rotator = glm::normalize(xRotator * yRotator);
+
+		forward = glm::normalize(rotator * forward);
+
+		//calculate new focal point position so that other camera operations function properly since some of htem rely on the focal point
+		glm::vec3 cameraToTarget = focalPoint - worldPos;
+		float distanceToTarget = cameraToTarget.length();
+
+		focalPoint = worldPos + forward * distanceToTarget;
 }
 
 bool Camera::avoidAligningForwardToUp(float &horizontalRotationDelta) {

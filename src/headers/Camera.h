@@ -35,6 +35,11 @@ public:
 	//delta x is rotation around the horizontal axis, y is rotation around vertical axis
 	void rotateAroundTarget(glm::vec2 rotationDelta);
 
+	//rotate camera around it's local origin
+	//must be in radians
+	//delta x is rotation around the horizontal axis, y is rotation around vertical axis
+	void rotate(glm::vec2 rotationDelta);
+
 private:
 
 	//if the forward vector aligns with global y axis then the camera wont be able to rotate around x axis anymore
