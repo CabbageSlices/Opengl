@@ -9,7 +9,7 @@ using std::endl;
 
 bool Mesh::loadFromFile(const std::string &filename) {
 
-	if(vao != 0 || attributeBuffer != 0) {
+	if(vao != 0 || attributeBuffer.isUsed()) {
 		cout << "Already storing a previous mesh, please delete the mesh before loading" << endl;
 		return false;
 	}
@@ -28,20 +28,15 @@ bool Mesh::loadFromFile(const std::string &filename) {
 
 	unsigned totalAttributeBufferSize = positionArraySize + normalArraySize;
 
-	glCreateBuffers(1, &attributeBuffer);
-	glNamedBufferData(attributeBuffer, totalAttributeBufferSize, nullptr,
-		GL_STATIC_DRAW);
-
-	glNamedBufferSubData(attributeBuffer, 0, positionArraySize, meshData.positions.data());
-	glNamedBufferSubData(attributeBuffer, positionArraySize, normalArraySize, meshData.normals.data());
-
+	attributeBuffer.create(Buffer::ArrayBuffer, nullptr, totalAttributeBufferSize, Buffer::StaticDraw);
+	attributeBuffer.updateData(meshData.positions.data(), positionArraySize, 0);
+	attributeBuffer.updateData(meshData.normals.data(), normalArraySize, positionArraySize);
 
 	//buffer for vertex indices
 	unsigned indicesArraySize = sizeof(unsigned int) * meshData.indices.size();
 
-	glCreateBuffers(1, &indexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	glNamedBufferData(indexBuffer, indicesArraySize, meshData.indices.data(), GL_STATIC_DRAW);
+	indexBuffer.create(Buffer::ElementArrayBuffer, meshData.indices.data(), indicesArraySize, Buffer::StaticDraw);
+	// indexBuffer.bindToTarget();
 
 	//buffer binding index that correspond to the different vertex attributes
 	const unsigned POSITION_BUFFER_INDEX = 0;
@@ -52,7 +47,8 @@ bool Mesh::loadFromFile(const std::string &filename) {
 	glVertexArrayAttribBinding(vao, Shader::POSITION_ATTRIBUTE_INDEX, 0);
 	glVertexArrayAttribBinding(vao, Shader::NORMAL_ATTRIBUTE_INDEX, 0);
 
-	glVertexArrayVertexBuffer(vao, POSITION_BUFFER_INDEX, attributeBuffer,
+	glVertexArrayElementBuffer(vao, indexBuffer.getBufferObject());
+	glVertexArrayVertexBuffer(vao, POSITION_BUFFER_INDEX, attributeBuffer.getBufferObject(),
 		0, sizeof(glm::vec3));
 
 	glVertexArrayAttribFormat(vao, Shader::POSITION_ATTRIBUTE_INDEX, 3, GL_FLOAT, GL_FALSE, 0);

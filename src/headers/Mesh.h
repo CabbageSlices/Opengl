@@ -5,12 +5,13 @@
 #include "MeshData.h"
 #include "ShaderProgram.h"
 #include "glad\glad.h"
+#include "Buffer.h"
 
 class Mesh {
 
 public:
 
-	Mesh() : attributeBuffer(0), indexBuffer(0), vao(0) {};
+	Mesh() : attributeBuffer(), indexBuffer(), vao(0) {};
 	
 	~Mesh() {
 		deleteMeshData();
@@ -20,12 +21,10 @@ public:
 	void setMaterial(ShaderProgram &program);
 
 	void deleteMeshData() {
-		glDeleteBuffers(1, &attributeBuffer);
-		glDeleteBuffers(1, &indexBuffer);
+		attributeBuffer.deleteBuffer();
+		indexBuffer.deleteBuffer();
 		glDeleteVertexArrays(1, &vao);
 
-		attributeBuffer = 0;
-		indexBuffer = 0;
 		vao = 0;
 
 		meshData.clear();
@@ -36,7 +35,9 @@ public:
 private:
 
 	MeshData meshData;
-	GLuint attributeBuffer;
-	GLuint indexBuffer;
+	// GLuint indexBuffer;
 	GLuint vao;
+
+	Buffer attributeBuffer;
+	Buffer indexBuffer;
 };
