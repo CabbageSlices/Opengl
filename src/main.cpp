@@ -31,6 +31,12 @@ using std::string;
 using std::fstream;
 using std::vector;
 
+struct Test {
+	glm::vec4 red = glm::vec4(1,0,0,0);
+	glm::vec4 green = glm::vec4(0,1,0, 0);
+	glm::vec4 blue = glm::vec4(0,0,1,0);
+};
+
 int main(int argc, char const *argv[])
 {
 	
@@ -76,6 +82,12 @@ int main(int argc, char const *argv[])
 	clock.restart();
 
 	glEnable(GL_DEPTH_TEST);
+
+	Test test;
+
+	Buffer buff;
+	buff.create(Buffer::BindingTarget::UniformBuffer, &test, sizeof(Test), Buffer::UsageType::StaticDraw);
+	buff.bindToTargetBindingPoint(2);
 
 	while(isRunning) {
 

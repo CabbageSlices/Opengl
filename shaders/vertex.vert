@@ -10,6 +10,13 @@ layout (location = 0) uniform mat4 worldToClip;
 layout (location = 1) uniform mat4 worldToCamera;
 // layout (location = 1) uniform vec4 offset;
 
+layout(std140, binding = 0) uniform CameraBlock {
+	
+	mat4 worldToClip;
+	mat4 worldToCamera;
+
+} camera;
+
 void main(void) {
 
 	vec3 pos = position;
