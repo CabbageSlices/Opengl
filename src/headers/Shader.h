@@ -33,27 +33,13 @@ public:
 		deleteShaderObject();
 	}
 
-	void deleteShaderObject() {
-		glDeleteShader(shaderObject);
-		shaderObject = 0;
-	}
-  
-  /**
-   * @brief      checks if the stored shader object compiled successfully
-   *
-   * @return     returns true if compilation was successful, false otherwise
-   */
-	bool checkCompilationStatus() {
+	void deleteShaderObject();
+	bool checkCompilationStatus();
 
-		GLint data;
-		glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &data);
-		return data == 1;
-	}
+	const GLuint getShaderObject();
 
-	const GLuint getShaderObject() {
-		return shaderObject;
-	}
-
+	//loads the given shader file, will automatically add the direcotry prefix to the filename so make sure you don't include it.
+	//returns true on success, false on failure.
 	bool loadAndCompileShader(const Type &type, const std::string &filename);
 
 	//binding indices of vertex attribute
@@ -62,11 +48,41 @@ public:
 	static const unsigned int NORMAL_ATTRIBUTE_INDEX = 1;
 	static const unsigned int TEX_COORD_ATTRIBUTE_INDEX = 2;
 
+	/**
+	 * @brief Set the shader include directory. the directory should be set as a relative path from 
+	 * location where the program is executed. All shader filenamees will have the directory prefix added to them so no need to add it yourself
+	 * 
+	 * @param _includeDirectory 
+	 */
+	static void SetIncludeDirectory(const std::string &_includeDirectory);
+
+
+	/**
+	 * @brief Set the Custom Preprocessor Directive Prefix, the symbols that will appear before custom preprocessor directives
+	 * Example, if you use #include, the prefex should be set to '#' without the quotation marks.
+	 * Please include the trailing /.   i.e: if your directory is 'shaders' then set the string to 'shaders/'
+	 * 
+	 * @param _customPreprocessorDirectivePrefix 
+	 */
+	static void SetCustomPreprocessorDirectivePrefix(const std::string &_customPreprocessorDirectivePrefix);
+
+	/**
+	 * @brief runs the shader preprocessor on the given shaderfile and executes the custom preprocessor directives
+	 * 
+	 * @param shaderFile file containg the shader string, this is NOT the filename, but an actual shader file
+	 * @return a new shaderfilee with the custom preprocessor directives stripped out and replaced with the result
+	 */
+	static std::string RunPreprocessor(const std::string &shaderFile);
+
 private:
 
+	void runPreProcessor();
 	void printCompilerError(const int &bufferSize = 256);
 
 	GLuint shaderObject;
+
+	static std::string includeDirectory;
+	static std::string customPreprocessorDirectivePrefix;
 };
 
 #endif

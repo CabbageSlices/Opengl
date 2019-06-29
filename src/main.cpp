@@ -21,7 +21,7 @@
 #include "headers\CameraController.h"
 #include "headers/ShaderProgram.h"
 #include "./headers/Shader.h"
-#include "./headers/loadFileToString.h"
+#include "./headers/StringMethods.h"
 #include "./headers/loadFromObj.h"
 #include "headers\Mesh.h"
 
@@ -39,7 +39,6 @@ struct Test {
 
 int main(int argc, char const *argv[])
 {
-	
 	//setup opengl context with version 4.5 core
 	sf::Window window(sf::VideoMode(800, 600), "OpenGL",
 		sf::Style::Default, sf::ContextSettings(24, 8, 4, 4, 5, sf::ContextSettings::Core));
@@ -57,8 +56,8 @@ int main(int argc, char const *argv[])
 
 	ShaderProgram program1;
 	program1.loadAndCompileShaders({
-		{Shader::Type::Vertex, "shaders/vertex.vert"},
-		{Shader::Type::Fragment, "shaders/fragment.frag"}
+		{Shader::Type::Vertex, "vertex.vert"},
+		{Shader::Type::Fragment, "fragment.frag"}
 	});
 
 	program1.linkProgram();
@@ -82,12 +81,6 @@ int main(int argc, char const *argv[])
 	clock.restart();
 
 	glEnable(GL_DEPTH_TEST);
-
-	Test test;
-
-	Buffer buff;
-	buff.create(Buffer::BindingTarget::UniformBuffer, &test, sizeof(Test), Buffer::UsageType::StaticDraw);
-	buff.bindToTargetBindingPoint(2);
 
 	while(isRunning) {
 
