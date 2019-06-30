@@ -24,6 +24,7 @@
 #include "./headers/StringMethods.h"
 #include "./headers/loadFromObj.h"
 #include "headers\Mesh.h"
+#include "headers/LightManager.h"
 
 using std::cout;
 using std::endl;
@@ -74,6 +75,19 @@ int main(int argc, char const *argv[])
 	//at the top is error
 	cameraController.camera.setPosition(-4, 0, 10);
 	cameraController.camera.focusOnPoint(0, 0, 0);
+
+	LightManager lightManager;
+	lightManager.createDirectionalLight({0, -5, -1, 0}, {0, 1, 1, 1});
+	vector<DirectionalLight> lightsForUniform = lightManager.getDirectionalLights();
+
+
+	DirectionalLight lights[] = {
+		DirectionalLight{glm::vec4(0,-1, 0, 0), glm::vec4(1,0,0,1)},
+	};
+
+	Buffer lightBuffer;
+	lightBuffer.create(Buffer::BindingTarget::UniformBuffer, lightsForUniform.data(), sizeof(DirectionalLight) * lightsForUniform.size(), Buffer::UsageType::StaticDraw);
+	lightBuffer.bindToTargetBindingPoint(ShaderProgram::DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
 
 	program1.setUniform(1, {0.5, 0, 0, 0});
 

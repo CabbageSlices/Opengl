@@ -73,7 +73,7 @@ public:
 
 	static const unsigned int WORLD_TO_CLIP_UNIFORM_LOCATION = 0;
 	static const unsigned int WORLD_TO_CAMERA_UNIFORM_LOCATION = 1;
-	static const unsigned int LIGHT_UNIFORM_BLOCK_BINDING_POINT =1;
+	static const unsigned int DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT = 4;
 
 private:
 
