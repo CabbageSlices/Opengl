@@ -77,17 +77,24 @@ int main(int argc, char const *argv[])
 	cameraController.camera.focusOnPoint(0, 0, 0);
 
 	LightManager lightManager;
-	lightManager.createDirectionalLight({0, -5, -1, 0}, {0, 1, 1, 1});
-	vector<DirectionalLight> lightsForUniform = lightManager.getDirectionalLights();
+	lightManager.createDirectionalLight({0, -1, 0, 0}, {0.5,0.5,0.5,1});
+	lightManager.createPointLight({2, 0, 0, 1}, {1,1,1,1}, 2);
+	lightManager.createPointLight({2, 0, 0.5, 1}, {1,0,0,1}, 2);
 
+	vector<DirectionalLight> directionalLightsForUniform = lightManager.getDirectionalLights();
+	vector<PointLight> pointLightsForUniform = lightManager.getPointLights();
 
-	DirectionalLight lights[] = {
-		DirectionalLight{glm::vec4(0,-1, 0, 0), glm::vec4(1,0,0,1)},
-	};
+	Buffer directionalLightBuffer;
+	directionalLightBuffer.create(Buffer::BindingTarget::UniformBuffer, directionalLightsForUniform.data(),
+		sizeof(DirectionalLight) * directionalLightsForUniform.size(), Buffer::UsageType::StaticDraw);
 
-	Buffer lightBuffer;
-	lightBuffer.create(Buffer::BindingTarget::UniformBuffer, lightsForUniform.data(), sizeof(DirectionalLight) * lightsForUniform.size(), Buffer::UsageType::StaticDraw);
-	lightBuffer.bindToTargetBindingPoint(ShaderProgram::DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
+	directionalLightBuffer.bindToTargetBindingPoint(ShaderProgram::DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
+
+	Buffer pointLightBuffer;
+	pointLightBuffer.create(Buffer::BindingTarget::UniformBuffer, pointLightsForUniform.data(),
+		sizeof(PointLight) * pointLightsForUniform.size(), Buffer::UsageType::StaticDraw);
+
+	pointLightBuffer.bindToTargetBindingPoint(ShaderProgram::POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
 
 	program1.setUniform(1, {0.5, 0, 0, 0});
 
@@ -119,7 +126,7 @@ int main(int argc, char const *argv[])
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		GLfloat clearColor[] = {1, 1, 0, 1};
+		GLfloat clearColor[] = {0.25, 0.5, 0, 1};
 		glClearBufferfv(GL_COLOR, 0, clearColor);
 		mesh.render();
 		window.display();

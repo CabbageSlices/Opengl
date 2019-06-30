@@ -12,4 +12,5 @@ struct PointLight {
     glm::vec4 intensity;
     
     float range;
+    glm::vec3 paddingForGLSLBuffer;
 };
