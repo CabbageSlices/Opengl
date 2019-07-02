@@ -27,8 +27,6 @@ vec4 calculatePointLightsIntensity(vec3 surfaceNormal) {
 
     vec4 lightTotal = vec4(0, 0, 0, 0);
     
-    // return pointLights[0].position;
-    // return calculatePointLightIntensity(pointLights[0], surfaceNormal);
     for(int i = 0; i < MAX_POINT_LIGHTS; ++i) {
 
         lightTotal = lightTotal + calculatePointLightIntensity(pointLights[i], surfaceNormal);

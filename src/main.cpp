@@ -32,12 +32,6 @@ using std::string;
 using std::fstream;
 using std::vector;
 
-struct Test {
-	glm::vec4 red = glm::vec4(1,0,0,0);
-	glm::vec4 green = glm::vec4(0,1,0, 0);
-	glm::vec4 blue = glm::vec4(0,0,1,0);
-};
-
 int main(int argc, char const *argv[])
 {
 	//setup opengl context with version 4.5 core
