@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <tuple>
+#include <memory>
 #include <map>
 #include <tiny_obj_loader.h>
 #include "glm\glm.hpp"
@@ -11,6 +12,8 @@
 #include "MeshData.h"
 #include "Material.h"
 
+using std::shared_ptr;
+using std::make_shared;
 using std::ostream;
 using std::cout;
 using std::endl;
@@ -98,17 +101,17 @@ inline void tinyobjAttributeIndicesToOpenglIndices(const MeshAttributes &origina
 	}
 }
 
-inline void tinyobjMaterialToCustomMaterial (const tinyobj::material_t &tinyobjMaterial, Material &material) {
+inline void tinyobjMaterialToCustomMaterial (const tinyobj::material_t &tinyobjMaterial, shared_ptr<Material> &material) {
 
-	material.diffuse = {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1], tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve};
-	material.name = tinyobjMaterial.name;
+	material->diffuse = {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1], tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve};
+	material->name = tinyobjMaterial.name;
 }
 
-inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> &tinyobjMaterials, vector<Material> &convertedMaterials) {
+inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> &tinyobjMaterials, vector<shared_ptr<Material> > &convertedMaterials) {
 
 	for(unsigned i = 0; i < tinyobjMaterials.size(); ++i) {
 
-		Material convertedMaterial;
+		shared_ptr<Material> convertedMaterial = make_shared<Material>();
 		tinyobjMaterialToCustomMaterial(tinyobjMaterials[i], convertedMaterial);
 		convertedMaterials.push_back(convertedMaterial);
 	}
@@ -116,7 +119,7 @@ inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> 
 
 //materials array MUST NOT BE EMPTY
 inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices, const vector<int> &meshMaterialIds,
-	const vector<Material> &materials, map<string, FaceSet> &materialFaceMap) {
+	const vector<shared_ptr<Material> > &materials, map<int, FaceSet> &materialFaceMap) {
 
 	//every 3 indices makes a face
 	for(unsigned i = 0; i < reorderedIndices.size(); i += 3) {
@@ -133,14 +136,14 @@ inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices
 
 		//TO-DO handle missing materials
 		assert(materialId < materials.size());
-		Material materialForFace = materials[materialId];
+		shared_ptr<Material> materialForFace = materials[materialId];
 
 		//faceset does not exist for this material, create it
-		if(materialFaceMap.count(materialForFace.name) == 0) {
-			materialFaceMap[materialForFace.name] = FaceSet();
+		if(materialFaceMap.count(materialForFace->id) == 0) {
+			materialFaceMap[materialForFace->id] = FaceSet();
 		}
 
-		materialFaceMap[materialForFace.name].push_back(face);
+		materialFaceMap[materialForFace->id].push_back(face);
 	}
 }
 
@@ -175,17 +178,17 @@ inline bool loadFromObj(std::string objFileName, MeshData &meshData/* MaterialMa
 	tinyobjAttributeToMeshAttributes(attrib, originalAttributes);
 
 	//generate material
-	vector<Material> convertedMaterials;
+	vector<shared_ptr<Material> > convertedMaterials;
 	tinyobjMaterialsToCustomMaterials(materials, convertedMaterials);
 
 	//add default material so every mesh always has some material
 	if(convertedMaterials.size() == 0)
-		convertedMaterials.push_back(Material());
+		convertedMaterials.push_back(make_shared<Material>());
 
 	tinyobj::mesh_t mesh = shapes[0].mesh;
 	MeshAttributes reorderedAttributes;
 	vector<unsigned int> reorderedIndices;
-	std::map<std::string, FaceSet> materialFaceMap;
+	map<int, FaceSet> materialFaceMap;
 
 	//reorganize vertex data so that position/normal/etec can be indexed with a single index instead of a unique index per attribute
 	tinyobjAttributeIndicesToOpenglIndices(originalAttributes, mesh.indices, reorderedAttributes, reorderedIndices);

@@ -44,7 +44,8 @@ struct MeshData {
 
 
 	//map of material name to the faces that use that material
-	std::map<std::string, FaceSet> materialFaceMap;
+	//maps material id to faceset
+	std::map<int, FaceSet> materialFaceMap;
 
 	std::vector<unsigned int> indices;
 };
