@@ -191,12 +191,12 @@ inline bool loadFromObj(std::string objFileName, MeshData &meshData/* MaterialMa
 	tinyobjAttributeIndicesToOpenglIndices(originalAttributes, mesh.indices, reorderedAttributes, reorderedIndices);
 	generateMaterialFaceMap(reorderedIndices, mesh.material_ids, convertedMaterials, materialFaceMap);
 
-	// meshData.positions = reorderedAttributes.positions;
-	// meshData.normals = reorderedAttributes.normals;
-	// meshData.indices = reorderedIndices;
+	meshData.positions = reorderedAttributes.positions;
+	meshData.normals = reorderedAttributes.normals;
+	meshData.indices = reorderedIndices;
 
-	meshData.attributes = reorderedAttributes;
-	meshData.materialFaceMap = materialFaceMap;
+	// meshData.attributes = reorderedAttributes;
+	// meshData.materialFaceMap = materialFaceMap;
 
 	return true;
 }

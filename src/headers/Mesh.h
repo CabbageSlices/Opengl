@@ -6,12 +6,13 @@
 #include "ShaderProgram.h"
 #include "glad\glad.h"
 #include "Buffer.h"
+#include "VertexArrayObject.h"
 
 class Mesh {
 
 public:
 
-	Mesh() : attributeBuffer(), indexBuffer(), vao(0) {};
+	Mesh() : attributeBuffer(), indexBuffer(), vao() {};
 	
 	~Mesh() {
 		deleteMeshData();
@@ -23,9 +24,9 @@ public:
 	void deleteMeshData() {
 		attributeBuffer.deleteBuffer();
 		indexBuffer.deleteBuffer();
-		glDeleteVertexArrays(1, &vao);
+		// glDeleteVertexArrays(1, &vao);
 
-		vao = 0;
+		vao.clear();
 
 		meshData.clear();
 	}
@@ -36,7 +37,8 @@ private:
 
 	MeshData meshData;
 	// GLuint indexBuffer;
-	GLuint vao;
+	// GLuint vao;
+	VertexArrayObject vao;
 
 	Buffer attributeBuffer;
 	Buffer indexBuffer;

@@ -61,7 +61,7 @@ int main(int argc, char const *argv[])
 	glPointSize(20);
 
 	Mesh mesh;
-	mesh.loadFromFile("untitled.obj");
+	mesh.loadFromFile("sphere.obj");
 
 	CameraController cameraController;
 	// Camera camera;

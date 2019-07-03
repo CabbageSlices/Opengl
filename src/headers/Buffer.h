@@ -64,7 +64,7 @@ public:
      */
     void bindToTargetBindingPoint(int bindingIndex);
 
-    GLuint getBufferObject() {
+    GLuint getBufferObject() const {
         return buffer;
     }
 
