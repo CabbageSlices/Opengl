@@ -38,7 +38,7 @@ public:
     VertexArrayObject();
 
     ~VertexArrayObject() {
-        clear();
+        deleteVao();
     }
 
     /**
