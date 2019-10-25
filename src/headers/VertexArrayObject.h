@@ -45,6 +45,8 @@ public:
      * @brief Connects the vertex attribute located aat shaderLocation within the shader program to the 
      * buffer bound at bufferBindingIndex. DOES NOT BIND BUFFER TO INDEX, buffer must be bound to the index as element array 
      * buffer for the data to reach the shader. need to call bindVertexAttributeBuffer
+     * Basically says, whatever buffer i decide to bind to this binding index will be responsible for sending data to
+     * the attribute at the given shader Location. Need to actually bind the buffer with bindVertexAttributeBuffer in order to the data to be sent.
      * 
      * @param shaderLocation location in shader th attribute data is located
      * @param bufferBindingIndex binding index of the buffer where dataa will be read from
