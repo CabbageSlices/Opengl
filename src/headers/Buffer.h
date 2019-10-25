@@ -42,8 +42,8 @@ public:
      * @return true if the buffer is created successfully
      * @return false otherewise
      */
-    bool create(const BindingTarget &target, const void * pointerToData, float bufferSize, const UsageType &usageType);
-    bool updateData(const void *pointerToData, float dataSize, int offsetIntoBuffer);
+    bool create(const BindingTarget &target, const void * pointerToData, GLsizeiptr bufferSize, const UsageType &usageType);
+    bool updateData(const void *pointerToData, GLsizeiptr dataSize, GLintptr offsetIntoBuffer);
 
     bool isUsed() {
         return buffer != 0;

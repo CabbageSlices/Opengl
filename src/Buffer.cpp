@@ -4,7 +4,7 @@
 using std::cout;
 using std::endl;
 
-bool Buffer::create(const Buffer::BindingTarget &target, const void *pointerToData, float bufferSize, const Buffer::UsageType &usageType) {
+bool Buffer::create(const Buffer::BindingTarget &target, const void *pointerToData, GLsizeiptr bufferSize, const Buffer::UsageType &usageType) {
 
     if(buffer != 0) {
         cout << "Error, Buffer already stores data!" << endl;
@@ -18,7 +18,7 @@ bool Buffer::create(const Buffer::BindingTarget &target, const void *pointerToDa
     return true;
 }
 
-bool Buffer::updateData(const void *pointerToData, float dataSize, int offsetIntoBuffer) {
+bool Buffer::updateData(const void *pointerToData, GLsizeiptr dataSize, GLintptr offsetIntoBuffer) {
 
     if(buffer == 0) {
         cout << "Error, no buffer created" << endl;
