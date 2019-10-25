@@ -1,3 +1,3 @@
 #include "Material.h"
 
-unsigned Material::NUM_MATERIALS = 0;
+unsigned Material::NUM_MATERIALS = 11;
