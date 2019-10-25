@@ -47,10 +47,18 @@ void VertexArrayObject::formatVertexAttributeData(GLuint shaderAttributeLocation
 }
 
 void VertexArrayObject::enableVertexAttribute(GLuint shaderAttributeLocation) {
+    if(vao == 0) {
+        init();
+    }
+
     glEnableVertexArrayAttrib(vao, shaderAttributeLocation);
 }
 
 void VertexArrayObject::bindToContext() {
+    if(vao == 0) {
+        init();
+    }
+    
     glBindVertexArray(vao);
 }
 
