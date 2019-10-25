@@ -87,7 +87,7 @@ public:
     void bindToContext();
     void unbindFromContext();
 
-    void clear() {
+    void deleteVao() {
         glDeleteVertexArrays(1, &vao);
         vao = 0;
     }
