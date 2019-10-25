@@ -24,9 +24,8 @@ public:
 	void deleteMeshData() {
 		attributeBuffer.deleteBuffer();
 		indexBuffer.deleteBuffer();
-		// glDeleteVertexArrays(1, &vao);
 
-		vao.clear();
+		vao.deleteVao();
 
 		meshData.clear();
 	}
@@ -34,6 +33,10 @@ public:
 	void render();
 
 private:
+
+	bool initializeAttributeBuffers();
+	bool initializeIndexBuffer();
+	void initializeVertexArrayObject();
 
 	MeshData meshData;
 	// GLuint indexBuffer;
