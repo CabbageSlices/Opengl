@@ -118,31 +118,31 @@ inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> 
 }
 
 //materials array MUST NOT BE EMPTY
-inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices, const vector<int> &meshMaterialIds,
+inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices, const vector<int> &meshMaterialIndices,
 	const vector<shared_ptr<Material> > &materials, map<int, FaceSet> &materialFaceMap) {
 
 	//every 3 indices makes a face
 	for(unsigned i = 0; i < reorderedIndices.size(); i += 3) {
 
 		int faceId = i / 3;
-		Face face(reorderedIndices[i], reorderedIndices[i + 1], reorderedIndices[i + 2]);
+		Face face{reorderedIndices[i], reorderedIndices[i + 1], reorderedIndices[i + 2]};
 
-		int materialId = meshMaterialIds[faceId];
+		int materialIndex = meshMaterialIndices[faceId];
 
 		//face has no material assigned to it, assign it to whatever material is available
-		if(materialId == -1) {
-			materialId = materials.size() - 1;
+		if(materialIndex == -1) {
+			materialIndex = materials.size() - 1;
 		}
 
 		//TO-DO handle missing materials
-		assert(materialId < materials.size());
-		shared_ptr<Material> materialForFace = materials[materialId];
+		assert(materialIndex < materials.size());
+		shared_ptr<Material> materialForFace = materials[materialIndex];
 
 		//faceset does not exist for this material, create it
 		if(materialFaceMap.count(materialForFace->id) == 0) {
 			materialFaceMap[materialForFace->id] = FaceSet();
 		}
-
+		int id = materialForFace->id;
 		materialFaceMap[materialForFace->id].push_back(face);
 	}
 }
@@ -194,124 +194,14 @@ inline bool loadFromObj(std::string objFileName, MeshData &meshData/* MaterialMa
 	tinyobjAttributeIndicesToOpenglIndices(originalAttributes, mesh.indices, reorderedAttributes, reorderedIndices);
 	generateMaterialFaceMap(reorderedIndices, mesh.material_ids, convertedMaterials, materialFaceMap);
 
-	meshData.positions = reorderedAttributes.positions;
-	meshData.normals = reorderedAttributes.normals;
-	meshData.indices = reorderedIndices;
+	// meshData.positions = reorderedAttributes.positions;
+	// meshData.normals = reorderedAttributes.normals;
+	// meshData.indices = reorderedIndices;
 
-	// meshData.attributes = reorderedAttributes;
-	// meshData.materialFaceMap = materialFaceMap;
+	meshData.numIndices = reorderedIndices.size();
+	meshData.attributes = reorderedAttributes;
+	meshData.materialFaceMap = materialFaceMap;
+	meshData.materials = convertedMaterials;
 
 	return true;
 }
-
-
-/**
- * @brief      Loads mesh data from obj file
- *
- * @param[in]  filename  The filename of object to load. If .obj extension is missing it will be added
- * @param      meshData  location to store newly loaded mesh data.
- *
- * @return     returns true if it loaded successfully, false otherwise
- */
-// inline bool loadFromObj(std::string filename, MeshData &meshData) {
-
-// 	//add fileformat if it's missing
-// 	if(filename.find(".obj") == std::string::npos) {
-// 		filename.append(".obj");
-// 	}
-
-// 	//there could be multiple objects in the obj file but for now just load the first one
-// 	tinyobj::attrib_t attrib;
-// 	vector<tinyobj::shape_t> shapes;
-// 	vector<tinyobj::material_t> materials;
-
-// 	string warning;
-// 	string error;
-// 	bool result = tinyobj::LoadObj(&attrib, &shapes, &materials, &error, filename.c_str());
-
-// 	if(!result) {
-// 		cout << error << endl;
-// 		return false;
-// 	}
-
-// 	//create a temporary storage for position and normal data
-// 	//use this to move the normals and positions around so that the position and normals
-// 	//have the same index. Opengl only allows 1 index buffer that has to index both position
-// 	//and normal, but obj files have multiple indices
-// 	//assume there is only 1 shape
-	
-// 	vector<glm::vec3> originalPositions;
-// 	vector<glm::vec3> originalNormals;
-
-// 	for(unsigned i = 0; i < attrib.vertices.size(); i += 3) {
-
-// 		glm::vec3 position = {attrib.vertices[i], attrib.vertices[i+1], attrib.vertices[i+2]};
-// 		glm::vec3 normal = {attrib.normals[i], attrib.normals[i+1], attrib.normals[i+2]};
-
-// 		originalPositions.push_back(position);
-// 		originalNormals.push_back(normal);
-// 	}
-
-// 	vector<glm::vec3> reorderedPositions;
-// 	vector<glm::vec3> reorderedNormals;
-// 	vector<unsigned int> combinedIndices;
-
-//   /**
-//    * @brief      Finds index of matching position and normal in the reordered array, if there is any.
-//    * Searches through the reordered arrays to see if the given position and normal have already been
-//    * inserted into the reordered arrays in the exact same position. If so it is a match and we can use
-//    * the same index to access both the position and normal, so we can use that index.
-//    *
-//    * @param[in]  position  The position
-//    * @param[in]  normal    The normal
-//    *
-//    * @return     index in reoredered arrays where the matching position and normal can be found. -1 if no match.
-//    */
-// 	auto findMatchingPositionNormalPair = [&](glm::vec3 position, glm::vec3 normal) ->int {
-
-// 		for(unsigned i = 0; i < reorderedPositions.size(); ++i) {
-
-// 			bool isPositionMatch = checkIsEqual(position, reorderedPositions[i]);
-// 			bool isNormalMatch = checkIsEqual(normal, reorderedNormals[i]);
-
-// 			if(isPositionMatch && isNormalMatch) {
-// 				return i;
-// 			}
-// 		}
-
-// 		return -1;
-// 	};
-
-// 	auto mesh = shapes[0].mesh;
-// 	for(unsigned i = 0; i < mesh.indices.size(); ++i) {
-
-// 		auto index = mesh.indices[i];
-// 	//	mesh.material_ids[i / 3] each face GROUP OF 3 VERTICES will have a material assigned to it, SAVE IT SOMEHOW
-// 		//check if the current postiion and normal vector pair have already been added to the reordered
-// 		//vectors. If the given pair is already reordered then get the index for that pair and use it for the
-// 		//new combined index. otherwise add it to the reordered set and then add the index.
-// 		glm::vec3 position = originalPositions[index.vertex_index];
-// 		glm::vec3 normal = originalNormals[index.normal_index];
-
-// 		int matchingPairIndex = findMatchingPositionNormalPair(position, normal);
-
-// 		//pair of position and normal already in the array, use the index of previous entry
-// 		if(matchingPairIndex != -1) {
-// 			combinedIndices.push_back(matchingPairIndex);
-// 			continue;
-// 		}
-
-// 		//current pair has not been stored yet, add it now and get the current index
-// 		reorderedPositions.push_back(position);
-// 		reorderedNormals.push_back(normal);
-
-// 		combinedIndices.push_back(reorderedPositions.size() - 1);
-// 	}
-
-// 	//we can store positions and normals as is to the meshdata object
-// 	meshData.positions = reorderedPositions;
-// 	meshData.normals = reorderedNormals;
-// 	meshData.indices = combinedIndices;
-
-// 	return true;
-// }
