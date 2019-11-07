@@ -24,6 +24,9 @@ public:
 	//zoom in out
 	void changeFov(const float &fovDelta);
 
+	//move closer/away from target, moves along the forward direction by distance
+	void moveTowardsTarget(const float &distance);
+
 	//translate in a plane perpindcular to the screen
 	//that is, x axis moves left and right on the screen as viewed by hte user,
 	//y axis is up and down as viewed by the user

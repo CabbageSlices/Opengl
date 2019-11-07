@@ -31,7 +31,7 @@ private:
 	bool isLeftMouseHeld;
 	glm::vec2 previousMousePosition;
 
-	const float mouseWheelDeltaFovRatio;
+	const float mouseWheelDeltaTranslationRatio;
 	const float mouseDeltaCameraTranslationRatio;
 	const float mouseDeltaCameraRotationRatio;
 };
