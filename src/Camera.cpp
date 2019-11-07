@@ -75,6 +75,12 @@ void Camera::changeFov(const float &fovDeltaRadians) {
 	projectionMatrix = glm::perspective(fov, 4.0f/3.0f, 0.1f, 10.0f);
 }
 
+void Camera::moveTowardsTarget(const float &distance) {
+	glm::vec3 translationOffset = getForward() * distance;
+
+	worldPos += translationOffset;
+}
+
 void Camera::translateIn2DPlane(const glm::vec2 &offset) {
 
 	glm::vec3 up = determineUpVector(angleAroundHorizontalAxis);

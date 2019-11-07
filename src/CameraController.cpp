@@ -6,8 +6,8 @@ CameraController::CameraController() :
     isLeftMouseHeld(false),
     isMiddleMouseHeld(false),
     previousMousePosition(-1, -1),
-    mouseWheelDeltaFovRatio(degToRad * 5),
-    mouseDeltaCameraTranslationRatio(1/200.0f),
+    mouseWheelDeltaTranslationRatio(degToRad * 20),
+    mouseDeltaCameraTranslationRatio(1/150.0f),
     mouseDeltaCameraRotationRatio(degToRad / 6.0f)
     {
 
@@ -31,7 +31,7 @@ glm::vec2 CameraController::getMousePosition() {
 bool CameraController::handleMouseEvent(const sf::Event &event, const float& deltaTime) {
 
     if(event.type == sf::Event::MouseWheelScrolled) {
-        camera.changeFov(-event.mouseWheelScroll.delta * mouseWheelDeltaFovRatio);
+        camera.moveTowardsTarget(event.mouseWheelScroll.delta * mouseWheelDeltaTranslationRatio);
 
         return true;
 	}
