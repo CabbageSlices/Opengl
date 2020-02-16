@@ -2,19 +2,13 @@
 #ifndef FRAGMENT_BASE
 #define FRAGMENT_BASE
 #define DIRECTIONAL
-#define POINT
 
 out vec4 fragOut;
 
 in vec4 cameraPos;
 in vec3 vs_Normal;
 
-#ifdef DIRECTIONAL
-//#include "directionalLight.frag"
-#endif
-#ifdef POINT
-//#include "pointLight.frag"
-#endif
+#include "Lighting.frag"
 
 void main(void) {
 	vec3 normal = normalize(vs_Normal);
@@ -22,11 +16,11 @@ void main(void) {
 	
 	vec4 outputColor = vec4(0);
 	
-	#ifdef COMPUTE_DIRECTIONAL_LIGHT_CONTRIBUTION
+	#ifdef DIRECTIONAL
 	outputColor += COMPUTE_DIRECTIONAL_LIGHT_CONTRIBUTION(baseColor, normal);
 	#endif
 
-	#ifdef COMPUTE_POINT_LIGHT_CONTRIBUTION
+	#ifdef POINT
 	outputColor += COMPUTE_POINT_LIGHT_CONTRIBUTION(baseColor, normal);
 	#endif
 
