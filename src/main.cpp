@@ -71,9 +71,12 @@ int main(int argc, char const *argv[])
 	cameraController.camera.focusOnPoint(0, 0, 0);
 
 	LightManager lightManager;
-	lightManager.createDirectionalLight({0, -1, 0, 0}, {0.5,0.5,0.5,1});
+	lightManager.createDirectionalLight({1, -1, 0, 0}, {1,0.5,0.5,1});
+	lightManager.createDirectionalLight({-1, -1, 0, 0}, {0,1,0.5,1});
 	lightManager.createPointLight({2, 0, 0, 1}, {1,1,1,1}, 2);
 	lightManager.createPointLight({2, 0, 0.5, 1}, {1,0,0,1}, 2);
+
+	lightManager.connectLightDataToShader();
 
 	vector<DirectionalLight> directionalLightsForUniform = lightManager.getDirectionalLights();
 	vector<PointLight> pointLightsForUniform = lightManager.getPointLights();
@@ -96,6 +99,9 @@ int main(int argc, char const *argv[])
 	clock.restart();
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glDepthFunc(GL_LEQUAL);
+	glBlendFunc(GL_ONE, GL_ONE);
 
 	while(isRunning) {
 
@@ -122,7 +128,17 @@ int main(int argc, char const *argv[])
 
 		GLfloat clearColor[] = {0.25, 0.5, 0, 1};
 		glClearBufferfv(GL_COLOR, 0, clearColor);
+
+		glDisable(GL_BLEND);
+		lightManager.sendBatchToShader(0);
 		mesh.render();
+
+		glEnable(GL_BLEND);
+		for(int i = 1; i < lightManager.getBatchCount(); ++i) {
+
+			lightManager.sendBatchToShader(i);
+			mesh.render();
+		}
 		window.display();
 	}
 	return 0;
