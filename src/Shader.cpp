@@ -9,7 +9,7 @@ using std::cout;
 using std::endl;
 
 string Shader::includeDirectory = "shaders/";
-string Shader::customPreprocessorDirectivePrefix = "//#";
+string Shader::customPreprocessorDirectivePrefix = "#";
 
 void Shader::SetIncludeDirectory(const string &_includeDirectory) {
 	includeDirectory = _includeDirectory;
