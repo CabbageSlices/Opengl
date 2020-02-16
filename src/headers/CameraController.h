@@ -1,3 +1,5 @@
+#pragma once
+
 #include "./Camera.h"
 #include "glm\glm.hpp"
 #include "SFML\Window.hpp"
