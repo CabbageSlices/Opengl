@@ -5,7 +5,7 @@
 
 out vec4 fragOut;
 
-in vec4 cameraPos;
+in vec4 worldSpacePosition;
 in vec3 vs_Normal;
 
 #include "Lighting.frag"

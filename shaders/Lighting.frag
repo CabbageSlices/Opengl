@@ -33,14 +33,14 @@ vec4 calculateDirectionalLightsIntensity(vec3 surfaceNormal) {
 	
 	for(int i = 0; i < MAX_DIRECTIONAL_LIGHTS; ++i) {
 
-			lightTotal = lightTotal + calculateDirectionalLightIntensity(directionalLights[i], surfaceNormal);
+			lightTotal += calculateDirectionalLightIntensity(directionalLights[i], surfaceNormal);
 	}
 
 	return lightTotal;
 }
 
 vec4 calculatePointLightIntensity(PointLight pointLight, vec3 surfaceNormal) {
-	vec4 dirToLight = pointLight.position - cameraPos;
+	vec4 dirToLight = pointLight.position - worldSpacePosition;
 	float distSquared = dot(dirToLight, dirToLight);
 
   //make sure range isn't 0

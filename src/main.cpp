@@ -61,7 +61,7 @@ int main(int argc, char const *argv[])
 	glPointSize(20);
 
 	Mesh mesh;
-	mesh.loadFromFile("sphere.obj");
+	mesh.loadFromFile("smoothsphere.obj");
 
 	CameraController cameraController;
 	// Camera camera;
@@ -71,10 +71,10 @@ int main(int argc, char const *argv[])
 	cameraController.camera.focusOnPoint(0, 0, 0);
 
 	LightManager lightManager;
-	lightManager.createDirectionalLight({1, -1, 0, 0}, {1,0.5,0.5,1});
-	lightManager.createDirectionalLight({-1, -1, 0, 0}, {0,1,0.5,1});
-	lightManager.createPointLight({2, 0, 0, 1}, {1,1,1,1}, 2);
-	lightManager.createPointLight({2, 0, 0.5, 1}, {1,0,0,1}, 2);
+	lightManager.createDirectionalLight({0, -1, 0.5, 0}, {1,1,1,1});
+	lightManager.createDirectionalLight({0, -1, -0.5, 0}, {1,1,1,1});
+	lightManager.createPointLight({2, 0, -0.5, 1}, {0,0,1,1}, 3);
+	lightManager.createPointLight({-2, 0, 0.5, 1}, {1,1,1,1}, 3);
 
 	lightManager.connectLightDataToShader();
 
