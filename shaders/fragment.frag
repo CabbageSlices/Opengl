@@ -2,6 +2,7 @@
 #ifndef FRAGMENT_BASE
 #define FRAGMENT_BASE
 #define DIRECTIONAL
+#define POINT
 
 out vec4 fragOut;
 
