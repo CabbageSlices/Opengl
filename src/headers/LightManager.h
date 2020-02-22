@@ -40,6 +40,10 @@ public:
 
 private:
 
+	template <typename T>
+	void sendLightBatchToShader(int batchId, const std::vector<T> &lightsCollection, Buffer &lightBuffer, const int maxLightInBatch, const T &dummyLight);
+
+
 	std::vector<DirectionalLight> directionalLights;
 	std::vector<PointLight> pointLights;
 

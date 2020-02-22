@@ -64,34 +64,23 @@ int main(int argc, char const *argv[])
 	mesh.loadFromFile("smoothsphere.obj");
 
 	CameraController cameraController;
-	// Camera camera;
-
-	//at the top is error
 	cameraController.camera.setPosition(-4, 0, 10);
 	cameraController.camera.focusOnPoint(0, 0, 0);
 
 	LightManager lightManager;
-	lightManager.createDirectionalLight({0, -1, 0.5, 0}, {1,1,1,1});
-	lightManager.createDirectionalLight({0, -1, -0.5, 0}, {1,1,1,1});
-	lightManager.createPointLight({2, 0, -0.5, 1}, {0,0,1,1}, 3);
-	lightManager.createPointLight({-2, 0, 0.5, 1}, {1,1,1,1}, 3);
+	lightManager.createDirectionalLight({0, -1, 0.5, 0}, {1,0,0,1});
+	lightManager.createDirectionalLight({0, -1, -0.5, 0}, {0,1,0,1});
+	lightManager.createPointLight({0, 2, 0, 1}, {1,0,0,1}, 3);
+	lightManager.createPointLight({0, -2, 0, 1}, {0,1,0,1}, 3);
+	lightManager.createPointLight({2, 0, 0, 1}, {0,0,1,1}, 3);
+	lightManager.createPointLight({0, 0, 2, 1}, {1,0,1,1}, 3);
+	lightManager.createPointLight({-2, 0, 0, 1}, {1,1,0,1}, 3);
+	lightManager.createPointLight({0, 0, -2, 1}, {0,1,1,1}, 3);
 
 	lightManager.connectLightDataToShader();
 
 	vector<DirectionalLight> directionalLightsForUniform = lightManager.getDirectionalLights();
 	vector<PointLight> pointLightsForUniform = lightManager.getPointLights();
-
-	Buffer directionalLightBuffer;
-	directionalLightBuffer.create(Buffer::BindingTarget::UniformBuffer, directionalLightsForUniform.data(),
-		sizeof(DirectionalLight) * directionalLightsForUniform.size(), Buffer::UsageType::StaticDraw);
-
-	directionalLightBuffer.bindToTargetBindingPoint(ShaderProgram::DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
-
-	Buffer pointLightBuffer;
-	pointLightBuffer.create(Buffer::BindingTarget::UniformBuffer, pointLightsForUniform.data(),
-		sizeof(PointLight) * pointLightsForUniform.size(), Buffer::UsageType::StaticDraw);
-
-	pointLightBuffer.bindToTargetBindingPoint(ShaderProgram::POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
 
 	program1.setUniform(1, {0.5, 0, 0, 0});
 
@@ -134,7 +123,7 @@ int main(int argc, char const *argv[])
 		mesh.render();
 
 		glEnable(GL_BLEND);
-		for(int i = 1; i < lightManager.getBatchCount(); ++i) {
+		for(int i = 0; i < lightManager.getBatchCount(); ++i) {
 
 			lightManager.sendBatchToShader(i);
 			mesh.render();
