@@ -3,13 +3,14 @@ BUILD_DIR = build
 OUTPUT_DIR = bin
 INCLUDE_DIR = include
 HEADERS_DIR = src/headers
+SHADERS = shaders
 LIB_DIR = lib
 
 OBJECTS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(wildcard $(SRC_DIR)/*.cpp))
 DEPS := $(OBJECTS:.o=.d)
 
 CPP = g++
-CPP_FLAGS = -I$(INCLUDE_DIR) -I$(HEADERS_DIR) -MMD -MP -std=c++14 -g
+CPP_FLAGS = -I$(INCLUDE_DIR) -I$(HEADERS_DIR) -I$(SHADERS) -MMD -MP -std=c++14 -g
 LINKER_FLAGS = -L$(LIB_DIR) -lsfml-graphics -lsfml-window -lsfml-system -lopengl32
 
 all : $(OBJECTS)

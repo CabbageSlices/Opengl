@@ -1,0 +1,6 @@
+#ifndef DEFINES
+#define DEFINES
+#define MAX_DIRECTIONAL_LIGHTS 1
+#define MAX_POINT_LIGHTS 4
+
+#endif

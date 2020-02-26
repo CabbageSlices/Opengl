@@ -1,6 +1,5 @@
 #ifdef FRAGMENT_BASE
-#define MAX_DIRECTIONAL_LIGHTS 1
-#define MAX_POINT_LIGHTS 4
+#include "defines.frag"
 
 struct DirectionalLight {
   vec3 direction;

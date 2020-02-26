@@ -1,8 +1,9 @@
 #pragma once
 
 #include <vector>
-#include "./Lights.h"
+#include "Lights.h"
 #include "./Buffer.h"
+#include "defines.frag"
 
 class LightManager {
 
@@ -29,14 +30,14 @@ public:
 	//batch 1 = next X lights, and so on
 	//returns true if the batch was selected (there are enough lights to reach that many batches),
 	//or returns false if the batch doesn't exist
-	bool sendBatchToShader(int batchId);
+	void sendBatchToShader(int batchId);
 
 	const std::vector<DirectionalLight> &getDirectionalLights();
 	const std::vector<PointLight> &getPointLights();
 
 
-	static constexpr unsigned DIRECTIONAL_LIGHTS_PER_BATCH = 1;
-	static constexpr unsigned POINT_LIGHTS_PER_BATCH = 4;
+	static constexpr unsigned DIRECTIONAL_LIGHTS_PER_BATCH = MAX_DIRECTIONAL_LIGHTS;
+	static constexpr unsigned POINT_LIGHTS_PER_BATCH = MAX_POINT_LIGHTS;
 
 private:
 

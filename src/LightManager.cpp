@@ -42,50 +42,16 @@ int LightManager::getBatchCount() {
 	return glm::max(direcitonalLightBatches, pointLightBatches);
 }
 
-bool LightManager::sendBatchToShader(int batchId) {
+void LightManager::sendBatchToShader(int batchId) {
 	//not enough batches, indicate failure
 	if(batchId >= getBatchCount()) {
-			return false;
+			return;
 	}
 
-	//index into arrays where the current batch would start, if there are enough lights
-	// int directionalLightBatchIndex = batchId * DIRECTIONAL_LIGHTS_PER_BATCH;
-	// int pointLightBatchIndex = batchId * POINT_LIGHTS_PER_BATCH;
-
-	// vector<DirectionalLight> directionalLightsToSend;
-
-	// //get all the direcitonal lights that actually exist, and add them to the batch
-	// directionalLightsToSend.insert(directionalLightsToSend.end(),
-	// 		directionalLights.begin() + directionalLightBatchIndex, directionalLights.begin() + directionalLightBatchIndex + DIRECTIONAL_LIGHTS_PER_BATCH);
-
-	
-	// //determine if you need to use dummy lights for directional batch
-	// //if you don't have enough lights to fill current batch, you will need dummy lights
-	// int numDummyDirectional = glm::clamp<int>(directionalLightBatchIndex + DIRECTIONAL_LIGHTS_PER_BATCH - directionalLights.size(), DIRECTIONAL_LIGHTS_PER_BATCH, 0);
-
-	// //add dummy directional lights
-	// directionalLightsToSend.insert(directionalLightsToSend.end(), numDummyDirectional, DUMMY_DIRECTIONAL_LIGHT);
-
-	// //put into light buffer which is connected to the shader uniform block
-	// directionalLightBuffer.updateData(directionalLightsToSend.data(), sizeof(DirectionalLight) * directionalLightsToSend.size(), 0);
-	// directionalLightBuffer.bindToTargetBindingPoint(ShaderProgram::DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
-
-	// vector<PointLight> pointLightsToSend;
-
-	// pointLightsToSend.insert(pointLightsToSend.end(),
-	// 	pointLights.begin() + pointLightBatchIndex, pointLights.begin() + pointLightBatchIndex + POINT_LIGHTS_PER_BATCH);
-
-	
-	// int numDummyPoints = glm::clamp<int>(pointLightBatchIndex + POINT_LIGHTS_PER_BATCH - pointLights.size(), POINT_LIGHTS_PER_BATCH, 0);
-
-	// pointLightsToSend.insert(pointLightsToSend.end(), numDummyPoints, DUMMY_POINT_LIGHT);
-
-	// pointLightBuffer.updateData(pointLightsToSend.data(), sizeof(PointLight) * pointLightsToSend.size(), 0);
-	// pointLightBuffer.bindToTargetBindingPoint(ShaderProgram::POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
 	sendLightBatchToShader(batchId, directionalLights, directionalLightBuffer, DIRECTIONAL_LIGHTS_PER_BATCH, DUMMY_DIRECTIONAL_LIGHT);
 	sendLightBatchToShader(batchId, pointLights, pointLightBuffer, POINT_LIGHTS_PER_BATCH, DUMMY_POINT_LIGHT);
 
-	return true;
+	return;
 	
 }
 
