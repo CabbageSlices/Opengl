@@ -91,6 +91,7 @@ int main(int argc, char const *argv[])
 	glEnable(GL_BLEND);
 	glDepthFunc(GL_LEQUAL);
 	glBlendFunc(GL_ONE, GL_ONE);
+	glClearColor(0, 0, 0, 0);
 
 	while(isRunning) {
 
@@ -115,15 +116,15 @@ int main(int argc, char const *argv[])
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		GLfloat clearColor[] = {0.25, 0.5, 0, 1};
-		glClearBufferfv(GL_COLOR, 0, clearColor);
+		glDisable(GL_BLEND); //first pass disable blend because when you render, if a triangle is rendered in the background, and then something renders on top of it, the background and 
+		//the triangle on top will be blended together.
 
-		glDisable(GL_BLEND);
 		lightManager.sendBatchToShader(0);
 		mesh.render();
 
-		glEnable(GL_BLEND);
-		for(int i = 0; i < lightManager.getBatchCount(); ++i) {
+		//additoinal passes, enable blend
+		glEnable(GL_BLEND); 
+		for(int i = 1; i < lightManager.getBatchCount(); ++i) {
 
 			lightManager.sendBatchToShader(i);
 			mesh.render();
