@@ -75,6 +75,7 @@ public:
 	static const unsigned int WORLD_TO_CAMERA_UNIFORM_LOCATION = 1;
 	static const unsigned int DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT = 4;
 	static const unsigned int POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT = 5;
+	static const unsigned int MATERIAL_UNIFORM_BLOCK_BINDING_POINT = 1;
 
 private:
 

@@ -103,7 +103,7 @@ inline void tinyobjAttributeIndicesToOpenglIndices(const MeshAttributes &origina
 
 inline void tinyobjMaterialToCustomMaterial (const tinyobj::material_t &tinyobjMaterial, shared_ptr<Material> &material) {
 
-	material->diffuse = {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1], tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve};
+	material->setDiffuse({tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1], tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve});
 	material->name = tinyobjMaterial.name;
 }
 

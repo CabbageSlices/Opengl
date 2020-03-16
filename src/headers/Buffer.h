@@ -51,7 +51,7 @@ public:
 	}
 	
 	/**
-	 * @brief Bind to the buffer type to tell opengl what kind of buffer this is (i.e uniform buffer, array buffer, etc)
+	 * @brief Bind to the buffer type to set the active buffer for that binding target to this buffer, so opengl uses it for any subsequent operation that reads from this binding target
 	 * 
 	 */
 	void bindToTarget();
@@ -59,7 +59,7 @@ public:
 	void unbindFromTarget();
 
 	/**
-	 * @brief bind the given buffer to the given index in the list of targets stored by the type of this buffer
+	 * @brief bind the given buffer to the given index in the list of targets stored by the type of this buffer.
 	 * uniform buffer's and the like have a list of binding targets for buffers to bind to in order for shaders to access them
 	 * the binding index is the index inside that array to bind this buffer to
 	 */

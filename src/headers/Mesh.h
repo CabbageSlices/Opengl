@@ -19,7 +19,6 @@ public:
 	}
 
 	bool loadFromFile(const std::string &filename);
-	void setMaterial(ShaderProgram &program);
 
 	void deleteMeshData() {
 		attributeBuffer.deleteBuffer();
@@ -39,8 +38,6 @@ private:
 	void initializeVertexArrayObject();
 
 	MeshData meshData;
-	// GLuint indexBuffer;
-	// GLuint vao;
 	VertexArrayObject vao;
 
 	Buffer attributeBuffer;

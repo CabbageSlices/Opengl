@@ -36,11 +36,14 @@ void Mesh::render() {
 	for(unsigned i = 0; i < meshData.materials.size(); ++i) {
 
 		int materialId = meshData.materials[i]->id;
+		auto mat = meshData.materials[i];
+
 		FaceSet faceset = meshData.materialFaceMap[materialId];
 
 		unsigned numIndicesPerFace = 3;
 		unsigned numIndicesCurrentFaceset = faceset.size() * numIndicesPerFace;
 
+		mat->connectMaterialDataToShader();
 		glDrawElements(GL_TRIANGLES, numIndicesCurrentFaceset, GL_UNSIGNED_INT, (void*)bytesAlreadyRead);//wtf? convert integer directly to pointer and not the address
 
 		 bytesAlreadyRead += sizeof(Face) * faceset.size();

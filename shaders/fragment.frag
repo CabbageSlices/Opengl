@@ -18,11 +18,11 @@ void main(void) {
 	vec4 outputColor = vec4(0);
 	
 	#ifdef DIRECTIONAL
-	outputColor += COMPUTE_DIRECTIONAL_LIGHT_CONTRIBUTION(baseColor, normal);
+	outputColor += COMPUTE_DIRECTIONAL_LIGHT_CONTRIBUTION(normal);
 	#endif
 
 	#ifdef POINT
-	outputColor += COMPUTE_POINT_LIGHT_CONTRIBUTION(baseColor, normal);
+	outputColor += COMPUTE_POINT_LIGHT_CONTRIBUTION(normal);
 	#endif
 
 	fragOut = outputColor;
