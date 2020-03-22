@@ -1,6 +1,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
-#include "headers\Camera.h"
+#include "Camera.h"
 #include "glm\gtc\matrix_transform.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm\gtx\rotate_vector.hpp"
@@ -8,9 +8,9 @@
 #include "glm\ext\quaternion_trigonometric.hpp"
 #include "glm\gtx\vector_angle.hpp"
 #include "SFML\Window.hpp"
-#include "headers\PrintVector.hpp"
+#include "PrintVector.hpp"
 #include "glm/gtx/fast_trigonometry.hpp"
-#include "headers/Constants.h"
+#include "Constants.h"
 
 #include <iostream>
 
@@ -39,6 +39,16 @@ Camera::Camera() :
 	projectionMatrix = glm::perspective(fov * degToRad, 4.0f/3.0f, 0.1f, 10.0f);
 }
 
+Camera::Camera(glm::vec3 initialPosition, glm::vec3 initialFocalPoint) :
+	worldPos(initialPosition),
+	angleAroundHorizontalAxis(0),
+	focalPoint(initialFocalPoint),
+	defaultFocalPointDistance(5),
+	fov(45.0f)
+{
+	projectionMatrix = glm::perspective(fov * degToRad, 4.0f/3.0f, 0.1f, 10.0f);
+}
+
 void Camera::setPosition(float x, float y, float z) {
 
 	glm::vec3 previousForwardDirection = getForward();
@@ -57,14 +67,14 @@ void Camera::focusOnPoint(float x, float y, float z) {
 	worldPos = focalPoint - previousForwardDirection * defaultFocalPointDistance;
 }
 
-glm::mat4 Camera::calculateWorldToClipMatrix() {
+glm::mat4 Camera::calculateWorldToClipMatrix() const {
 
 	glm::mat4 worldToCamera = getWorldToCameraMatrix();
 
 	return projectionMatrix * worldToCamera;
 }
 
-glm::mat4 Camera::getWorldToCameraMatrix() {
+glm::mat4 Camera::getWorldToCameraMatrix() const {
 
 	return glm::lookAt(worldPos, focalPoint, determineUpVector(angleAroundHorizontalAxis));
 }

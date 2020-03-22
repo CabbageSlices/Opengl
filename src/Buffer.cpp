@@ -1,4 +1,4 @@
-#include "headers/Buffer.h"
+#include "Buffer.h"
 #include <iostream>
 
 using std::cout;

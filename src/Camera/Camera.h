@@ -14,12 +14,13 @@ public:
 	static glm::vec3 determineUpVector(const float &angleAroundHorizontalAxis);
 
 	Camera();
+	Camera(glm::vec3 initialPosition, glm::vec3 initialFocalPoint);
 
 	void setPosition(float x, float y, float z);
 	void focusOnPoint(float x, float y, float z);
 
-	glm::mat4 calculateWorldToClipMatrix();
-	glm::mat4 getWorldToCameraMatrix();
+	glm::mat4 calculateWorldToClipMatrix() const;
+	glm::mat4 getWorldToCameraMatrix() const;
 
 	//zoom in out
 	void changeFov(const float &fovDelta);

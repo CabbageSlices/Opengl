@@ -5,6 +5,8 @@
 #include "./Buffer.h"
 #include "defines.frag"
 
+//TODO move to own folder with lights
+//TODO write tests, disable copying?
 class LightManager {
 
 public:

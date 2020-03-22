@@ -1,5 +1,5 @@
-#include "headers/LightManager.h"
-#include "headers/ShaderProgram.h"
+#include "LightManager.h"
+#include "ShaderProgram.h"
 
 using std::vector;
 

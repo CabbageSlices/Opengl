@@ -1,6 +1,6 @@
 #include <vector>
 #include <iostream>
-#include "./headers/ShaderProgram.h"
+#include "./ShaderProgram.h"
 
 using std::cout;
 using std::endl;

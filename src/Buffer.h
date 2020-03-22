@@ -1,6 +1,7 @@
 #pragma once
 #include "glad\glad.h"
 
+//TODO copy constructor and assignmetn operator need to be disabled
 class Buffer {
 
 public:

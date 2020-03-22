@@ -10,6 +10,8 @@ using std::pair;
 using std::map;
 using std::shared_ptr;
 
+//TODO when resourse manager is made, move shader array out of shader program and into resource manager
+//TODO disable copy constructor/ assignment opearator, or write them to ccreate new instances of shader with new buffer
 class ShaderProgram {
 
 public:

@@ -1,7 +1,7 @@
-#include "headers/Mesh.h"
-#include "headers/MeshData.h"
-#include "headers/loadFromObj.h"
-#include "headers/Shader.h"
+#include "Mesh.h"
+#include "MeshData.h"
+#include "loadFromObj.h"
+#include "Shader.h"
 #include <iostream>
 
 using std::cout;

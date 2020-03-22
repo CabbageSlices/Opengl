@@ -1,4 +1,4 @@
-#define GLM_ENABLE_EXPERIMENTAL
+#ifndef TESTING
 
 #include <iostream>
 #include <string>
@@ -8,29 +8,31 @@
 #include "SFML/OpenGL.hpp"
 #include "SFML/Window.hpp"
 #include "SFML\System.hpp"
-#include "glm\gtc\quaternion.hpp"
-#include "glm\ext\quaternion_trigonometric.hpp"
-#include "glm\gtx\vector_angle.hpp"
-#include "headers/PrintVector.hpp"
-#include "glm/gtx/fast_trigonometry.hpp"
+#include "PrintVector.hpp"
+#include "Entity/Entity.h"
+#include <memory>
 
-
-#define TINYOBJLOADER_IMPLEMENTATION
-
-#include "headers\Camera.h"
-#include "headers\CameraController.h"
-#include "headers/ShaderProgram.h"
-#include "./headers/Shader.h"
-#include "./headers/StringMethods.h"
-#include "./headers/loadFromObj.h"
-#include "headers\Mesh.h"
-#include "headers/LightManager.h"
+#include "Camera/Camera.h"
+#include "Camera/CameraController.h"
+#include "ShaderProgram.h"
+#include "./Shader.h"
+#include "./StringMethods.h"
+#include "./loadFromObj.h"
+#include "Mesh.h"
+#include "LightManager.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 using std::cout;
 using std::endl;
 using std::string;
 using std::fstream;
 using std::vector;
+
+TEST(lolz, lol2) {
+	ASSERT_EQ(5,5);
+}
+
 
 int main(int argc, char const *argv[])
 {
@@ -62,10 +64,17 @@ int main(int argc, char const *argv[])
 
 	Mesh mesh;
 	mesh.loadFromFile("smoothsphere.obj");
+	Entity et;
+	et.update();
 
-	CameraController cameraController;
-	cameraController.camera.setPosition(-4, 0, 10);
-	cameraController.camera.focusOnPoint(0, 0, 0);
+	// MeshAsset cubeAsset = AssetManager.loadObj("smoothsphere.obj");
+	// MeshComponent cubeMesh(cubeAsset);
+
+	// Entity cube(position, rotation, scale);
+	// cube.addComponent(cubeMesh);
+
+
+	CameraController cameraController({-4, 0, 10}, {0, 0, 0});
 
 	LightManager lightManager;
 	lightManager.createDirectionalLight({0, -1, 0.5, 0}, {1,0,0,1});
@@ -110,8 +119,8 @@ int main(int argc, char const *argv[])
 
 		cameraController.handleInput(timeInSeconds);
 
-		program1.setUniform(ShaderProgram::WORLD_TO_CLIP_UNIFORM_LOCATION, false, cameraController.camera.calculateWorldToClipMatrix());
-		program1.setUniform(ShaderProgram::WORLD_TO_CAMERA_UNIFORM_LOCATION, false, cameraController.camera.getWorldToCameraMatrix());
+		program1.setUniform(ShaderProgram::WORLD_TO_CLIP_UNIFORM_LOCATION, false, cameraController.getCamera().calculateWorldToClipMatrix());
+		program1.setUniform(ShaderProgram::WORLD_TO_CAMERA_UNIFORM_LOCATION, false, cameraController.getCamera().getWorldToCameraMatrix());
 	
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -133,3 +142,4 @@ int main(int argc, char const *argv[])
 	}
 	return 0;
 }
+#endif

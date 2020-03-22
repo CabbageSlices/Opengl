@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
-#include "./headers/Shader.h"
-#include "./headers/StringMethods.h"
+#include "./Shader.h"
+#include "./StringMethods.h"
 
 using std::vector;
 using std::string;

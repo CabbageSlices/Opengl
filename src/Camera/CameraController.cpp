@@ -1,17 +1,31 @@
-#include "headers/CameraController.h"
-#include "headers/Constants.h"
+#include "CameraController.h"
+#include "Constants.h"
 
+//TODO camera turning left/right in place is probably wrong
+//TODO write camera tests
 CameraController::CameraController() :
-    camera(),
     isLeftMouseHeld(false),
     isMiddleMouseHeld(false),
     previousMousePosition(-1, -1),
     mouseWheelDeltaTranslationRatio(degToRad * 20),
     mouseDeltaCameraTranslationRatio(1/150.0f),
-    mouseDeltaCameraRotationRatio(degToRad / 6.0f)
+    mouseDeltaCameraRotationRatio(degToRad / 6.0f),
+    camera()
     {
 
     }
+
+CameraController::CameraController(glm::vec3 initialPosition, glm::vec3 initialFocalPoint) :
+    isLeftMouseHeld(false),
+    isMiddleMouseHeld(false),
+    previousMousePosition(-1, -1),
+    mouseWheelDeltaTranslationRatio(degToRad * 20),
+    mouseDeltaCameraTranslationRatio(1/150.0f),
+    mouseDeltaCameraRotationRatio(degToRad / 6.0f),
+    camera(initialPosition, initialFocalPoint)
+{
+
+}
 
 bool CameraController::handleEvent(const sf::Event &event, const float &deltaTime) {
 
@@ -21,6 +35,10 @@ bool CameraController::handleEvent(const sf::Event &event, const float &deltaTim
 void CameraController::handleInput(const float &deltaTime) {
     handleKeyboardInput(deltaTime);
     handleMouseInput(deltaTime);
+}
+
+const Camera &CameraController::getCamera() const {
+    return camera;
 }
 
 glm::vec2 CameraController::getMousePosition() {

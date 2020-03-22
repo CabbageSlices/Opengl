@@ -31,6 +31,7 @@ class Buffer;
     = data_position of first position element + buffer stride
     number of bytes corresponding to each
  */
+//TODO disable copying
 class VertexArrayObject {
 
 public:

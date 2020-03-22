@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/src/headers",
+                "${workspaceFolder}/src",
                 "${workspaceFolder}/shaders"
             ],
             "defines": [

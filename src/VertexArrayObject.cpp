@@ -1,5 +1,5 @@
-#include "headers/VertexArrayObject.h"
-#include "headers/Buffer.h"
+#include "VertexArrayObject.h"
+#include "Buffer.h"
 
 VertexArrayObject::VertexArrayObject() :
     vao(0)

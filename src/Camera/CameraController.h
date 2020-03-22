@@ -1,7 +1,7 @@
 #pragma once
 
 #include "./Camera.h"
-#include "glm\glm.hpp"
+#include "Includes.h"
 #include "SFML\Window.hpp"
 /**
  * @brief Class that will manage a Camera object and handle input for it
@@ -12,11 +12,13 @@ class CameraController {
 public:
 
 	CameraController();
+	CameraController(glm::vec3 initialPosition, glm::vec3 initialFocalPoint);
 
     bool handleEvent(const sf::Event &event, const float &deltaTime);
 	void handleInput(const float &deltaTime);
 
-    Camera camera;
+	const Camera &getCamera() const;
+
 private:
 
     glm::vec2 getMousePosition();
@@ -36,4 +38,6 @@ private:
 	const float mouseWheelDeltaTranslationRatio;
 	const float mouseDeltaCameraTranslationRatio;
 	const float mouseDeltaCameraRotationRatio;
+
+	Camera camera;
 };

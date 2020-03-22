@@ -6,6 +6,7 @@
 #include "ShaderProgram.h"
 #include "Buffer.h"
 
+//TODO create better material system
 class Material {
 
 public: 
