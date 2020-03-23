@@ -4,7 +4,7 @@
 using std::cout;
 using std::endl;
 
-bool Buffer::create(const Buffer::BindingTarget &target, const void *pointerToData, GLsizeiptr bufferSize, const Buffer::UsageType &usageType) {
+bool Buffer::create(const Buffer::BufferType &type, const void *pointerToData, GLsizeiptr bufferSize, const Buffer::UsageType &usageType) {
 
     if(buffer != 0) {
         cout << "Error, Buffer already stores data!" << endl;
@@ -13,7 +13,7 @@ bool Buffer::create(const Buffer::BindingTarget &target, const void *pointerToDa
 
     glCreateBuffers(1, &buffer);
     glNamedBufferData(buffer, bufferSize, pointerToData, usageType);
-    bindingTarget = target;
+    bufferType = type;
 
     return true;
 }
@@ -31,13 +31,13 @@ bool Buffer::updateData(const void *pointerToData, GLsizeiptr dataSize, GLintptr
 
 void Buffer::bindToTarget() {
 
-    glBindBuffer(bindingTarget, buffer);
+    glBindBuffer(bufferType, buffer);
 }
 
 void Buffer::unbindFromTarget() {
-    glBindBuffer(bindingTarget, 0);
+    glBindBuffer(bufferType, 0);
 }
 
 void Buffer::bindToTargetBindingPoint(int bindingIndex) {
-    glBindBufferBase(bindingTarget, bindingIndex, buffer);
+    glBindBufferBase(bufferType, bindingIndex, buffer);
 }

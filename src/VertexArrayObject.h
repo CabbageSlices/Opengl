@@ -31,7 +31,6 @@ class Buffer;
     = data_position of first position element + buffer stride
     number of bytes corresponding to each
  */
-//TODO disable copying
 class VertexArrayObject {
 
 public:
@@ -41,6 +40,10 @@ public:
     ~VertexArrayObject() {
         deleteVao();
     }
+
+    //copying  vertex array objects don't make sense so delete them
+    VertexArrayObject(const VertexArrayObject &rhs) = delete;
+    VertexArrayObject& operator=(const VertexArrayObject &rhs) = delete;
 
     /**
      * @brief Connects the vertex attribute located aat shaderLocation within the shader program to the 

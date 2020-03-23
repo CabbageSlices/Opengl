@@ -46,6 +46,7 @@
         "set": "cpp",
         "string": "cpp",
         "iomanip": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "list": "cpp"
     }
 }

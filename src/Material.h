@@ -12,7 +12,7 @@ class Material {
 public: 
 
     Material() : id(NUM_MATERIALS++) {
-        materialBuffer.create(Buffer::BindingTarget::UniformBuffer, 0, sizeof(glm::vec4), Buffer::UsageType::StaticDraw);
+        materialBuffer.create(Buffer::BufferType::UniformBuffer, 0, sizeof(glm::vec4), Buffer::UsageType::StaticDraw);
     }
 
     void connectMaterialDataToShader() {

@@ -1,12 +1,11 @@
 #pragma once
 #include "glad\glad.h"
 
-//TODO copy constructor and assignmetn operator need to be disabled
 class Buffer {
 
 public:
 
-	enum BindingTarget : GLuint {
+	enum BufferType : GLuint {
 			None = GL_ZERO,
 			UniformBuffer = GL_UNIFORM_BUFFER,
 			ArrayBuffer = GL_ARRAY_BUFFER,
@@ -19,11 +18,14 @@ public:
 			StreamDraw = GL_STREAM_DRAW
 	};
 
-	Buffer(): buffer(0), bindingTarget(None) {}
+	Buffer(): buffer(0), bufferType(None) {}
 
 	~Buffer() {
 			deleteBuffer();
 	}
+
+	Buffer(const Buffer &rhs) = delete;
+	Buffer &operator=(const Buffer &rhs) = delete;
 
 	void deleteBuffer() {
 			if(buffer == 0)
@@ -44,7 +46,7 @@ public:
 	 * @return true if the buffer is created successfully
 	 * @return false otherewise
 	 */
-	bool create(const BindingTarget &target, const void * pointerToData, GLsizeiptr bufferSize, const UsageType &usageType);
+	bool create(const BufferType &type, const void * pointerToData, GLsizeiptr bufferSize, const UsageType &usageType);
 	bool updateData(const void *pointerToData, GLsizeiptr dataSize, GLintptr offsetIntoBuffer);
 
 	bool isUsed() {
@@ -73,5 +75,5 @@ public:
 private:
 
 	GLuint buffer;
-	BindingTarget bindingTarget;
+	BufferType bufferType;
 };
