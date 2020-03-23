@@ -19,7 +19,7 @@
 #include "./StringMethods.h"
 #include "./loadFromObj.h"
 #include "Mesh.h"
-#include "LightManager.h"
+#include "Lights/LightManager.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -74,7 +74,7 @@ int main(int argc, char const *argv[])
 	// cube.addComponent(cubeMesh);
 
 
-	CameraController cameraController({-4, 0, 10}, {0, 0, 0});
+	CameraController cameraController({0, 0, 5}, {0, 0, 0});
 
 	LightManager lightManager;
 	lightManager.createDirectionalLight({0, -1, 0.5, 0}, {1,0,0,1});
