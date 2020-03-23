@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+#include <typeinfo>
 #include <vector>
 #include <string>
 #include <memory>
@@ -11,5 +13,3 @@
 
 using std::cout;
 using std::endl;
-
-typedef std::function<void()> NoArgumentVoidFunction;

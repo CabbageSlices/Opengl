@@ -4,6 +4,7 @@
 #include "Transform.h"
 
 //TODO cleanup code in entity, write documentation, write tests
+//TODO use callbacklist  for callback handling instead of inside the class itself
 class ComponentBase;
 
 typedef std::function<void()> RenderCallback; 
