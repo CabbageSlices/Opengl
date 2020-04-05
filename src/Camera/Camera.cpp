@@ -36,7 +36,7 @@ Camera::Camera() :
 	defaultFocalPointDistance(5),
 	fov(45.0f)
 {
-	projectionMatrix = glm::perspective(fov * degToRad, 4.0f/3.0f, 0.1f, 10.0f);
+	projectionMatrix = glm::perspective(fov * degToRad, 4.0f/3.0f, 0.1f, 30.0f);
 }
 
 Camera::Camera(glm::vec3 initialPosition, glm::vec3 initialFocalPoint) :
