@@ -1,47 +1,49 @@
 #include "./Entity.h"
 #include "./Component.h"
 
-void Entity::addComponent(std::shared_ptr<ComponentBase> component) {
+bool Entity::addComponent(const std::shared_ptr<ComponentBase> &component) {
+    //don't add the same component twice
+    if(std::find(components.begin(), components.end(), component) != components.end())
+        return false;
+    
     component->registerEntity(this);
     components.push_back(component);
+
+    return true;
 }
 
-// void Entity::registerCallback(EventCallbackTypes callbackType, std::shared_ptr<NoArgumentVoidFunction> callback) {
-    
-//     if(callbackMap.count(callbackType) == 0) {
-//         cout << "Entity contains no callback list for callback " << callbackType << endl;
-//     }
-
-//     callbackMap.at(callbackType)->push_back(callback);
-// }
-
-void Entity::registerRenderCallback(RenderCallback callback) {
-    
-    renderCallbacks.push_back(callback);
+void Entity::removeComponent(const std::shared_ptr<ComponentBase> &component) {
+    renderCallbacks.removeCallback(component);
+    updateCallbacks.removeCallback(component);
+    components.erase(std::remove(components.begin(), components.end(), component), components.end());
 }
 
-void Entity::registerUpdateCallback(UpdateCallback callback) {
+void Entity::registerRenderCallback(const CallbackIdentifier &id, const RenderCallback &callback) {
     
-    updateCallbacks.push_back(callback);
+    renderCallbacks.addCallback(id, callback);
 }
 
-void Entity::update() {
+void Entity::registerRenderCallback(CallbackIdentifier &&id, RenderCallback &&callback) {
+    
+    renderCallbacks.addCallback(std::move(id), std::move(callback));
+}
 
-    executeAll(updateCallbacks);
+void Entity::registerUpdateCallback(const CallbackIdentifier &id, const UpdateCallback &callback) {
+    
+    updateCallbacks.addCallback(id, callback);
+}
+
+void Entity::registerUpdateCallback(CallbackIdentifier &&id, UpdateCallback &&callback) {
+    
+    updateCallbacks.addCallback(std::move(id), std::move(callback));
 }
 
 void Entity::render() {
 
-    executeAll(renderCallbacks);
+    renderCallbacks.executeAll();
 }
 
-template<typename T>
-void Entity::executeAll(std::vector<T> &callbacks) {
-    for(auto &callback : callbacks) {
-        callback();
-    }
-}
+void Entity::update() {
 
-// void Entity::initCallbackMap() {
-//     callbackMap[Render] = &renderCallbacks;
-// }
+    updateCallbacks.executeAll();
+}

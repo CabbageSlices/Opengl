@@ -21,10 +21,6 @@ protected:
     //register the derived classes callbacks to the entity
     virtual void registerCallbacksToEntity(Entity *entity) = 0;
 
-    //list of functions to registger as callback to the entity when the entity is registered. if the entity is already registered tghen the callbacks will be registered manaully,
-    //wihtout using this 
-    // std::map<Entity::EventCallbackTypes, CallbackList> callbackMap;
-
 private:
 
     //owning entiry
