@@ -11,22 +11,22 @@ using testing::Mock;
 //test multiple callbacks have the same argument
 TEST(CallbackList, lambdaSameArgumentMultiple) {
 
-    MockFunction<void(const int&)> callback;
-    MockFunction<void(const int &)> callback1;
-    MockFunction<void(const int &)> callback2;
+    MockFunction<void(int &)> callback;
+    MockFunction<void(int &)> callback1;
+    MockFunction<void(int &)> callback2;
 
-    const int CALL_VAL = 3;
+     int CALL_VAL = 3;
 
     EXPECT_CALL(callback, Call(CALL_VAL));
     EXPECT_CALL(callback1, Call(CALL_VAL));
     EXPECT_CALL(callback2, Call(CALL_VAL));
 
-    CallbackList<int, void, const int &> list;
-    typedef CallbackList<int, void, const int &>::Callback Callback;
+    CallbackList<int, void, int &> list;
+    typedef CallbackList<int, void, int &>::Callback Callback;
 
-    list.addCallback(callback::getCallback<Callback, const int &> (callback), 1);
-    list.addCallback(callback::getCallback<Callback, const int &> (callback1), 2);
-    list.addCallback(callback::getCallback<Callback, const int &> (callback2), 3);
+    list.addCallback(1 , callback::getCallback<Callback, int &> (callback));
+    list.addCallback(2, callback::getCallback<Callback, int &> (callback1));
+    list.addCallback(3, callback::getCallback<Callback, int &> (callback2));
     
     list.executeAll(CALL_VAL);
 }
@@ -48,9 +48,9 @@ TEST(CallbackList, lambdaMultipleArgumentMultiple) {
     CallbackList<int, void, const int &, const std::string &> list;
     typedef CallbackList<int, void, const int &, const std::string &>::Callback Callback;
 
-    list.addCallback(callback::getCallback<Callback, const int &, const std::string &> (callback), 1);
-    list.addCallback(callback::getCallback<Callback, const int &, const std::string &> (callback1), 2);
-    list.addCallback(callback::getCallback<Callback, const int &, const std::string &> (callback2), 3);
+    list.addCallback(1, callback::getCallback<Callback, const int &, const std::string &> (callback));
+    list.addCallback(2, callback::getCallback<Callback, const int &, const std::string &> (callback1));
+    list.addCallback(3, callback::getCallback<Callback, const int &, const std::string &> (callback2));
     list.executeAll(CALL_VAL1, CALL_VAL2);
 }
 
@@ -72,9 +72,9 @@ TEST(CallbackList, callbackDeletionReplacement) {
 
     //callback2 replaced by callback, so it shouldn't be called.
     //callback1 is removed so it shouldn't be called
-    list.addCallback(callback::getCallback<Callback, const int &> (callback2), "1");
-    list.addCallback(callback::getCallback<Callback, const int &> (callback1), "2");
-    list.addCallback(callback::getCallback<Callback, const int &> (callback), "1");
+    list.addCallback("1", callback::getCallback<Callback, const int &> (callback2));
+    list.addCallback("2", callback::getCallback<Callback, const int &> (callback1));
+    list.addCallback("1", callback::getCallback<Callback, const int &> (callback));
     list.removeCallback("2");
 
     list.executeAll(CALL_VAL);
@@ -89,9 +89,9 @@ TEST(CallbackList, callbackDeletionReplacement) {
     EXPECT_CALL(callback1, Call).Times(0);
     EXPECT_CALL(callback2, Call).Times(0);
 
-    list.addCallback(callback::getCallback<Callback, const int &> (callback), "1");
-    list.addCallback(callback::getCallback<Callback, const int &> (callback1), "2");
-    list.addCallback(callback::getCallback<Callback, const int &> (callback2), "3");
+    list.addCallback("1", callback::getCallback<Callback, const int &> (callback));
+    list.addCallback("2", callback::getCallback<Callback, const int &> (callback1));
+    list.addCallback("3", callback::getCallback<Callback, const int &> (callback2));
     list.removeCallback("1");
     list.removeCallback("2");
     list.removeCallback("3");
@@ -112,7 +112,7 @@ TEST(CallbackList, classMethodMemberVariableMutation) {
     
     CallbackList<int, void, const int &> list;
 
-    list.addCallback(mock.getCallback(), 1);
+    list.addCallback(1, mock.getCallback());
 
     list.executeAll(CALL_VAL);
 

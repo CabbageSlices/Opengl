@@ -23,11 +23,13 @@ inline auto getCallback(MockFunction<void(Args...)> &mock) {
 
 class MockBase {
 public:
+    virtual ~MockBase() = default;
     virtual void Call(int x) = 0;
 };
 
 class MockClass : public MockBase {
 public:
+    virtual ~MockClass() = default;
     MOCK_METHOD(void, Call, (int x), (override));
 
     auto getCallback() {
