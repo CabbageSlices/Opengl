@@ -17,6 +17,20 @@
                 "$gcc"
             ],
         },
+        {
+            "label": "build_test",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "test"
+            ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+        },
 
         {
             "label": "build & run",
