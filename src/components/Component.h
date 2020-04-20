@@ -1,15 +1,27 @@
 #pragma once
 #include "Includes.h"
-#include "./Entity.h"
+#include "Entity/Entity.h"
 
 //also consider https://www.cprogramming.com/tutorial/virtual_inheritance.html for multiple component types
 class ComponentBase {
 public:
-    virtual ~ComponentBase() {}
+    virtual ~ComponentBase() {
+        if(entity) {
+            entity->removeComponent(this);
+            entity = nullptr;
+        }
+    }
 
     void registerEntity(Entity* _entity) {
         entity = _entity;
         registerCallbacksToEntity(entity);
+    }
+
+    void clearEntity(bool deregisterCallbacks = true) {
+        if(deregisterCallbacks && entity)
+            entity->removeComponent(this);
+
+        entity = nullptr;
     }
 
     Entity* getEntity() {
@@ -24,5 +36,5 @@ protected:
 private:
 
     //owning entiry
-    Entity* entity;
+    Entity* entity = nullptr;
 };

@@ -2,6 +2,6 @@
 #include "Includes.h"
 
 struct Transform {
-    glm::vec4 position;
+    glm::vec3 position;
     glm::quat orientation;
 };

@@ -64,7 +64,8 @@ public:
 	/**
 	 * @brief bind the given buffer to the given index in the list of targets stored by the type of this buffer.
 	 * uniform buffer's and the like have a list of binding targets for buffers to bind to in order for shaders to access them
-	 * the binding index is the index inside that array to bind this buffer to
+	 * the binding index is the index inside that array to bind this buffer to. Shader programs automatically have access to buffers
+	 * bound to this array, that way multiple shader programs can access the same data without the use of glSetUniform
 	 */
 	void bindToTargetBindingPoint(int bindingIndex);
 

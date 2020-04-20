@@ -1,6 +1,7 @@
 #ifdef FRAGMENT_BASE
 #include "defines.frag"
 #include "diffuseMaterial.frag"
+#include "uniformBlockBindings.vert"
 
 struct DirectionalLight {
   vec3 direction;
@@ -13,11 +14,11 @@ struct PointLight {
 	float range;
 };
 
-layout (std140, binding = 4) uniform DirectionalLights {
+layout (std140, binding = DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT) uniform DirectionalLights {
   DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 };
 
-layout (std140, binding = 5) uniform PointLights {
+layout (std140, binding = POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT) uniform PointLights {
   PointLight pointLights[MAX_POINT_LIGHTS];
 };
 

@@ -2,8 +2,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "./Entity.h"
-#include "./Component.h"
-#include "./Component_Tests.h"
+#include "components/Component.h"
+#include "components/Component_Tests.h"
 #include "gmock/gmock-function-mocker.h"
 
 using ::testing::MockFunction;

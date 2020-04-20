@@ -22,15 +22,6 @@ using std::map;
 using std::tuple;
 using std::make_tuple;
 
-template<typename T>
-inline bool checkIsEqual(const T &a, const T &b) {
-
-	T difference = a - b;
-
-	float eplison = 0.001;
-	return glm::dot(difference, difference) < eplison * eplison;
-}
-
 //tinyobj stores all atttributes as individual floats, store them as vectors so it's easy to index them
 //normally if a mesh usees vertex index i, you need to access the attributes as i * 3 + 0,1,2
 //which is annoying, so group them together in vectors so you can index them with just i
@@ -112,6 +103,7 @@ inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> 
 
 		shared_ptr<Material> convertedMaterial = make_shared<Material>();
 		tinyobjMaterialToCustomMaterial(tinyobjMaterials[i], convertedMaterial);
+		cout << convertedMaterial->name << endl;
 		convertedMaterials.push_back(convertedMaterial);
 	}
 }
@@ -146,7 +138,15 @@ inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices
 	}
 }
 
-inline bool loadFromObj(std::string objFileName, MeshData &meshData/* MaterialManager &materialManager, std::vector<MeshData> &meshData*/) {
+/**
+ * @brief Loads a mesh asset from the given filename. returns the mesh asset pointer, or null ptr if it failed
+ * 
+ * @param objFileName filename of the obj file to load, assumes it's of type .obj, if there is no .obj extension, then .obj will be appended to the filename
+ * @return shared_ptr<MeshData> the loaded mesh data. null if loading failed
+ */
+inline shared_ptr<MeshData> loadFromObj(std::string objFileName/* MaterialManager &materialManager, std::vector<MeshData> &meshData*/) {
+
+	shared_ptr<MeshData> meshData = std::make_shared<MeshData>();
 
 	//load into tinyobj format
 	//reorganize vertex data so that position/normal/etec can be indexed with a single index instead of a unique index per attribute
@@ -170,7 +170,7 @@ inline bool loadFromObj(std::string objFileName, MeshData &meshData/* MaterialMa
 
 	if(!result) {
 		cout << error << endl;
-		return false;
+		return nullptr;
 	}
 
 	MeshAttributes originalAttributes;
@@ -193,10 +193,11 @@ inline bool loadFromObj(std::string objFileName, MeshData &meshData/* MaterialMa
 	tinyobjAttributeIndicesToOpenglIndices(originalAttributes, mesh.indices, reorderedAttributes, reorderedIndices);
 	generateMaterialFaceMap(reorderedIndices, mesh.material_ids, convertedMaterials, materialFaceMap);
 
-	meshData.numIndices = reorderedIndices.size();
-	meshData.attributes = reorderedAttributes;
-	meshData.materialFaceMap = materialFaceMap;
-	meshData.materials = convertedMaterials;
+	meshData->numIndices = reorderedIndices.size();
+	meshData->attributes = reorderedAttributes;
+	meshData->materialFaceMap = materialFaceMap;
+	meshData->materials = convertedMaterials;
+	cout << meshData->numIndices << endl;
 
-	return true;
+	return meshData;
 }

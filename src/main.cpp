@@ -1,5 +1,4 @@
 #ifndef TESTING
-
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -18,7 +17,9 @@
 #include "./Shader.h"
 #include "./StringMethods.h"
 #include "./loadFromObj.h"
-#include "Mesh.h"
+#include "Includes.h"
+#include "MeshRenderer.h"
+#include "components/MeshRendererComponent.h"
 #include "Lights/LightManager.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -62,10 +63,13 @@ int main(int argc, char const *argv[])
 
 	glPointSize(20);
 
-	Mesh mesh;
-	mesh.loadFromFile("smoothsphere.obj");
-	Entity et;
-	et.update();
+	std::shared_ptr<MeshData> cubeMeshData = loadFromObj("cube.obj");
+	std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
+	
+	Entity cube;
+	cube.addComponent(cubeMeshRendererComponent);
+	cube.setRotation(45, 45, 0);
+	// MeshRenderer mesh(cubeMeshData);
 
 	// MeshAsset cubeAsset = AssetManager.loadObj("smoothsphere.obj");
 	// MeshComponent cubeMesh(cubeAsset);
@@ -77,6 +81,8 @@ int main(int argc, char const *argv[])
 	CameraController cameraController({0, 0, 5}, {0, 0, 0});
 
 	LightManager lightManager;
+	lightManager.createDirectionalLight({0, -1, 0, 0}, {1,1,1,1});
+	lightManager.createDirectionalLight({0, 1, 0, 0}, {1,1,1,1});
 	lightManager.createDirectionalLight({0, -1, 0.5, 0}, {1,0,0,1});
 	lightManager.createDirectionalLight({0, -1, -0.5, 0}, {0,1,0,1});
 	lightManager.createPointLight({0, 2, 0, 1}, {1,0,0,1}, 3);
@@ -119,9 +125,11 @@ int main(int argc, char const *argv[])
 
 		cameraController.handleInput(timeInSeconds);
 
-		program1.setUniform(ShaderProgram::WORLD_TO_CLIP_UNIFORM_LOCATION, false, cameraController.getCamera().calculateWorldToClipMatrix());
-		program1.setUniform(ShaderProgram::WORLD_TO_CAMERA_UNIFORM_LOCATION, false, cameraController.getCamera().getWorldToCameraMatrix());
+		program1.setUniform(WORLD_TO_CLIP_UNIFORM_BUFFER_LOCATION, false, cameraController.getCamera().calculateWorldToClipMatrix());
+		program1.setUniform(WORLD_TO_CAMERA_UNIFORM_BUFFER_LOCATION, false, cameraController.getCamera().getWorldToCameraMatrix());
 	
+		cube.rotate(glm::vec3(0, 1, 0), elapsedTime.asSeconds() * 50);
+		cube.rotate(glm::vec3(1, 0, 0), elapsedTime.asSeconds() * 10);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -129,14 +137,14 @@ int main(int argc, char const *argv[])
 		//the triangle on top will be blended together.
 
 		lightManager.sendBatchToShader(0);
-		mesh.render();
+		cube.render();
 
 		//additoinal passes, enable blend
 		glEnable(GL_BLEND); 
 		for(int i = 1; i < lightManager.getBatchCount(); ++i) {
 
 			lightManager.sendBatchToShader(i);
-			mesh.render();
+			cube.render();
 		}
 		window.display();
 	}

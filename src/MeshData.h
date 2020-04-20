@@ -21,7 +21,17 @@ struct MeshAttributes {
 };
 
 //3 indices to make up a face
-//each index should refer to position, normal, and texcoords
+//each index should refer to position, normal, and texcoords SIMULTANEOUSLY
+/*that is face 1 =  {
+	vertex1: {
+		position: positions[i1]
+		normal: normals[i1]
+		texCoord: texCoords[i1]
+	},
+	vertex2: {
+		...[i2]
+	},
+}*/
 struct Face {
 	unsigned i1, i2, i3;
 };

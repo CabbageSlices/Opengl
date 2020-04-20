@@ -2,9 +2,11 @@
 
 #include "Includes.h"
 #include "Transform.h"
+#include "Buffer.h"
 #include "CallbackList/CallbackList.h"
+#include "glm/gtc/quaternion.hpp"
+#include "gtest/gtest.h"
 
-//TODO cleanup code in entity, write documentation, write tests
 class ComponentBase;
 
 /**
@@ -22,7 +24,7 @@ public:
      * each callback list can only have 1 callback with a given identifier, if a second callback is 
      * added with the same identifier, then the older callback is replaced
      */
-    typedef std::shared_ptr<ComponentBase> CallbackIdentifier;
+    typedef ComponentBase *CallbackIdentifier;
 
     typedef void(RenderCallbackSignature)();
     typedef void(UpdateCallbackSignature)();
@@ -30,7 +32,10 @@ public:
     typedef std::function<RenderCallbackSignature> RenderCallback; 
     typedef std::function<UpdateCallbackSignature> UpdateCallback;
 
-    Entity() = default;
+    Entity();
+    virtual ~Entity() {
+        removeAllComponents();
+    }
 
     /**
      * @brief Adds the given component to the entity. The Component's corresponding registerEntity function is called
@@ -48,7 +53,17 @@ public:
      * 
      * @param component component to remove
      */
-    void removeComponent(const std::shared_ptr<ComponentBase> &component);
+    //MUST NOT BE REFERENCE, see definition of function for explanation
+    void removeComponent(std::shared_ptr<ComponentBase> component);
+    void removeComponent(ComponentBase *component);
+
+    /**
+     * @brief Removes all componetns attached to this entity, and also removes all callbacks
+     * associated with the removed component. If for whatever reason there is a callback that isn't part of a component
+     * that is attached, then the callback will NOT be removed
+     * 
+     */
+    void removeAllComponents();
 
     /**
      * @brief Register the given callback function to the render callback list. Whenever the entity renders, the render callbacks
@@ -66,7 +81,47 @@ public:
     void update();
     void render();
 
+    const Transform &getTransform() const {
+        return transform;
+    }
+
+    /**
+     * @brief Set the Position of the given entity, also updates the internal buffer (but does not bind it to shader)
+     * 
+     * @param position new position
+     */
+    void setPosition(const glm::vec3 &position) {
+        transform.position = position;
+        updateModelToWorldBuffer();
+    }
+
+    /**
+     * @brief Set the Rotation around each LOCAL axis. Angles are in degrees
+     * 
+     * @param xRot rotation around local x axis, in degrees
+     * @param yRot rotation around local y axis in degrees
+     * @param zRot rotation around local z axis in degrees
+     */
+    void setRotation(float xRot, float yRot, float zRot) {
+        transform.orientation = glm::quat(glm::vec3(glm::radians(xRot), glm::radians(yRot), glm::radians(zRot)));
+        updateModelToWorldBuffer();
+    }
+
+    /**
+     * @brief rotate the entity locally around the given axis by the given angle in degrees
+     * 
+     * @param axis local axis to rotate around
+     * @param degrees 
+     */
+    void rotate(glm::vec3 axis, float degrees) {
+        transform.orientation = glm::angleAxis(glm::radians(degrees), axis) * transform.orientation;
+        updateModelToWorldBuffer();
+    }
+
 private:
+    void updateModelToWorldBuffer();
+
+    FRIEND_TEST(EntityTest, componentRemainOutOfScop);
 
     //disable copying because we don't want the callback functions copied
     //there is a change the callback will be a lambda that captures local variables, whichi will  have incorrect references once copied
@@ -74,6 +129,7 @@ private:
     Entity &operator=(const Entity &entity) = delete;
 
     Transform transform;
+    Buffer modelToWorldBuffer;
 
     std::vector<std::shared_ptr<ComponentBase> > components;
 

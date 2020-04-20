@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include "./MeshRenderer.h"
 #include "MeshData.h"
 #include "loadFromObj.h"
 #include "Shader.h"
@@ -7,7 +7,18 @@
 using std::cout;
 using std::endl;
 
-bool Mesh::loadFromFile(const std::string &filename) {
+MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData):
+	meshData(_meshData),
+	vao(),
+	attributeBuffer(),
+	indexBuffer()
+	{
+		initializeAttributeBuffers();
+		initializeIndexBuffer();
+		initializeVertexArrayObject();
+	}
+
+bool MeshRenderer::loadFromFile(const std::string &filename) {
 
 	if(vao.getVao() != 0 || attributeBuffer.isUsed()) {
 		cout << "Already storing a previous mesh, please delete the mesh before loading" << endl;
@@ -15,7 +26,7 @@ bool Mesh::loadFromFile(const std::string &filename) {
 	}
 
 	//load data
-	if(!loadFromObj(filename, meshData))
+	if(!(meshData = loadFromObj(filename)))
 		return false;
 
 	initializeAttributeBuffers();
@@ -25,7 +36,7 @@ bool Mesh::loadFromFile(const std::string &filename) {
 	return true;
 }
 
-void Mesh::render() {
+void MeshRenderer::render() {
 
 	vao.bindToContext();
 
@@ -33,12 +44,12 @@ void Mesh::render() {
 	//number of indices that have already been drawn
 	unsigned int bytesAlreadyRead = 0 * sizeof(unsigned int);
 	
-	for(unsigned i = 0; i < meshData.materials.size(); ++i) {
+	for(unsigned i = 0; i < meshData->materials.size(); ++i) {
 
-		int materialId = meshData.materials[i]->id;
-		auto mat = meshData.materials[i];
+		int materialId = meshData->materials[i]->id;
+		auto mat = meshData->materials[i];
 
-		FaceSet faceset = meshData.materialFaceMap[materialId];
+		FaceSet faceset = meshData->materialFaceMap[materialId];
 
 		unsigned numIndicesPerFace = 3;
 		unsigned numIndicesCurrentFaceset = faceset.size() * numIndicesPerFace;
@@ -53,21 +64,21 @@ void Mesh::render() {
 }
 
 
-bool Mesh::initializeAttributeBuffers() {
+bool MeshRenderer::initializeAttributeBuffers() {
 
-	unsigned positionArraySize = sizeof(glm::vec3) * meshData.attributes.positions.size();
-	unsigned normalArraySize = sizeof(glm::vec3) * meshData.attributes.normals.size();
+	unsigned positionArraySize = sizeof(glm::vec3) * meshData->attributes.positions.size();
+	unsigned normalArraySize = sizeof(glm::vec3) * meshData->attributes.normals.size();
 
 	unsigned totalAttributeBufferSize = positionArraySize + normalArraySize;
 
 	attributeBuffer.create(Buffer::ArrayBuffer, nullptr, totalAttributeBufferSize, Buffer::StaticDraw);
-	attributeBuffer.updateData(meshData.attributes.positions.data(), positionArraySize, 0);
-	attributeBuffer.updateData(meshData.attributes.normals.data(), normalArraySize, positionArraySize);
+	attributeBuffer.updateData(meshData->attributes.positions.data(), positionArraySize, 0);
+	attributeBuffer.updateData(meshData->attributes.normals.data(), normalArraySize, positionArraySize);
 }	
 
-bool Mesh::initializeIndexBuffer() {
+bool MeshRenderer::initializeIndexBuffer() {
 
-	unsigned indicesArraySize = sizeof(unsigned int) * meshData.numIndices;
+	unsigned indicesArraySize = sizeof(unsigned int) * meshData->numIndices;
 
 	indexBuffer.create(Buffer::ElementArrayBuffer, 0, indicesArraySize, Buffer::StaticDraw);
 
@@ -77,11 +88,11 @@ bool Mesh::initializeIndexBuffer() {
 	int dataOffset = 0;
 
 	//add each faceset for each material to the index buffer
-	for(unsigned i = 0; i < meshData.materials.size(); ++i) {
+	for(unsigned i = 0; i < meshData->materials.size(); ++i) {
 
 		//current materials indices
-		int materialId = meshData.materials[i]->id;
-		FaceSet faceset = meshData.materialFaceMap[materialId];
+		int materialId = meshData->materials[i]->id;
+		FaceSet faceset = meshData->materialFaceMap[materialId];
 
 		indexBuffer.updateData(faceset.data(), sizeof(Face) * faceset.size(), dataOffset);
 
@@ -90,13 +101,13 @@ bool Mesh::initializeIndexBuffer() {
 
 }
 
-void Mesh::initializeVertexArrayObject() {
+void MeshRenderer::initializeVertexArrayObject() {
 	//buffer binding index that correspond to the different vertex attributes
 	const unsigned POSITION_BUFFER_INDEX = 0;
 	const unsigned NORMAL_BUFFER_INDEX = 1;
 	const unsigned TEX_COORD_BUFFER_INDEX = 2;
 
-	unsigned int positionBufferSize = sizeof(glm::vec3) * meshData.attributes.positions.size();
+	unsigned int positionBufferSize = sizeof(glm::vec3) * meshData->attributes.positions.size();
 
 	vao.vertexAttributeShaderLocationToBufferIndex(Shader::POSITION_ATTRIBUTE_INDEX, 0);
 	vao.vertexAttributeShaderLocationToBufferIndex(Shader::NORMAL_ATTRIBUTE_INDEX, 0);

@@ -1,5 +1,6 @@
 #include "./LightManager.h"
 #include "ShaderProgram.h"
+#include "Includes.h"
 
 using std::vector;
 
@@ -31,8 +32,8 @@ void LightManager::createPointLight(const glm::vec4 &position, const glm::vec4 &
 }
 
 void LightManager::connectLightDataToShader() {
-	directionalLightBuffer.bindToTargetBindingPoint(ShaderProgram::DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
-	pointLightBuffer.bindToTargetBindingPoint(ShaderProgram::POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
+	directionalLightBuffer.bindToTargetBindingPoint(DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
+	pointLightBuffer.bindToTargetBindingPoint(POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
 }
 
 int LightManager::getBatchCount() {

@@ -68,6 +68,15 @@ public:
     }
 
     /**
+     * @brief Gets the number of callbacks stored in the callbacklist
+     * 
+     * @return int the number of callbacks
+     */
+    unsigned size() {
+        return callbacks.size();
+    }
+
+    /**
      * @brief Executes all the callbacks stored in the list, each callback is given the supplied arguments.
      * Return value of callback is ignored for now
      * 

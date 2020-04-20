@@ -47,6 +47,7 @@
         "string": "cpp",
         "iomanip": "cpp",
         "cinttypes": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "*.vert": "glsl"
     }
 }

@@ -5,6 +5,7 @@
 #include "glm/glm.hpp"
 #include "ShaderProgram.h"
 #include "Buffer.h"
+#include "Includes.h"
 
 //TODO create better material system
 class Material {
@@ -16,7 +17,7 @@ public:
     }
 
     void connectMaterialDataToShader() {
-        materialBuffer.bindToTargetBindingPoint(ShaderProgram::MATERIAL_UNIFORM_BLOCK_BINDING_POINT);
+        materialBuffer.bindToTargetBindingPoint(MATERIAL_UNIFORM_BLOCK_BINDING_POINT);
     }
 
     void setDiffuse(glm::vec4 _diffuse) {

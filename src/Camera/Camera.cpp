@@ -46,7 +46,7 @@ Camera::Camera(glm::vec3 initialPosition, glm::vec3 initialFocalPoint) :
 	defaultFocalPointDistance(5),
 	fov(45.0f)
 {
-	projectionMatrix = glm::perspective(fov * degToRad, 4.0f/3.0f, 0.1f, 10.0f);
+	projectionMatrix = glm::perspective(fov * degToRad, 4.0f/3.0f, 0.1f, 30.0f);
 }
 
 void Camera::setPosition(float x, float y, float z) {
@@ -82,7 +82,7 @@ glm::mat4 Camera::getWorldToCameraMatrix() const {
 void Camera::changeFov(const float &fovDeltaRadians) {
 
 	fov += fovDeltaRadians;
-	projectionMatrix = glm::perspective(fov, 4.0f/3.0f, 0.1f, 10.0f);
+	projectionMatrix = glm::perspective(fov, 4.0f/3.0f, 0.1f, 30.0f);
 }
 
 void Camera::moveTowardsTarget(const float &distance) {
