@@ -37,9 +37,10 @@ TEST(lolz, lol2) {
 
 int main(int argc, char const *argv[])
 {
-	//setup opengl context with version 4.5 core
+
+	//setup opengl context with version 4.6 core
 	sf::Window window(sf::VideoMode(800, 600), "OpenGL",
-		sf::Style::Default, sf::ContextSettings(24, 8, 4, 4, 5, sf::ContextSettings::Core));
+		sf::Style::Default, sf::ContextSettings(24, 8, 4, 6, 5, sf::ContextSettings::Core));
 	
 	//activte the context
 	window.setActive(true);
@@ -49,6 +50,10 @@ int main(int argc, char const *argv[])
 		cout << "Unable to load opengl" << endl;
 		exit(-1);
 	}
+
+	cout << glGetString(GL_RENDERER) << endl;
+		cout << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+		cout << glGetString(GL_VERSION) << endl;
 
 	bool isRunning = true;
 
@@ -69,6 +74,7 @@ int main(int argc, char const *argv[])
 	Entity cube;
 	cube.addComponent(cubeMeshRendererComponent);
 	cube.setRotation(45, 45, 0);
+	cube.setPosition({3, 0, 2});
 	// MeshRenderer mesh(cubeMeshData);
 
 	// MeshAsset cubeAsset = AssetManager.loadObj("smoothsphere.obj");
@@ -108,8 +114,27 @@ int main(int argc, char const *argv[])
 	glBlendFunc(GL_ONE, GL_ONE);
 	glClearColor(0, 0, 0, 0);
 
-	while(isRunning) {
+	//create some kinda 2d texture
+	GLuint texture;
+	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+	glTextureStorage2D(texture, 1, GL_RGBA32F, 256, 256);
+	float *textureData = new float[256*256*4];
 
+	for(unsigned i = 0; i < 256*256; i += 4) {
+		float val = (float)(rand() % 256) / (float)255;
+		textureData[i] = val;
+		textureData[i + 1] = val;
+		textureData[i + 2] = val;
+		textureData[i + 3] = 1;
+	}
+	glTextureSubImage2D(texture, 0, 0, 0, 256, 256, GL_RGBA, GL_FLOAT, textureData);
+	glBindTextureUnit(0, texture);
+	
+
+	//TODO set texture data
+
+
+	while(isRunning) {
 		sf::Event event;
 
 		sf::Time elapsedTime = clock.getElapsedTime();
@@ -146,6 +171,7 @@ int main(int argc, char const *argv[])
 			lightManager.sendBatchToShader(i);
 			cube.render();
 		}
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 		window.display();
 	}
 	return 0;
