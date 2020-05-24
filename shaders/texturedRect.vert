@@ -1,29 +1,26 @@
-#version 450 core
+#version 460 core
 
 out vec2 texCoord;
-vec2 POSITION_DATA[6] = vec2[5] (
+vec2 POSITION_DATA[6] = vec2[6] (
     vec2(-1, -1),
     vec2(1, -1),
     vec2(-1, 1),
     vec2(1, -1),
     vec2(1, 1),
     vec2(-1, 1)
-)
+);
 
-vec2 TEXCOORD_DATA[6] = vec2[5] (
-    vec2(-1, -1),
-    vec2(1, -1),
-    vec2(-1, 1),
-    vec2(1, -1),
+vec2 TEXCOORD_DATA[6] = vec2[6] (
+    vec2(0, 0),
+    vec2(1, 0),
+    vec2(0, 1),
+    vec2(1, 0),
     vec2(1, 1),
-    vec2(-1, 1)
-)
+    vec2(0, 1)
+);
 
 void main(void) {
 
-	vec3 pos = position;
-	worldSpacePosition = modelToWorld * vec4(pos, 1);
-	vs_Normal = normal;
-	gl_Position = POSITION_DATA[gl_VertexId];
-    texCoord = TEXCOORD_DATA[gl_VertexId];
+	gl_Position = vec4(POSITION_DATA[gl_VertexID], 0, 1);
+    texCoord = TEXCOORD_DATA[gl_VertexID];
 }

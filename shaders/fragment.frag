@@ -1,4 +1,4 @@
-#version 450 core
+#version 460 core
 #ifndef FRAGMENT_BASE
 #define FRAGMENT_BASE
 #define DIRECTIONAL
@@ -8,6 +8,9 @@ out vec4 fragOut;
 
 in vec4 worldSpacePosition;
 in vec3 vs_Normal;
+in vec2 vs_TexCoord;
+
+uniform sampler2D s;
 
 #include "Lighting.frag"
 
@@ -25,6 +28,8 @@ void main(void) {
 	outputColor += COMPUTE_POINT_LIGHT_CONTRIBUTION(normal);
 	#endif
 
-	fragOut = outputColor;
+	fragOut = outputColor * texture(s, vs_TexCoord);
+	// fragOut = texture(s, vs_TexCoord);
+	// fragOut = vec4(vs_TexCoord, 0, 1);
 }
 #endif

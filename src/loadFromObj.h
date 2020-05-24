@@ -22,26 +22,39 @@ using std::map;
 using std::tuple;
 using std::make_tuple;
 
+//go to the given position in the array and combine 3 consequitive floats into a single vec3, and place the vec3 in the destination
+inline const void extractVector(const vector<float> &array, unsigned startPosition, glm::vec3 &destination) {
+	destination = {array[startPosition], array[startPosition + 1], array[startPosition + 2]};
+}
+
+//go to the given position in the array and combine 2 consequitive floats into a single vec2, and place the vec2 in the destination
+inline const void extractVector(const vector<float> &array, unsigned startPosition, glm::vec2 &destination) {
+	destination = {array[startPosition], array[startPosition + 1]};
+}
+
+//tiny obj attributes are an array of floats with a given number of elemetns per entry
+//for example, a position attrbute has 3 elements per entry
+//combines X number of elements into a single vectory <X1, X2 ... Xn> and places it into meshAttribute
+//an entry indexed by i in the tinyobj array will be indexed by i in mesh attribute
+template<typename T>
+inline void tinyobjAttributeToMeshAttribute(const vector<float> &tinyobjAttribute, int elementsPerEntry, vector<T> &meshAttribute) {
+	for(unsigned i = 0; i < tinyobjAttribute.size(); i += elementsPerEntry) {
+		T entry;
+		extractVector(tinyobjAttribute, i, entry);
+		meshAttribute.push_back(entry);
+	}
+}
+
 //tinyobj stores all atttributes as individual floats, store them as vectors so it's easy to index them
 //normally if a mesh usees vertex index i, you need to access the attributes as i * 3 + 0,1,2
 //which is annoying, so group them together in vectors so you can index them with just i
-inline void tinyobjAttributeToMeshAttributes(const tinyobj::attrib_t & attributes, MeshAttributes &meshAttributes) {
+inline void tinyobjAttributesToMeshAttributes(const tinyobj::attrib_t & attributes, MeshAttributes &meshAttributes) {
 
-	for(unsigned vertexIndex = 0, texCoordIndex = 0;
-		vertexIndex < attributes.vertices.size(); vertexIndex += 3, texCoordIndex += 2) {
+	tinyobjAttributeToMeshAttribute(attributes.vertices, 3, meshAttributes.positions);
+	tinyobjAttributeToMeshAttribute(attributes.normals, 3, meshAttributes.normals);
 
-		glm::vec3 position = {attributes.vertices[vertexIndex], attributes.vertices[vertexIndex+1], attributes.vertices[vertexIndex+2]};
-		glm::vec3 normal = {attributes.normals[vertexIndex], attributes.normals[vertexIndex+1], attributes.normals[vertexIndex+2]};
-
-		meshAttributes.positions.push_back(position);
-		meshAttributes.normals.push_back(normal);
-
-		//might be missing tex coords
-		if(attributes.texcoords.size() > 0) {
-			glm::vec2 texCoord = {attributes.texcoords[texCoordIndex], attributes.texcoords[texCoordIndex + 1]};
-			meshAttributes.texCoords.push_back(texCoord);
-		}
-	}
+	if(attributes.texcoords.size() > 0)
+		tinyobjAttributeToMeshAttribute(attributes.texcoords, 2, meshAttributes.texCoords);
 }
 
 //move the normals and positions around so that the position, normals, and texcoord have the same index.
@@ -61,9 +74,6 @@ inline void tinyobjAttributeIndicesToOpenglIndices(const MeshAttributes &origina
 	for(unsigned i = 0; i < originalIndices.size(); ++i) {
 
 		tinyobj::index_t index = originalIndices[i];
-		
-		glm::vec3 position = originalAttributes.positions[index.vertex_index];
-		glm::vec3 normal = originalAttributes.normals[index.normal_index];
 
 		VertexIndex originalVertex = make_tuple(index.vertex_index, index.normal_index, index.texcoord_index);
 
@@ -75,19 +85,21 @@ inline void tinyobjAttributeIndicesToOpenglIndices(const MeshAttributes &origina
 			continue;
 		}
 
+		glm::vec3 position = originalAttributes.positions[index.vertex_index];
+		glm::vec3 normal = originalAttributes.normals[index.normal_index];
+
 		//this combination is unique so it forms a new vertex, must add the vertex data for position, normal, and texcoord and index this new vertex
 		reorderedAttributes.positions.push_back(position);
 		reorderedAttributes.normals.push_back(normal);
 		
+		//there is a texcoord so use it
 		if(originalAttributes.texCoords.size() > 0) {
-			glm::vec2 texCoord = originalAttributes.texCoords[index.texcoord_index];
-			reorderedAttributes.texCoords.push_back(texCoord);
+			reorderedAttributes.texCoords.push_back(originalAttributes.texCoords[index.texcoord_index]);
 		}	
 
 		int reorderedIndex = reorderedAttributes.positions.size() - 1;
 		reorderedIndices.push_back(reorderedIndex);
 		originalIndexToReorderedIndex[originalVertex] = reorderedIndex;
-
 	}
 }
 
@@ -103,7 +115,6 @@ inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> 
 
 		shared_ptr<Material> convertedMaterial = make_shared<Material>();
 		tinyobjMaterialToCustomMaterial(tinyobjMaterials[i], convertedMaterial);
-		cout << convertedMaterial->name << endl;
 		convertedMaterials.push_back(convertedMaterial);
 	}
 }
@@ -174,7 +185,7 @@ inline shared_ptr<MeshData> loadFromObj(std::string objFileName/* MaterialManage
 	}
 
 	MeshAttributes originalAttributes;
-	tinyobjAttributeToMeshAttributes(attrib, originalAttributes);
+	tinyobjAttributesToMeshAttributes(attrib, originalAttributes);
 
 	//generate material
 	vector<shared_ptr<Material> > convertedMaterials;
@@ -197,7 +208,6 @@ inline shared_ptr<MeshData> loadFromObj(std::string objFileName/* MaterialManage
 	meshData->attributes = reorderedAttributes;
 	meshData->materialFaceMap = materialFaceMap;
 	meshData->materials = convertedMaterials;
-	cout << meshData->numIndices << endl;
 
 	return meshData;
 }

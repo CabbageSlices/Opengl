@@ -25,6 +25,11 @@ bool Buffer::updateData(const void *pointerToData, GLsizeiptr dataSize, GLintptr
         return false;
     }
 
+    if(dataSize == 0) {
+        cout << "no data updated" << endl;
+        return false;
+    }
+
     glNamedBufferSubData(buffer, offsetIntoBuffer, dataSize, pointerToData);
     return true;
 }
