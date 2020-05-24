@@ -1,4 +1,3 @@
-#ifndef TESTING
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -30,17 +29,13 @@ using std::string;
 using std::fstream;
 using std::vector;
 
-TEST(lolz, lol2) {
-	ASSERT_EQ(5,5);
-}
 
-
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
 
 	//setup opengl context with version 4.6 core
 	sf::Window window(sf::VideoMode(800, 600), "OpenGL",
-		sf::Style::Default, sf::ContextSettings(24, 8, 4, 6, 5, sf::ContextSettings::Core));
+		sf::Style::Default, sf::ContextSettings(24, 8, 4, 4, 6, sf::ContextSettings::Core));
 	
 	//activte the context
 	window.setActive(true);
@@ -68,21 +63,13 @@ int main(int argc, char const *argv[])
 
 	glPointSize(20);
 
-	std::shared_ptr<MeshData> cubeMeshData = loadFromObj("cube.obj");
+	std::shared_ptr<MeshData> cubeMeshData = loadFromObj("sphere.obj");
 	std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
 	
 	Entity cube;
 	cube.addComponent(cubeMeshRendererComponent);
-	cube.setRotation(45, 45, 0);
-	cube.setPosition({3, 0, 2});
-	// MeshRenderer mesh(cubeMeshData);
-
-	// MeshAsset cubeAsset = AssetManager.loadObj("smoothsphere.obj");
-	// MeshComponent cubeMesh(cubeAsset);
-
-	// Entity cube(position, rotation, scale);
-	// cube.addComponent(cubeMesh);
-
+	// cube.setRotation(45, 45, 0);
+	// cube.setPosition({3, 0, 2});
 
 	CameraController cameraController({0, 0, 5}, {0, 0, 0});
 
@@ -112,27 +99,32 @@ int main(int argc, char const *argv[])
 	glEnable(GL_BLEND);
 	glDepthFunc(GL_LEQUAL);
 	glBlendFunc(GL_ONE, GL_ONE);
+	glEnable(GL_CULL_FACE);
 	glClearColor(0, 0, 0, 0);
 
 	//create some kinda 2d texture
 	GLuint texture;
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	glTextureStorage2D(texture, 1, GL_RGBA32F, 256, 256);
-	float *textureData = new float[256*256*4];
+	glTextureStorage2D(texture, 1, GL_RGBA32F, 1024, 1024);
+	float *textureData = new float[1024*1024*4];
 
-	for(unsigned i = 0; i < 256*256; i += 4) {
-		float val = (float)(rand() % 256) / (float)255;
-		textureData[i] = val;
-		textureData[i + 1] = val;
-		textureData[i + 2] = val;
-		textureData[i + 3] = 1;
+	for(unsigned i = 0; i < 1024*1024; i += 1) {
+		float val = (float)(rand() % 255) / (float)255;
+
+		unsigned pixel = i * 4;
+		textureData[pixel] = val;
+		textureData[pixel + 1] = val;
+		textureData[pixel + 2] = val;
+		textureData[pixel + 3] = 1;
 	}
-	glTextureSubImage2D(texture, 0, 0, 0, 256, 256, GL_RGBA, GL_FLOAT, textureData);
+	glTextureSubImage2D(texture, 0, 0, 0, 1024, 1024, GL_RGBA, GL_FLOAT, textureData);
 	glBindTextureUnit(0, texture);
 	
 
-	//TODO set texture data
-
+	//TODO load image as texture
+	// GLuint vao;
+	// glGenVertexArrays(1, &vao);
+	// glBindVertexArray(vao);
 
 	while(isRunning) {
 		sf::Event event;
@@ -153,8 +145,8 @@ int main(int argc, char const *argv[])
 		program1.setUniform(WORLD_TO_CLIP_UNIFORM_BUFFER_LOCATION, false, cameraController.getCamera().calculateWorldToClipMatrix());
 		program1.setUniform(WORLD_TO_CAMERA_UNIFORM_BUFFER_LOCATION, false, cameraController.getCamera().getWorldToCameraMatrix());
 	
-		cube.rotate(glm::vec3(0, 1, 0), elapsedTime.asSeconds() * 50);
-		cube.rotate(glm::vec3(1, 0, 0), elapsedTime.asSeconds() * 10);
+		// cube.rotate(glm::vec3(0, 1, 0), elapsedTime.asSeconds() * 50);
+		// cube.rotate(glm::vec3(1, 0, 0), elapsedTime.asSeconds() * 10);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -176,4 +168,3 @@ int main(int argc, char const *argv[])
 	}
 	return 0;
 }
-#endif

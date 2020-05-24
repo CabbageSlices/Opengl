@@ -4,13 +4,14 @@ BUILD_DIR_BASE = build#.o files, base path, where all the build subfolders will 
 #on clean ENTIRE build folder will be deleted
 OUTPUT_DIR = bin#.exe
 INCLUDE_DIR = include
-MAINS = %main.cpp %main.o#stuff containing int main(...), the entry point. need to filter this out while testing since it will build with gmock_main
+RUN_MAINS = %main.cpp %main.o#stuff containing int main(...), the entry point. need to filter this out while testing since it will build with test_mains
+TEST_MAINS = %main_test.cpp %main_test.o#main to use while testing, filter this out in regular build
 SHADERS = shaders
 LIB_DIR = lib
 
 #get ALL .cpp files in all subdirectories
 #https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc753551(v=ws.11)?redirectedfrom=MSDN
-SRC := $(shell FORFILES /p $(SRC_DIR) /s /m *.cpp /c "CMD /c ECHO @relpath")
+SRC := $(shell FORFILES /P $(SRC_DIR) /s /m *.cpp /c "CMD /c ECHO @relpath")
 
 #remove quotation marks around src files
 SRC := $(patsubst ".\\%.cpp", $(SRC_DIR)\\%.cpp, $(SRC))
@@ -27,17 +28,18 @@ BUILD_DIRS := $(sort $(BUILD_DIRS))
 
 CPP = g++
 CPP_FLAGS = -I$(INCLUDE_DIR) -I$(SHADERS) -I$(SRC_DIR) -MMD -MP -std=c++14 -g
-LINKER_FLAGS = -L$(LIB_DIR) -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 -lgmock_main -lgmock  -lgtest
+LINKER_FLAGS = -L$(LIB_DIR) -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 -lgmock  -lgtest
 
-all : $(OBJECTS)
-	$(CPP) -o $(OUTPUT_DIR)/main.exe $(OBJECTS) $(LINKER_FLAGS)
+#regular builds, filter out mains used for testing
+all : $(filter-out $(TEST_MAINS), $(OBJECTS))
+	$(CPP) -o $(OUTPUT_DIR)/main.exe $^ $(LINKER_FLAGS)
 
-run :$(OBJECTS)
-	$(CPP) -o $(OUTPUT_DIR)/main.exe $(OBJECTS) $(LINKER_FLAGS)
+run : $(filter-out $(TEST_MAINS), $(OBJECTS))
+	$(CPP) -o $(OUTPUT_DIR)/main.exe $^ $(LINKER_FLAGS)
 	$(OUTPUT_DIR)/main.exe
 
-#for testing, don't include main file because it's included with gmock
-test: $(filter-out $(MAINS), $(OBJECTS))
+#for testing, don't include main file because it's included with test_mains
+test: $(filter-out $(RUN_MAINS), $(OBJECTS))
 	$(CPP) -o $(OUTPUT_DIR)/test.exe $^ $(LINKER_FLAGS)
 	$(OUTPUT_DIR)/test.exe
 
