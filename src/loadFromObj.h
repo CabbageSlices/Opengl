@@ -23,12 +23,12 @@ using std::tuple;
 using std::make_tuple;
 
 //go to the given position in the array and combine 3 consequitive floats into a single vec3, and place the vec3 in the destination
-inline const void extractVector(const vector<float> &array, unsigned startPosition, glm::vec3 &destination) {
+inline void extractVector(const vector<float> &array, unsigned startPosition, glm::vec3 &destination) {
 	destination = {array[startPosition], array[startPosition + 1], array[startPosition + 2]};
 }
 
 //go to the given position in the array and combine 2 consequitive floats into a single vec2, and place the vec2 in the destination
-inline const void extractVector(const vector<float> &array, unsigned startPosition, glm::vec2 &destination) {
+inline void extractVector(const vector<float> &array, unsigned startPosition, glm::vec2 &destination) {
 	destination = {array[startPosition], array[startPosition + 1]};
 }
 
@@ -137,7 +137,7 @@ inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices
 		}
 
 		//TO-DO handle missing materials
-		assert(materialIndex < materials.size());
+		assert((unsigned)materialIndex < materials.size());
 		shared_ptr<Material> materialForFace = materials[materialIndex];
 
 		//faceset does not exist for this material, create it
@@ -145,7 +145,7 @@ inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices
 			materialFaceMap[materialForFace->id] = FaceSet();
 		}
 		int id = materialForFace->id;
-		materialFaceMap[materialForFace->id].push_back(face);
+		materialFaceMap[id].push_back(face);
 	}
 }
 

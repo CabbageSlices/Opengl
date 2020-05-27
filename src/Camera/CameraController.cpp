@@ -4,8 +4,8 @@
 //TODO camera turning left/right in place is probably wrong
 //TODO write camera tests
 CameraController::CameraController() :
-    isLeftMouseHeld(false),
     isMiddleMouseHeld(false),
+    isLeftMouseHeld(false),
     previousMousePosition(-1, -1),
     mouseWheelDeltaTranslationRatio(degToRad * 20),
     mouseDeltaCameraTranslationRatio(1/150.0f),
@@ -16,8 +16,8 @@ CameraController::CameraController() :
     }
 
 CameraController::CameraController(glm::vec3 initialPosition, glm::vec3 initialFocalPoint) :
-    isLeftMouseHeld(false),
     isMiddleMouseHeld(false),
+    isLeftMouseHeld(false),
     previousMousePosition(-1, -1),
     mouseWheelDeltaTranslationRatio(degToRad * 20),
     mouseDeltaCameraTranslationRatio(1/150.0f),

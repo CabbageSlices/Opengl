@@ -33,7 +33,6 @@ string Shader::RunPreprocessor(const string &shaderFile) {
 		string includeLine = extractLine(processedShader, includePos);
 		string fileName = extractStringFromLine(includeLine, includeStatementLength);
 		string file = loadFileToString(includeDirectory + fileName);
-		int len = includeLine.length();
 		processedShader.replace(includePos, includeLine.length(), file);
 
 		includePos = processedShader.find(customPreprocessorDirectivePrefix + "include ");
@@ -56,7 +55,7 @@ void Shader::deleteShaderObject() {
 	shaderObject = 0;
 }
 
-const GLuint Shader::getShaderObject() {
+GLuint Shader::getShaderObject() {
 	return shaderObject;
 }
 

@@ -36,7 +36,7 @@ public:
 	void deleteShaderObject();
 	bool checkCompilationStatus();
 
-	const GLuint getShaderObject();
+	GLuint getShaderObject();
 
 	//loads the given shader file, will automatically add the direcotry prefix to the filename so make sure you don't include it.
 	//returns true on success, false on failure.

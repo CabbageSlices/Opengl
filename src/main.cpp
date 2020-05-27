@@ -29,9 +29,23 @@ using std::string;
 using std::fstream;
 using std::vector;
 
+//TODO make a log to file system to log stuff to a file
+//log out all mesh buffers, camera buffers, and compare to when c_str() is called
+//to determine why the fuck stbi_load fucks things up.
+#define FLOG cout << __FILE__ << ":" << __LINE__ << ":: "
 
-int main(int argc, char *argv[])
+
+int main()
 {
+		int width = 0, height = 0, channels = 0;
+
+	unsigned char *imageData = stbi_load("./images/grasslands.jpg", &width, &height, &channels, 0);
+
+	if(!imageData) {
+		cout << "failed to load image" << endl;
+	}
+	
+	FLOG << "HELLO" << endl;
 
 	//setup opengl context with version 4.6 core
 	sf::Window window(sf::VideoMode(800, 600), "OpenGL",
@@ -46,10 +60,6 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	cout << glGetString(GL_RENDERER) << endl;
-		cout << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-		cout << glGetString(GL_VERSION) << endl;
-
 	bool isRunning = true;
 
 	ShaderProgram program1;
@@ -63,7 +73,7 @@ int main(int argc, char *argv[])
 
 	glPointSize(20);
 
-	std::shared_ptr<MeshData> cubeMeshData = loadFromObj("sphere.obj");
+	std::shared_ptr<MeshData> cubeMeshData = loadFromObj("cube.obj");
 	std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
 	
 	Entity cube;
@@ -119,7 +129,8 @@ int main(int argc, char *argv[])
 	}
 	glTextureSubImage2D(texture, 0, 0, 0, 1024, 1024, GL_RGBA, GL_FLOAT, textureData);
 	glBindTextureUnit(0, texture);
-	
+
+	cout << "LOADED BUT GRAHPICS R FUCKED???" << endl;
 
 	//TODO load image as texture
 	// GLuint vao;
@@ -156,7 +167,7 @@ int main(int argc, char *argv[])
 		lightManager.sendBatchToShader(0);
 		cube.render();
 
-		//additoinal passes, enable blend
+		// additoinal passes, enable blend
 		glEnable(GL_BLEND); 
 		for(int i = 1; i < lightManager.getBatchCount(); ++i) {
 

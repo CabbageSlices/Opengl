@@ -96,7 +96,7 @@ public:
         vao = 0;
     }
 
-    const GLuint getVao() const {
+    GLuint getVao() const {
         return vao;
     }
 

@@ -18,7 +18,7 @@ class MeshRenderer {
 
 public:
 
-	MeshRenderer() : attributeBuffer(), indexBuffer(), vao() {};
+	MeshRenderer() : meshData(), vao(), attributeBuffer(), indexBuffer() {};
 	MeshRenderer(const shared_ptr<MeshData> &_meshData);
 	
 	~MeshRenderer() {

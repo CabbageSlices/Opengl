@@ -41,7 +41,7 @@ void Entity::removeComponent(ComponentBase *component) {
 }
 
 void Entity::removeAllComponents() {
-    for(int i = 0; i < components.size();) {
+    for(unsigned i = 0; i < components.size();) {
         removeComponent(components[i]);
     }
 }

@@ -27,7 +27,7 @@ BUILD_DIRS := $(patsubst %\,%,$(BUILD_DIRS))
 BUILD_DIRS := $(sort $(BUILD_DIRS))
 
 CPP = g++
-CPP_FLAGS = -I$(INCLUDE_DIR) -I$(SHADERS) -I$(SRC_DIR) -MMD -MP -std=c++14 -g
+CPP_FLAGS = -I$(INCLUDE_DIR) -I$(SHADERS) -I$(SRC_DIR) -MMD -MP -std=c++14 -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-sign-compare
 LINKER_FLAGS = -L$(LIB_DIR) -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 -lgmock  -lgtest
 
 #regular builds, filter out mains used for testing

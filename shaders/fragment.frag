@@ -28,7 +28,7 @@ void main(void) {
 	outputColor += COMPUTE_POINT_LIGHT_CONTRIBUTION(normal);
 	#endif
 
-	fragOut = outputColor * texture(s, vs_TexCoord);
+	fragOut = outputColor;
 	// fragOut = texture(s, vs_TexCoord);
 	// fragOut = vec4(vs_TexCoord, 0, 1);
 }

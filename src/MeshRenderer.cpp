@@ -80,6 +80,8 @@ bool MeshRenderer::initializeAttributeBuffers() {
 	attributeBuffer.updateData(meshData->attributes.positions.data(), positionArraySize, 0);
 	attributeBuffer.updateData(meshData->attributes.normals.data(), normalArraySize, positionArraySize);
 	attributeBuffer.updateData(meshData->attributes.texCoords.data(), texCoordArraySize, positionArraySize + normalArraySize);
+
+	return true;
 }	
 
 bool MeshRenderer::initializeIndexBuffer() {
@@ -105,6 +107,7 @@ bool MeshRenderer::initializeIndexBuffer() {
 		dataOffset += faceset.size() * sizeof(Face);
 	}
 
+	return true;
 }
 
 void MeshRenderer::initializeVertexArrayObject() {

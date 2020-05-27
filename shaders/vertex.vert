@@ -22,5 +22,6 @@ void main(void) {
 	worldSpacePosition = modelToWorld * vec4(pos, 1);
 	vs_Normal = normal;//TODO multiply by inverse transpose
 	gl_Position = worldToClip * worldSpacePosition;
+	// gl_Position = worldToClip * vec4(pos, 1);
 	vs_TexCoord = texCoord;
 }
