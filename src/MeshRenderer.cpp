@@ -8,8 +8,6 @@
 using std::cout;
 using std::endl;
 
-//TODO send mesh texcoord to shaders. Avoid making buffers/sending data if coords are missing
-
 MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData):
 	meshData(_meshData),
 	vao(),
@@ -44,7 +42,6 @@ void MeshRenderer::render() {
 	vao.bindToContext();
 
 	//render faceset of each material
-	//number of indices that have already been drawn
 	unsigned int bytesAlreadyRead = 0 * sizeof(unsigned int);
 	
 	for(unsigned i = 0; i < meshData->materials.size(); ++i) {

@@ -35,17 +35,16 @@ using std::vector;
 #define FLOG cout << __FILE__ << ":" << __LINE__ << ":: "
 
 
-int main()
-{
-		int width = 0, height = 0, channels = 0;
-
+int main() {
+	int width = 0, height = 0, channels = 0;
+	
 	unsigned char *imageData = stbi_load("./images/grasslands.jpg", &width, &height, &channels, 0);
 
 	if(!imageData) {
 		cout << "failed to load image" << endl;
 	}
 	
-	FLOG << "HELLO" << endl;
+	FLOG << "width: " << width << " ,height  " << height  << ",  channels" << channels<< endl;
 
 	//setup opengl context with version 4.6 core
 	sf::Window window(sf::VideoMode(800, 600), "OpenGL",
