@@ -16,6 +16,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "uniformBlockBindings.vert"
 #include "uniformLocations.vert"
+#include "stb_image.h"
 
 using std::string;
 using std::vector;
