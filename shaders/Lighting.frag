@@ -34,7 +34,7 @@ vec4 calculateDirectionalLightsIntensity(vec3 surfaceNormal) {
 	
 	for(int i = 0; i < MAX_DIRECTIONAL_LIGHTS; ++i) {
 
-			lightTotal += calculateDirectionalLightIntensity(directionalLights[i], surfaceNormal) * diffuseColor;
+			lightTotal += calculateDirectionalLightIntensity(directionalLights[i], surfaceNormal) ;
 	}
 
 	return lightTotal;
@@ -58,7 +58,7 @@ vec4 calculatePointLightsIntensity(vec3 surfaceNormal) {
 	
 	for(int i = 0; i < MAX_POINT_LIGHTS; ++i) {
 
-			lightTotal = lightTotal + calculatePointLightIntensity(pointLights[i], surfaceNormal) * diffuseColor;
+			lightTotal = lightTotal + calculatePointLightIntensity(pointLights[i], surfaceNormal);
 	}
 
 	return lightTotal;

@@ -1,0 +1,8 @@
+BasedOnStyle: Google
+Language: Cpp
+ColumnLimit: 125
+AllowAllConstructorInitializersOnNextLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IndentWidth: 4
+ContinuationIndentWidth: 4
+AccessModifierOffset: -2

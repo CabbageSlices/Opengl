@@ -29,7 +29,7 @@ void main(void) {
 	#endif
 
 	fragOut = outputColor;
-	// fragOut = texture(s, vs_TexCoord);
+	fragOut = texture(s, vs_TexCoord) * outputColor;
 	// fragOut = vec4(vs_TexCoord, 0, 1);
 }
 #endif

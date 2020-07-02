@@ -9,6 +9,7 @@
 #include <functional>
 #include <algorithm>
 #include <map>
+#include "glad/glad.h"
 #include "glm/gtx/string_cast.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
