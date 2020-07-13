@@ -48,7 +48,8 @@
     "iomanip": "cpp",
     "cinttypes": "cpp",
     "list": "cpp",
-    "*.vert": "glsl"
+    "*.vert": "glsl",
+    "*.frag": "glsl"
   },
   "editor.formatOnSave": true,
   "editor.tabSize": 4,

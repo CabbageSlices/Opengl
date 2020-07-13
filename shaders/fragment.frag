@@ -3,6 +3,8 @@
 #define FRAGMENT_BASE
 #define DIRECTIONAL
 #define POINT
+#include "diffuseMaterial.frag"
+#include "textureSamplers.frag"
 
 out vec4 fragOut;
 
@@ -16,20 +18,23 @@ uniform sampler2D s;
 
 void main(void) {
 	vec3 normal = normalize(vs_Normal);
-	vec4 baseColor = vec4(1,1,1,1);
 	
 	vec4 outputColor = vec4(0);
+
+    vec4 diffuseTextureSample = isDiffuseTextureAvailable ? texture(diffuseTextureSampler, vs_TexCoord) : vec4(1);
+    vec4 totalMaterialColor = diffuseColor * diffuseTextureSample;
 	
 	#ifdef DIRECTIONAL
-	outputColor += COMPUTE_DIRECTIONAL_LIGHT_CONTRIBUTION(normal);
+	outputColor += COMPUTE_DIRECTIONAL_LIGHT_CONTRIBUTION(normal) * totalMaterialColor;
 	#endif
 
 	#ifdef POINT
-	outputColor += COMPUTE_POINT_LIGHT_CONTRIBUTION(normal);
+	outputColor += COMPUTE_POINT_LIGHT_CONTRIBUTION(normal) * totalMaterialColor;
 	#endif
 
 	fragOut = outputColor;
-	fragOut = texture(s, vs_TexCoord) * outputColor;
-	// fragOut = vec4(vs_TexCoord, 0, 1);
+    // fragOut = diffuseTextureSample;
+	// fragOut = texture(s, vs_TexCoord) * outputColor;
+	// fragOut = vec4(diffuseTextureSample, 0, 0, 1);
 }
 #endif

@@ -1,3 +1,4 @@
+#pragma once
 #include "Enums.h"
 #include "Includes.h"
 
@@ -53,6 +54,13 @@ class GLTextureObject {
      * @param textureUnit  texture unit to bind this texture to
      */
     void bindToTextureUnit(unsigned textureUnit);
+
+    /**
+     * @brief Clears whatever texture is currently bound to the given texture unit. Essentially sets the bound texture to 0
+     *
+     * @param textureUnit
+     */
+    static void unbindTextureAtUnit(unsigned textureUnit) { glBindTextureUnit(textureUnit, 0); }
 
   private:
     TextureType textureType;

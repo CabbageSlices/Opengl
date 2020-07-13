@@ -49,6 +49,7 @@ int main() {
         cout << "Unable to load opengl" << endl;
         exit(-1);
     }
+
     {  // temp scope to ensure all destrucotrs are called before opengl is erased
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         stbi_set_flip_vertically_on_load(true);
@@ -120,6 +121,8 @@ int main() {
         ImageTextureResource image("./images/small.png");
         auto textureObject = image.createGLTextureObject(0);
         textureObject->bindToTextureUnit(0);
+        GLTextureObject::unbindTextureAtUnit(0);
+        cubeMeshData->materials[0]->setTexture(TextureUnit::diffuseTexture, textureObject);
 
         // ImageTextureResource image()
 
@@ -189,11 +192,11 @@ int main() {
                 cube.render();
             }
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glBindVertexArray(vao);
-            texturedRect.useProgram();
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            // glBindVertexArray(vao);
+            // texturedRect.useProgram();
+            // glDrawArrays(GL_TRIANGLES, 0, 6);
 
             window.display();
         }

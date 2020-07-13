@@ -1,0 +1,6 @@
+#ifndef SAMPLER_BINDINGS
+#define SAMPLER_BINDINGS
+
+#define DIFFUSE_TEXTURE_TEXTURE_UNIT 0
+
+#endif

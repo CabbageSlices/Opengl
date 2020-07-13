@@ -1,6 +1,5 @@
 #ifdef FRAGMENT_BASE
 #include "defines.frag"
-#include "diffuseMaterial.frag"
 #include "uniformBlockBindings.vert"
 
 struct DirectionalLight {
@@ -22,19 +21,19 @@ layout (std140, binding = POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT) uniform Point
   PointLight pointLights[MAX_POINT_LIGHTS];
 };
 
-vec4 calculateDirectionalLightIntensity(DirectionalLight directionalLight, vec3 surfaceNormal) {
+vec4 calculateDirectionalLightDiffuseIntensity(DirectionalLight directionalLight, vec3 surfaceNormal) {
 	vec3 dirToLight = -directionalLight.direction;
 	
 	return clamp(dot(surfaceNormal, dirToLight), 0, 1) * directionalLight.intensity;
 }
 
-vec4 calculateDirectionalLightsIntensity(vec3 surfaceNormal) {
+vec4 calculateDirectionalLightsContribution(vec3 surfaceNormal) {
 
 	vec4 lightTotal = vec4(0, 0, 0, 0);
 	
 	for(int i = 0; i < MAX_DIRECTIONAL_LIGHTS; ++i) {
 
-			lightTotal += calculateDirectionalLightIntensity(directionalLights[i], surfaceNormal) ;
+			lightTotal += calculateDirectionalLightDiffuseIntensity(directionalLights[i], surfaceNormal) ;
 	}
 
 	return lightTotal;
@@ -64,6 +63,6 @@ vec4 calculatePointLightsIntensity(vec3 surfaceNormal) {
 	return lightTotal;
 }
 
-#define COMPUTE_DIRECTIONAL_LIGHT_CONTRIBUTION(surfaceNormal) calculateDirectionalLightsIntensity(surfaceNormal)
+#define COMPUTE_DIRECTIONAL_LIGHT_CONTRIBUTION(surfaceNormal) calculateDirectionalLightsContribution(surfaceNormal)
 #define COMPUTE_POINT_LIGHT_CONTRIBUTION(surfaceNormal) calculatePointLightsIntensity(surfaceNormal)
 #endif

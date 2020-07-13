@@ -10,6 +10,7 @@ out vec4 worldSpacePosition;
 out vec3 vs_Normal;
 out vec2 vs_TexCoord;
 
+//TODO  change to uniform block
 layout (location = 0) uniform mat4 worldToClip;
 layout (location = 1) uniform mat4 worldToCamera;
 layout (std140, binding = MODEL_TO_WORLD_UNIFORM_BLOCK_BINDING_POINT) uniform ModelToWorld  {
@@ -22,6 +23,5 @@ void main(void) {
 	worldSpacePosition = modelToWorld * vec4(pos, 1);
 	vs_Normal = normal;//TODO multiply by inverse transpose
 	gl_Position = worldToClip * worldSpacePosition;
-	// gl_Position = worldToClip * vec4(pos, 1);
 	vs_TexCoord = texCoord;
 }
