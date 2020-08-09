@@ -10,14 +10,17 @@ TEST(ImageTextureResource, loadFromImageSuccess) {
     const int height = 3;
     const int channelsInFile = 3;
     const ImageTextureResource::Channels desiredChannels = ImageTextureResource::Channels::AUTO;
+    const ImageTextureResource::Channels loadedChannels = ImageTextureResource::Channels::RGB;
 
     try {
-        ImageTextureResource image("testing_resources/images/3x3.jpg", ImageTextureResource::Channels::AUTO);
+        ImageTextureResource image("testing_resources/images/3x3.jpg", desiredChannels);
 
         ASSERT_EQ(image.getWidth(), width);
         ASSERT_EQ(image.getHeight(), height);
         ASSERT_EQ(image.getChannelnsInFile(), channelsInFile);
-        ASSERT_EQ(image.getLoadedChannels(), desiredChannels);
+
+        // auto laoded channels, imageh as 3 channels
+        ASSERT_EQ(image.getLoadedChannels(), loadedChannels);
 
         const stbi_uc *data = image.getData();
 

@@ -30,7 +30,7 @@ class ImageTextureResource {
      * @param fileName name of file to load from, MUST include directory path, etc
      * @param desiredChannels how many channels to store when loaded. Image can
      * have any number of channels, and this will force the loaded data to store
-     * the given number of channels
+     * the given number of channels.
      * @throw throws exception if texture failed to load from file for whatever
      * reason
      */
@@ -56,6 +56,14 @@ class ImageTextureResource {
     int getWidth() const { return width; }
     int getHeight() const { return height; }
     int getChannelnsInFile() const { return channelsInFile; }
+
+    /**
+     * @brief Get the number of loaded channels. if the texture was loaded with desired channels set to auto then  this value
+     * will be equal to the number of channels in the texture. Otherwise this value will be the same as the value used to
+     * load the texture.
+     *
+     * @return Channels
+     */
     Channels getLoadedChannels() const { return loadedChannels; }
 
     SizedColourFormats getSizedColourFormat() const;
