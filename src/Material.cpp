@@ -10,6 +10,11 @@ void Material::connectMaterialDataToShader() {
     }
 }
 
+void Material::setSpecularCoefficient(float specular) {
+    diffuseMaterial.specularCoefficient = specular;
+    updateBufferData();
+}
+
 void Material::setDiffuseColour(glm::vec4 _diffuse) {
     diffuseMaterial.diffuse = _diffuse;
     updateBufferData();

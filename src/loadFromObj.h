@@ -110,6 +110,7 @@ inline void tinyobjAttributeIndicesToOpenglIndices(const MeshAttributes &origina
 inline void tinyobjMaterialToCustomMaterial(const tinyobj::material_t &tinyobjMaterial, shared_ptr<Material> &material) {
     material->setDiffuseColour(
         {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1], tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve});
+    material->setSpecularCoefficient(tinyobjMaterial.shininess);
     material->name = tinyobjMaterial.name;
 }
 

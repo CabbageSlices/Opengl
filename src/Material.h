@@ -11,6 +11,7 @@
 
 struct DiffuseMaterial {
     glm::vec4 diffuse = glm::vec4(1, 1, 1, 1);
+    float specularCoefficient = 25;
     unsigned int isDiffuseTextureAvailable = 0;
 };
 
@@ -35,6 +36,13 @@ class Material {
      * @param _diffuse
      */
     void setDiffuseColour(glm::vec4 _diffuse);
+
+    /**
+     * @brief Set the Specular Coefficient object
+     *
+     * @param specular
+     */
+    void setSpecularCoefficient(float specular);
 
     /**
      * @brief assigns the given texture to the given unit, and binds it to the associated texture unit whenever this material

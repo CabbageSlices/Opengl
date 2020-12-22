@@ -71,7 +71,7 @@ int main() {
 
         glPointSize(20);
 
-        std::shared_ptr<MeshData> cubeMeshData = loadFromObj("cube.obj");
+        std::shared_ptr<MeshData> cubeMeshData = loadFromObj("smoothsphere.obj");
         std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
 
         Entity cube;
@@ -80,16 +80,10 @@ int main() {
         CameraController cameraController({0, 0, 5}, {0, 0, 0});
 
         LightManager lightManager;
-        lightManager.createDirectionalLight({0, -1, 0, 0}, {1, 1, 1, 1});
-        lightManager.createDirectionalLight({0, 1, 0, 0}, {1, 1, 1, 1});
-        lightManager.createDirectionalLight({0, -1, 0.5, 0}, {1, 0, 0, 1});
-        lightManager.createDirectionalLight({0, -1, -0.5, 0}, {0, 1, 0, 1});
-        lightManager.createPointLight({0, 2, 0, 1}, {1, 0, 0, 1}, 3);
-        lightManager.createPointLight({0, -2, 0, 1}, {0, 1, 0, 1}, 3);
-        lightManager.createPointLight({2, 0, 0, 1}, {0, 0, 1, 1}, 3);
-        lightManager.createPointLight({0, 0, 2, 1}, {1, 0, 1, 1}, 3);
-        lightManager.createPointLight({-2, 0, 0, 1}, {1, 1, 0, 1}, 3);
-        lightManager.createPointLight({0, 0, -2, 1}, {0, 1, 1, 1}, 3);
+        // lightManager.createDirectionalLight({0, -1, 0, 0}, {1, 1, 1, 1});
+        // lightManager.createDirectionalLight({0, 0, 1, 0}, {1, 1, 1, 1});
+        // lightManager.createDirectionalLight({0, 0, -1, 0}, {1, 1, 1, 1});
+        lightManager.createPointLight({5, 0, 0, 1}, {0.7, 0.7, 0.7, 0.7}, 10);
 
         lightManager.connectLightDataToShader();
 
@@ -120,9 +114,7 @@ int main() {
 
         ImageTextureResource image("./images/small.png");
         auto textureObject = image.createGLTextureObject(0);
-        textureObject->bindToTextureUnit(0);
-        GLTextureObject::unbindTextureAtUnit(0);
-        cubeMeshData->materials[0]->setTexture(TextureUnit::diffuseTexture, textureObject);
+        cubeMeshData->materials[1]->setTexture(TextureUnit::diffuseTexture, textureObject);
 
         // ImageTextureResource image()
 
@@ -172,15 +164,16 @@ int main() {
                                 cameraController.getCamera().calculateWorldToClipMatrix());
             program1.setUniform(WORLD_TO_CAMERA_UNIFORM_BUFFER_LOCATION, false,
                                 cameraController.getCamera().getWorldToCameraMatrix());
+            program1.setUniform(EYE_POSITION_UNIFORM_LOCATION, cameraController.getCamera().getPosition());
 
             // cube.rotate(glm::vec3(0, 1, 0), elapsedTime.asSeconds() * 50);
             // cube.rotate(glm::vec3(1, 0, 0), elapsedTime.asSeconds() * 10);
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
             glDisable(GL_BLEND);  // first pass disable blend because when you render, if a triangle is rendered in the
                                   // background, and then something renders on top of it, the background and
             // the triangle on top will be blended together.
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             lightManager.sendBatchToShader(0);
             cube.render();
