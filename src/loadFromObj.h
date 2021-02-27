@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "./PrintVector.hpp"
-#include "Material.h"
+#include "Material/Material.h"
 #include "MeshData.h"
 #include "glm\glm.hpp"
 
@@ -108,16 +108,24 @@ inline void tinyobjAttributeIndicesToOpenglIndices(const MeshAttributes &origina
 }
 
 inline void tinyobjMaterialToCustomMaterial(const tinyobj::material_t &tinyobjMaterial, shared_ptr<Material> &material) {
-    material->setDiffuseColour(
-        {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1], tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve});
-    material->setSpecularCoefficient(tinyobjMaterial.shininess);
-    material->name = tinyobjMaterial.name;
+    // material->setAttribute<glm::vec4>("diffuseColor", {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1],
+    // tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve}); material
+    material->setAttribute("diffuseColor", glm::vec4(tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1],
+                                                     tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve));
+    material->setAttribute("specularCoefficient", (float)tinyobjMaterial.shininess);
+    material->setAttribute<bool>("diffuseTexture_Provided", false);
+
+    // material->setDiffuseColour(
+    //     {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1], tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve});
+    // material->setSpecularCoefficient(tinyobjMaterial.shininess);
+    // material->name = tinyobjMaterial.name;
 }
 
 inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> &tinyobjMaterials,
                                               vector<shared_ptr<Material> > &convertedMaterials) {
     for (unsigned i = 0; i < tinyobjMaterials.size(); ++i) {
-        shared_ptr<Material> convertedMaterial = make_shared<Material>();
+        auto defaultProgram = Material::createShaderProgramForDefaultMaterial();
+        shared_ptr<Material> convertedMaterial(new Material(defaultProgram, "DiffuseMaterial", false));
         tinyobjMaterialToCustomMaterial(tinyobjMaterials[i], convertedMaterial);
         convertedMaterials.push_back(convertedMaterial);
     }
@@ -143,10 +151,10 @@ inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices
         shared_ptr<Material> materialForFace = materials[materialIndex];
 
         // faceset does not exist for this material, create it
-        if (materialFaceMap.count(materialForFace->id) == 0) {
-            materialFaceMap[materialForFace->id] = FaceSet();
+        if (materialFaceMap.count(materialForFace->getId()) == 0) {
+            materialFaceMap[materialForFace->getId()] = FaceSet();
         }
-        int id = materialForFace->id;
+        int id = materialForFace->getId();
         materialFaceMap[id].push_back(face);
     }
 }
@@ -193,7 +201,7 @@ inline shared_ptr<MeshData> loadFromObj(
     tinyobjMaterialsToCustomMaterials(materials, convertedMaterials);
 
     // add default material so every mesh always has some material
-    if (convertedMaterials.size() == 0) convertedMaterials.push_back(make_shared<Material>());
+    if (convertedMaterials.size() == 0) convertedMaterials.push_back(Material::createDefaultMaterial());
 
     tinyobj::mesh_t mesh = shapes[0].mesh;
     MeshAttributes reorderedAttributes;

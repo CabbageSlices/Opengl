@@ -1,5 +1,6 @@
 #pragma once
-#include "glad/glad.h"
+
+#include "GraphicsWrapper.h"
 
 /**
  * @brief Enum mapping a sized format to opengls sized internal formats
@@ -8,6 +9,7 @@
 enum SizedColourFormats {
     RGB_8 = GL_RGB8,
     RGBA_8 = GL_RGBA8,
+    DEPTH_COMPONENT_32F = GL_DEPTH_COMPONENT32F,
 };
 
 enum ColourFormats {

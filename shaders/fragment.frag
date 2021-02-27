@@ -6,6 +6,12 @@
 #include "diffuseMaterial.frag"
 #include "textureSamplers.frag"
 
+layout(std140, binding = UNIFORM_TRANSFORM_MATRICES_BLOCK_BINDING_POINT) uniform SharedMatrices {
+    mat4 worldToClip;
+    mat4 worldToCamera;
+    vec4 eyePosition;
+};
+
 out vec4 fragOut;
 
 in vec4 worldSpacePosition;
@@ -22,7 +28,7 @@ void main(void) {
 
     vec4 outputColor = vec4(0);
 
-    vec4 diffuseTextureSample = isDiffuseTextureAvailable ? texture(diffuseTextureSampler, vs_TexCoord) : vec4(1);
+    vec4 diffuseTextureSample = diffuseTexture_Provided == 1 ? texture(diffuseTexture_Sampler, vs_TexCoord) : vec4(1);
     vec4 totalMaterialColor = diffuseColor * diffuseTextureSample;
 
     Material material = Material(totalMaterialColor, specularCoefficient);

@@ -18,10 +18,9 @@
 #include "SFML/OpenGL.hpp"
 #include "SFML/Window.hpp"
 #include "SFML\System.hpp"
-#include "ShaderProgram.h"
+#include "ShaderProgram/shaderprogram.h"
 #include "TextureResource/ImageTextureResource.h"
 #include "components/MeshRendererComponent.h"
-#include "glad/glad.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -37,6 +36,7 @@ using std::vector;
 #define FLOG cout << __FILE__ << ":" << __LINE__ << ":: "
 
 int main() {
+    cout << sizeof(bool) << endl;
     // setup opengl context with version 4.6 core
     sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default,
                       sf::ContextSettings(24, 8, 4, 4, 6, sf::ContextSettings::Core));
@@ -80,9 +80,9 @@ int main() {
         CameraController cameraController({0, 0, 5}, {0, 0, 0});
 
         LightManager lightManager;
-        // lightManager.createDirectionalLight({0, -1, 0, 0}, {1, 1, 1, 1});
-        // lightManager.createDirectionalLight({0, 0, 1, 0}, {1, 1, 1, 1});
-        // lightManager.createDirectionalLight({0, 0, -1, 0}, {1, 1, 1, 1});
+        lightManager.createDirectionalLight({0, -1, 0, 0}, {1, 1, 1, 1});
+        lightManager.createDirectionalLight({0, 0, 1, 0}, {1, 1, 1, 1});
+        lightManager.createDirectionalLight({0, 0, -1, 0}, {1, 1, 1, 1});
         lightManager.createPointLight({5, 0, 0, 1}, {0.7, 0.7, 0.7, 0.7}, 10);
 
         lightManager.connectLightDataToShader();
@@ -108,42 +108,37 @@ int main() {
 
         if (!imageData) {
             cout << "failed to load image" << endl;
-        } else {
-            cout << width << " " << height << " " << channels << endl;
         }
-
-        ImageTextureResource image("./images/small.png");
-        auto textureObject = image.createGLTextureObject(0);
-        cubeMeshData->materials[1]->setTexture(TextureUnit::diffuseTexture, textureObject);
-
-        // ImageTextureResource image()
-
-        // TextureResource::CreateGLTextureObject(textureResource);
-
-        // stores image data as texture data in ram
-        // unrelated to opengl shit
-        // Texture textureResource = Texture::loadFromFile("./images/grasslands.jpg", desiredChannels);
-        // GLTexture textureObject;
-
-        // //create the texture
-        // //create opgnel object, setup storage, load data to gpu
-        // textureObject.create(textureResource, numMipmappingLevels);
-
-        // textureObject.bindToTextureUnit(unit_number);
-
-        // create some kinda 2d texture
-        // GLuint texture;
-        // glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-        // glTextureStorage2D(texture, 1, GL_RGBA8, width, height);
-
-        // glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-        // glBindTextureUnit(0, texture);
-
-        cout << "LOADED BUT GRAHPICS R FUCKED???" << endl;
 
         // TODO load image as texture
         GLuint vao;
         glGenVertexArrays(1, &vao);
+
+        // GLuint framebuffer = 0;
+        // glCreateFramebuffers(1, &framebuffer);
+        // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+        // GLTextureObject framebufferTexture(TextureType::TEXTURE_2D);
+        // framebufferTexture.create(1, SizedColourFormats::RGBA_8, 800, 600, ColourFormats::RGBA, DataType::FLOAT, 0);
+
+        // glNamedFramebufferTexture(framebuffer, GL_COLOR_ATTACHMENT0, framebufferTexture.getTextureObject(), 0);
+        // glNamedFramebufferDrawBuffer(framebuffer, GL_COLOR_ATTACHMENT0);
+
+        // loads the mesh data, materials, textures, and creates the shaders
+        // ResourceManager::getInstance().loadFromObj("mesh.obj");
+
+        // ResourceManager::loadFromObj("mesh.obj");
+        // weak_ptr<MeshData> cubeMesh = ResourceManager::get<MeshData>("cube");
+        // cubeMesh.setMaterial(ResourceManager::get<Material>())
+
+        // ResourceManager::registerLoader("obj", loadFromObj);
+        // vector<weak_ptr<meshData>> meshs = ResourceManager::load("blah.obj");
+        // meshs[0]->materials[0]->setShader(program1);
+
+        Buffer cameraBuffer;
+        GLuint bufferSize = sizeof(glm::mat4) * 2 + sizeof(glm::vec4);
+        cameraBuffer.create(Buffer::BufferType::UniformBuffer, 0, bufferSize, Buffer::UsageType::StreamDraw);
+        cameraBuffer.bindToTargetBindingPoint(UNIFORM_TRANSFORM_MATRICES_BLOCK_BINDING_POINT);
 
         while (isRunning) {
             sf::Event event;
@@ -160,30 +155,47 @@ int main() {
 
             cameraController.handleInput(timeInSeconds);
 
-            program1.setUniform(WORLD_TO_CLIP_UNIFORM_BUFFER_LOCATION, false,
-                                cameraController.getCamera().calculateWorldToClipMatrix());
-            program1.setUniform(WORLD_TO_CAMERA_UNIFORM_BUFFER_LOCATION, false,
-                                cameraController.getCamera().getWorldToCameraMatrix());
-            program1.setUniform(EYE_POSITION_UNIFORM_LOCATION, cameraController.getCamera().getPosition());
+            cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().calculateWorldToClipMatrix()),
+                                    sizeof(glm::mat4), 0);
+            cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().getWorldToCameraMatrix()), sizeof(glm::mat4),
+                                    sizeof(glm::mat4));
+            cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().getPosition()), sizeof(glm::vec4),
+                                    sizeof(glm::mat4) * 2);
 
-            // cube.rotate(glm::vec3(0, 1, 0), elapsedTime.asSeconds() * 50);
-            // cube.rotate(glm::vec3(1, 0, 0), elapsedTime.asSeconds() * 10);
+            // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
             glDisable(GL_BLEND);  // first pass disable blend because when you render, if a triangle is rendered in the
                                   // background, and then something renders on top of it, the background and
             // the triangle on top will be blended together.
+            program1.useProgram();
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             lightManager.sendBatchToShader(0);
             cube.render();
 
-            // additoinal passes, enable blend
+            // // additoinal passes, enable blend
             glEnable(GL_BLEND);
             for (int i = 1; i < lightManager.getBatchCount(); ++i) {
                 lightManager.sendBatchToShader(i);
                 cube.render();
             }
+
+            // glBindVertexArray(vao);
+            // glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            // GLenum err = glGetError();
+            // if (err != GL_NO_ERROR) {
+            //     cout << "ERROR: " << err << endl;
+            // }
+
+            // glDisable(GL_BLEND);
+
+            // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            // framebufferTexture.unbindTextureAtUnit(0);
+            // framebufferTexture.bindToTextureUnit(0);
+            // glClearBufferfv(GL_COLOR, 0, black);
+            // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

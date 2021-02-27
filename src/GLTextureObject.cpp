@@ -25,7 +25,10 @@ bool GLTextureObject::create(unsigned numMipMapLevels, SizedColourFormats sizedC
     }
 
     glTextureStorage2D(textureObject, numMipMapLevels, sizedColorFormat, width, height);
-    glTextureSubImage2D(textureObject, 0, 0, 0, width, height, colourFormat, dataType, dataAtLowestLevel);
+
+    if (dataAtLowestLevel) {
+        glTextureSubImage2D(textureObject, 0, 0, 0, width, height, colourFormat, dataType, dataAtLowestLevel);
+    }
 
     return true;
 }
@@ -41,4 +44,4 @@ bool GLTextureObject::generateMipMapLevels() {
     return true;
 }
 
-void GLTextureObject::bindToTextureUnit(unsigned textureUnit) { glBindTextureUnit(textureUnit, textureObject); }
+void GLTextureObject::bindToTextureUnit(unsigned textureUnit) { bindTextureUnit(textureUnit, textureObject); }

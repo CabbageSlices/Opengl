@@ -44,7 +44,7 @@ void MeshRenderer::render() {
     unsigned int bytesAlreadyRead = 0 * sizeof(unsigned int);
 
     for (unsigned i = 0; i < meshData->materials.size(); ++i) {
-        int materialId = meshData->materials[i]->id;
+        int materialId = meshData->materials[i]->getId();
         auto mat = meshData->materials[i];
 
         FaceSet faceset = meshData->materialFaceMap[materialId];
@@ -52,7 +52,7 @@ void MeshRenderer::render() {
         unsigned numIndicesPerFace = 3;
         unsigned numIndicesCurrentFaceset = faceset.size() * numIndicesPerFace;
 
-        mat->connectMaterialDataToShader();
+        mat->activate();
         glDrawElements(GL_TRIANGLES, numIndicesCurrentFaceset, GL_UNSIGNED_INT,
                        (void *)bytesAlreadyRead);  // wtf? convert integer directly to pointer and not the address
 
@@ -92,7 +92,7 @@ bool MeshRenderer::initializeIndexBuffer() {
     // add each faceset for each material to the index buffer
     for (unsigned i = 0; i < meshData->materials.size(); ++i) {
         // current materials indices
-        int materialId = meshData->materials[i]->id;
+        int materialId = meshData->materials[i]->getId();
         FaceSet faceset = meshData->materialFaceMap[materialId];
 
         indexBuffer.updateData(faceset.data(), sizeof(Face) * faceset.size(), dataOffset);

@@ -23,6 +23,8 @@ class GLTextureObject {
         glDeleteTextures(1, &textureObject);
         textureObject = 0;
     }
+
+    GLuint getTextureObject() { return textureObject; }
     /**
      * @brief Create the storage for the texture, and fill the lowest level of the mipmap layers (level 0) with the specified
      * data The given data must be in the formats specified, with the given dimensions

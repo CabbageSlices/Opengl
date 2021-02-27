@@ -11,7 +11,7 @@ struct DirectionalLight {
 struct PointLight {
     vec4 position;
     vec4 intensity;
-    float range;
+    vec4 range;  // only the x value is used for the range. Make vec4 in order to make array structure better
 };
 
 // final material data after texutre sampling and stuff, send to lighting computations to
@@ -20,8 +20,6 @@ struct Material {
     vec4 diffuseColor;
     float specularCoefficient;
 };
-
-layout(location = EYE_POSITION_UNIFORM_LOCATION) uniform vec3 eyePosition;
 
 layout(std140, binding = DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT) uniform DirectionalLights {
     DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
@@ -32,7 +30,7 @@ layout(std140, binding = POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT) uniform PointL
 };
 
 float computeSpecularFactor(vec3 dirToLight, vec3 surfaceNormal, float specularCoefficient) {
-    vec3 toEye = normalize(eyePosition - worldSpacePosition.xyz);
+    vec3 toEye = normalize(eyePosition.xyz - worldSpacePosition.xyz);
     vec3 halfVector = normalize(toEye + dirToLight);
     float nDotH = clamp(dot(surfaceNormal, halfVector), 0, 1);
 
@@ -68,7 +66,7 @@ vec4 calculatePointLightContribution(PointLight pointLight, vec3 surfaceNormal, 
     dirToLight = normalize(dirToLight);
 
     // make sure range isn't 0
-    float range = max(pointLight.range, 0.01);
+    float range = max(pointLight.range.x, 0.01);
     float attenuation = clamp(1 - distSquared / (range * range), 0, 1);
     attenuation *= attenuation;
 
