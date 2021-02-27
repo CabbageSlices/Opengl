@@ -5,7 +5,7 @@
 #include "Buffer.h"
 #include "GLTextureObject.h"
 #include "Includes.h"
-#include "ShaderProgram.h"
+#include "ShaderProgram/ShaderProgram.h"
 #include "glm/glm.hpp"
 #include "samplerBindings.frag"
 

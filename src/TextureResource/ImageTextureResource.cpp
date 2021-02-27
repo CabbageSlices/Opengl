@@ -32,13 +32,13 @@ ImageTextureResource::ImageTextureResource(const std::string &fileName,
     }
 }
 
-std::unique_ptr<GLTextureObject> ImageTextureResource::createGLTextureObject(unsigned int numAdditionalMipMapLevels,
+std::shared_ptr<GLTextureObject> ImageTextureResource::createGLTextureObject(unsigned int numAdditionalMipMapLevels,
                                                                              bool autoGenerateMipMapLevels) {
     if (!data) {
         return nullptr;
     }
 
-    std::unique_ptr<GLTextureObject> textureObject(new GLTextureObject(TextureType::TEXTURE_2D));
+    std::shared_ptr<GLTextureObject> textureObject(new GLTextureObject(TextureType::TEXTURE_2D));
 
     try {
         textureObject->create(1 + numAdditionalMipMapLevels, getSizedColourFormat(), width, height, getColourFormat(),
@@ -52,7 +52,7 @@ std::unique_ptr<GLTextureObject> ImageTextureResource::createGLTextureObject(uns
         textureObject->generateMipMapLevels();
     }
 
-    return std::move(textureObject);
+    return textureObject;
 }
 
 SizedColourFormats ImageTextureResource::getSizedColourFormat() const {

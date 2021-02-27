@@ -49,8 +49,13 @@
     "cinttypes": "cpp",
     "list": "cpp",
     "*.vert": "glsl",
-    "*.frag": "glsl"
-  },
+    "*.frag": "glsl",
+    "chrono": "cpp",
+    "codecvt": "cpp",
+    "filesystem": "cpp",
+    "ratio": "cpp",
+    "any": "cpp"
+},
   "editor.formatOnSave": true,
   "editor.tabSize": 4,
   "editor.detectIndentation": false

@@ -11,10 +11,13 @@ out vec4 worldSpacePosition;
 out vec3 vs_Normal;
 out vec2 vs_TexCoord;
 
-// TODO  change to uniform block
-layout(location = WORLD_TO_CLIP_UNIFORM_BUFFER_LOCATION) uniform mat4 worldToClip;
-layout(location = WORLD_TO_CAMERA_UNIFORM_BUFFER_LOCATION) uniform mat4 worldToCamera;
-layout(std140, binding = MODEL_TO_WORLD_UNIFORM_BLOCK_BINDING_POINT) uniform ModelToWorld { mat4 modelToWorld; };
+layout(std140, binding = UNIFORM_TRANSFORM_MATRICES_BLOCK_BINDING_POINT) uniform SharedMatrices {
+    mat4 worldToClip;
+    mat4 worldToCamera;
+    vec4 eyePosition;
+};
+
+layout(std140, binding = MODEL_TO_WORLD_UNIFORM_BLOCK_BINDING_POINT) uniform ModelMatrices { mat4 modelToWorld; };
 
 void main(void) {
     vec3 pos = position;

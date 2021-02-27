@@ -48,9 +48,9 @@ class ImageTextureResource {
      * @param numAdditionalMipMapLevels the number of additional mipmap levels to add to the texture object. This does not
      * include the base level, which is mipmap level.
      * @param autoGenerateMipMapLevels when set to true all higher mipmap levels are generated automatically
-     * @return std::unique_ptr<GLTextureObject>
+     * @return std::shared_ptr<GLTextureObject>
      */
-    std::unique_ptr<GLTextureObject> createGLTextureObject(unsigned int numAdditionalMipMapLevels,
+    std::shared_ptr<GLTextureObject> createGLTextureObject(unsigned int numAdditionalMipMapLevels,
                                                            bool autoGenerateMipMapLevels = false);
 
     int getWidth() const { return width; }

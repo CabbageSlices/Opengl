@@ -1,5 +1,5 @@
 #include "Enums.h"
-#include "glad\glad.h"
+#include "GraphicsWrapper.h"
 
 class Buffer;
 

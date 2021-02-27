@@ -1,16 +1,16 @@
 #pragma once
-#include "glad\glad.h"
+#include "GraphicsWrapper.h"
 
 class Buffer {
   public:
-    enum BufferType : GLuint {
+    enum BufferType : GLenum {
         None = GL_ZERO,
         UniformBuffer = GL_UNIFORM_BUFFER,
         ArrayBuffer = GL_ARRAY_BUFFER,
         ElementArrayBuffer = GL_ELEMENT_ARRAY_BUFFER
     };
 
-    enum UsageType : GLuint {
+    enum UsageType : GLenum {
 
         StaticDraw = GL_STATIC_DRAW,
         StreamDraw = GL_STREAM_DRAW
@@ -32,8 +32,8 @@ class Buffer {
 
     /**
      * @brief Create the buffer object and store the given data in the buffer
-     * does not bind the buffer to the context. Fails if this object has already created a buffer
-     * and has not deleted it.
+     * does not bind the buffer to the context. will replace existing data with new data if a buffer already exists
+     *
      * @param target the buffer target that the buffer should be bound
      * @param pointerToData pointer to data to store in the buffer
      * @param bufferSize how big the buffer should be, in bytes

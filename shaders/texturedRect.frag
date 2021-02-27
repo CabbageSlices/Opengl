@@ -7,6 +7,6 @@ in vec2 texCoord;
 uniform sampler2D s;
 
 void main(void) {
-	fragOut = vec4(1, 0, 0, 1);
-	fragOut = texture(s, texCoord);
+    fragOut = vec4(1, 0, 0, 1);
+    // fragOut = texture(s, texCoord);
 }

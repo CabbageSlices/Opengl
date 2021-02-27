@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Buffer.h"
+#include "GraphicsWrapper.h"
 #include "Includes.h"
 #include "MeshData.h"
-#include "ShaderProgram.h"
-#include "glad\glad.h"
-#include "Buffer.h"
+#include "ShaderProgram/shaderprogram.h"
 #include "VertexArrayObject.h"
 
 /**
@@ -12,42 +12,37 @@
  * given mesh asset. The MeshRendererComponent uses this under-the-hood to render a mesh. This class keeps track
  * of all opengl buffers related to rendering the mesh. This class has no concept of positioning and so does
  * not send any data to the opengl shaders related to the position/projection matrices.
- * 
+ *
  */
 class MeshRenderer {
+  public:
+    MeshRenderer() : meshData(), vao(), attributeBuffer(), indexBuffer(){};
+    MeshRenderer(const shared_ptr<MeshData> &_meshData);
 
-public:
+    ~MeshRenderer() { deleteMeshData(); }
 
-	MeshRenderer() : meshData(), vao(), attributeBuffer(), indexBuffer() {};
-	MeshRenderer(const shared_ptr<MeshData> &_meshData);
-	
-	~MeshRenderer() {
-		deleteMeshData();
-	}
+    bool loadFromFile(const std::string &filename);
 
-	bool loadFromFile(const std::string &filename);
+    void deleteMeshData() {
+        attributeBuffer.deleteBuffer();
+        indexBuffer.deleteBuffer();
 
-	void deleteMeshData() {
-		attributeBuffer.deleteBuffer();
-		indexBuffer.deleteBuffer();
+        vao.deleteVao();
 
-		vao.deleteVao();
+        // don't clear mesh data manually because others might be using the mesh data pointer
+        // meshData->clear();
+    }
 
-		//don't clear mesh data manually because others might be using the mesh data pointer
-		//meshData->clear();
-	}
+    void render();
 
-	void render();
+  private:
+    bool initializeAttributeBuffers();
+    bool initializeIndexBuffer();
+    void initializeVertexArrayObject();
 
-private:
+    shared_ptr<MeshData> meshData;
+    VertexArrayObject vao;
 
-	bool initializeAttributeBuffers();
-	bool initializeIndexBuffer();
-	void initializeVertexArrayObject();
-
-	shared_ptr<MeshData> meshData;
-	VertexArrayObject vao;
-
-	Buffer attributeBuffer;
-	Buffer indexBuffer;
+    Buffer attributeBuffer;
+    Buffer indexBuffer;
 };
