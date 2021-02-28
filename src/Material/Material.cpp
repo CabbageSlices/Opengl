@@ -4,6 +4,53 @@ std::string Material::materialTextureProvidedFlagPrefix = "_Provided";
 std::string Material::samplerTextureSamplerPrefix = "_Sampler";
 int Material::numMaterialsCreated = 0;
 
+std::shared_ptr<ShaderProgram> Material::createShaderProgramForDefaultMaterial() {
+    std::shared_ptr<ShaderProgram> defaultShaderProgram = std::make_shared<ShaderProgram>();
+    defaultShaderProgram->loadAndCompileShaders(
+        {{Shader::Type::Vertex, "vertex.vert"}, {Shader::Type::Fragment, "fragment.frag"}});
+    defaultShaderProgram->linkProgram();
+
+    return defaultShaderProgram;
+}
+
+std::shared_ptr<Material> Material::createDefaultMaterial() {
+    auto shaderProgram = createShaderProgramForDefaultMaterial();
+
+    auto material = std::make_shared<Material>(shaderProgram, "DiffuseMaterial", false);
+    material->setAttribute("diffuseColor", glm::vec4(1, 1, 1, 1));
+    material->setAttribute("specularCoefficient", 225);
+    material->setAttribute("diffuseTexture_Provided", false);
+
+    return material;
+}
+
+void copyAttributes(const std::map<std::string, Attribute> &source, std::map<std::string, Attribute> &destination) {
+    for (auto &attributePair : source) {
+        string name = attributePair.first;
+        Attribute attribute = attributePair.second;
+
+        void *copiedData = malloc(attribute.size);
+        cout << " DATA MADE: " << copiedData << endl;
+        memcpy(copiedData, attribute.data.get(), attribute.size);
+
+        shared_ptr<void> dataPtr(copiedData, [](void *data) {
+            cout << "DATA FREED: " << data << endl;
+            free(data);
+        });
+
+        destination[name] = Attribute{.data = dataPtr, .type = attribute.type, .size = attribute.size};
+    }
+}
+
+void copyTextures(const map<string, shared_ptr<GLTextureObject>> &src, map<string, shared_ptr<GLTextureObject>> &dst) {
+    for (auto &texturePair : src) {
+        string name = texturePair.first;
+        auto textureObj = texturePair.second;
+
+        dst[name] = textureObj;
+    }
+}
+
 Material::Material(std::shared_ptr<ShaderProgram> &program, string materialNameInShader,
                    bool prefixAttributeNameWithMaterialName)
     : loadedAttributeOffsets(false),
@@ -35,24 +82,44 @@ Material::Material(string materialNameInShader, bool prefixAttributeNameWithMate
     buffer.create(Buffer::UniformBuffer, NULL, 0, Buffer::StaticDraw);
 }
 
-std::shared_ptr<ShaderProgram> Material::createShaderProgramForDefaultMaterial() {
-    std::shared_ptr<ShaderProgram> defaultShaderProgram = std::make_shared<ShaderProgram>();
-    defaultShaderProgram->loadAndCompileShaders(
-        {{Shader::Type::Vertex, "vertex.vert"}, {Shader::Type::Fragment, "fragment.frag"}});
-    defaultShaderProgram->linkProgram();
-
-    return defaultShaderProgram;
+Material::Material(const Material &m1)
+    : loadedAttributeOffsets(m1.loadedAttributeOffsets),
+      loadedUniformBlockData(m1.loadedUniformBlockData),
+      bufferRequiresUpdate(m1.bufferRequiresUpdate),
+      textureUnitsRequireUpdate(m1.textureUnitsRequireUpdate),
+      prefixAttributeWithMaterialName(m1.prefixAttributeWithMaterialName),
+      uniformBlockSize(m1.uniformBlockSize),
+      attributeOffsets(m1.attributeOffsets),
+      textureSamplerTextureUnit(m1.textureSamplerTextureUnit),
+      shaderProgram(m1.shaderProgram),
+      materialName(m1.materialName),
+      materialUniformBlockIndex(m1.materialUniformBlockIndex),
+      bindingIndexInShader(m1.bindingIndexInShader),
+      id(++numMaterialsCreated) {
+    copyAttributes(m1.attributes, attributes);
+    copyTextures(m1.textures, textures);
+    updateBuffer();
 }
 
-std::shared_ptr<Material> Material::createDefaultMaterial() {
-    auto shaderProgram = createShaderProgramForDefaultMaterial();
+Material &Material::operator=(const Material &rhs) {
+    loadedAttributeOffsets = rhs.loadedAttributeOffsets;
+    loadedUniformBlockData = rhs.loadedUniformBlockData;
+    bufferRequiresUpdate = rhs.bufferRequiresUpdate;
+    textureUnitsRequireUpdate = rhs.textureUnitsRequireUpdate;
+    prefixAttributeWithMaterialName = rhs.prefixAttributeWithMaterialName;
+    uniformBlockSize = rhs.uniformBlockSize;
+    attributeOffsets = rhs.attributeOffsets;
+    textureSamplerTextureUnit = rhs.textureSamplerTextureUnit;
+    shaderProgram = rhs.shaderProgram;
+    materialName = rhs.materialName;
+    materialUniformBlockIndex = rhs.materialUniformBlockIndex;
+    bindingIndexInShader = rhs.bindingIndexInShader;
 
-    auto material = std::make_shared<Material>(shaderProgram, "DiffuseMaterial", false);
-    material->setAttribute("diffuseColor", glm::vec4(1, 1, 1, 1));
-    material->setAttribute("specularCoefficient", 225);
-    material->setAttribute("diffuseTexture_Provided", false);
+    copyAttributes(rhs.attributes, attributes);
+    copyTextures(rhs.textures, textures);
+    updateBuffer();
 
-    return material;
+    return *this;
 }
 
 bool Material::queryAttributeOffsets() {
@@ -133,6 +200,7 @@ bool Material::updateBuffer() {
 
     bufferRequiresUpdate = false;
 
+    delete[] data;
     return true;
 }
 

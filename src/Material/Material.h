@@ -12,6 +12,10 @@
 #include "glm/glm.hpp"
 #include "samplerBindings.frag"
 
+using std::map;
+using std::shared_ptr;
+using std::string;
+
 struct Attribute {
     shared_ptr<void> data;
     const std::type_info *type;
@@ -20,8 +24,14 @@ struct Attribute {
 
 class Material {
   public:
+    static std::shared_ptr<ShaderProgram> createShaderProgramForDefaultMaterial();
+    static std::shared_ptr<Material> createDefaultMaterial();
+
     Material(std::shared_ptr<ShaderProgram> &program, string materialNameInShader, bool prefixAttributeNameWithMaterialName);
     Material(string materialNameInShader, bool prefixAttributeNameWithMaterialName);
+
+    Material(const Material &m1);
+    Material &operator=(const Material &rhs);
 
     template <typename T>
     void setAttribute(string name, const T &value) {
@@ -104,14 +114,10 @@ class Material {
     int getId() { return id; }
 
     GLuint getBufferObject() { return buffer.getBufferObject(); }
+    std::shared_ptr<ShaderProgram> getProgram() { return shaderProgram; }
 
     static std::string materialTextureProvidedFlagPrefix;
     static std::string samplerTextureSamplerPrefix;
-
-    std::shared_ptr<ShaderProgram> getProgram() { return shaderProgram; }
-
-    static std::shared_ptr<ShaderProgram> createShaderProgramForDefaultMaterial();
-    static std::shared_ptr<Material> createDefaultMaterial();
 
   private:
     // load information about the uniform block in the sahder such as the binding location, the index
@@ -154,3 +160,6 @@ class Material {
 
     static int numMaterialsCreated;
 };
+
+void copyAttributes(const map<string, Attribute> &source, map<string, Attribute> &destination);
+void copyTextures(const map<string, shared_ptr<GLTextureObject>> &src, map<string, shared_ptr<GLTextureObject>> &dst);

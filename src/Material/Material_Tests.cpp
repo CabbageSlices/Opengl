@@ -193,27 +193,92 @@ TEST_F(MaterialTests,
     mat.setTexture("diffuseTexture", obj);
     mat.activate();
 }
-// }
 
-// // test that adding a texture to a material, without supploying the texture itself will bind 0 texture to the texture
-// unit
-// // associated with the sampler essentially we want to test that if a previously activated material supplied a texture,
-// but
-// // the current material does not have a texture, then the shader does not access the previous materials texture
-// TEST_F(MaterialTests, unsuppliedTexturesAreSetToZeroAndOverridePreviouslyBoundTextures) {
-//     OpenGLTestContext::createSamplerUniform("diffuseTexture", 22);
+// test copy constructor
+TEST_F(MaterialTests, copyingExistingMaterialToNewMaterialWillCopyDataAndUseSameShadersAndTextures) {
+    glm::vec4 diffuse(1, 1, 0.5, 1);
+    float specularCoefficient = 256;
+    const ImageTextureResource::Channels desiredChannels = ImageTextureResource::Channels::AUTO;
+    GLuint textureUnit = 23;
 
-//     ImageTextureResource img("testData.png");
-//     TextureObject texture(img);
+    ImageTextureResource image("testing_resources/images/3x3.jpg", desiredChannels);
+    shared_ptr<GLTextureObject> obj = image.createGLTextureObject(0);
 
-//     mat.setTexture("diffuseTexture", texture);
+    mat.setAttribute("diffuseColor", diffuse);
+    mat.setAttribute("specularCoefficient", specularCoefficient);
+    mat.setTexture("diffuseTexture", obj);
+    mat.setAttribute("otherTexture" + Material::materialTextureProvidedFlagPrefix, false);
+    mat.activate();
 
-//     material.activate();
+    MockFunction<void(GLuint, GLuint)> mockBindTextureUnit;
 
-//     Material mat2;
-//     mat2.setTexture("diffuseTexture", null);
+    GLuint textureObj = obj->getTextureObject();
 
-//     mat2.activate();
+    EXPECT_CALL(mockBindTextureUnit, Call(textureUnit, textureObj));
+    auto bindBufferBaseFunc = mockBindTextureUnit.AsStdFunction();
+    mockglBindTextureUnit = bindBufferBaseFunc;
 
-//     ASSERT_NO_THROW({ EXPECT_EQ(0, OpenGLTestContext::getTextureObjectAtUnit(22)); })
-// }
+    Material otherMat(mat);
+
+    const int bufferSize = 24;
+    char originalData[bufferSize];
+    char copiedData[bufferSize];
+
+    otherMat.activate();
+    glGetNamedBufferSubData(mat.getBufferObject(), 0, bufferSize, (GLvoid *)originalData);
+    glGetNamedBufferSubData(otherMat.getBufferObject(), 0, bufferSize, (GLvoid *)copiedData);
+
+    EXPECT_EQ(memcmp(originalData, copiedData, bufferSize), 0);
+
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    ASSERT_EQ(currentProgram, shader->getShaderProgram());
+
+    GLenum error = glGetError();
+    EXPECT_EQ(error, GL_NO_ERROR);
+}
+
+// test copy assignment operator
+TEST_F(MaterialTests, copyingExistingMaterialToExistingMaterialWillCopyDataAndUseSameShadersAndTextures) {
+    glm::vec4 diffuse(1, 1, 0.5, 1);
+    float specularCoefficient = 256;
+    const ImageTextureResource::Channels desiredChannels = ImageTextureResource::Channels::AUTO;
+    GLuint textureUnit = 23;
+
+    ImageTextureResource image("testing_resources/images/3x3.jpg", desiredChannels);
+    shared_ptr<GLTextureObject> obj = image.createGLTextureObject(0);
+
+    mat.setAttribute("diffuseColor", diffuse);
+    mat.setAttribute("specularCoefficient", specularCoefficient);
+    mat.setTexture("diffuseTexture", obj);
+    mat.setAttribute("otherTexture" + Material::materialTextureProvidedFlagPrefix, false);
+    mat.activate();
+
+    MockFunction<void(GLuint, GLuint)> mockBindTextureUnit;
+
+    GLuint textureObj = obj->getTextureObject();
+
+    EXPECT_CALL(mockBindTextureUnit, Call(textureUnit, textureObj));
+    auto bindBufferBaseFunc = mockBindTextureUnit.AsStdFunction();
+    mockglBindTextureUnit = bindBufferBaseFunc;
+
+    Material otherMat("blah", true);
+    otherMat = mat;
+
+    const int bufferSize = 24;
+    char originalData[bufferSize];
+    char copiedData[bufferSize];
+
+    otherMat.activate();
+    glGetNamedBufferSubData(mat.getBufferObject(), 0, bufferSize, (GLvoid *)originalData);
+    glGetNamedBufferSubData(otherMat.getBufferObject(), 0, bufferSize, (GLvoid *)copiedData);
+
+    EXPECT_EQ(memcmp(originalData, copiedData, bufferSize), 0);
+
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    ASSERT_EQ(currentProgram, shader->getShaderProgram());
+
+    GLenum error = glGetError();
+    EXPECT_EQ(error, GL_NO_ERROR);
+}

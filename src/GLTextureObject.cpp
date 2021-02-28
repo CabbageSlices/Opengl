@@ -30,6 +30,13 @@ bool GLTextureObject::create(unsigned numMipMapLevels, SizedColourFormats sizedC
         glTextureSubImage2D(textureObject, 0, 0, 0, width, height, colourFormat, dataType, dataAtLowestLevel);
     }
 
+    properties.numMipMapLevels = numMipMapLevels;
+    properties.sizedColorFormat = sizedColorFormat;
+    properties.width = width;
+    properties.height = height;
+    properties.colourFormat = colourFormat;
+    properties.dataType = dataType;
+
     return true;
 }
 

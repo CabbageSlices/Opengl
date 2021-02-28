@@ -30,6 +30,12 @@ using std::fstream;
 using std::string;
 using std::vector;
 
+void GLAPIENTRY debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                     const GLchar* message, const void* userParam) {
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, source = 0x%x, severity = 0x%x, message = %s\n",
+            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, source, severity, message);
+}
+
 // TODO make a log to file system to log stuff to a file
 // log out all mesh buffers, camera buffers, and compare to when c_str() is called
 // to determine why the fuck stbi_load fucks things up.
@@ -53,6 +59,13 @@ int main() {
     {  // temp scope to ensure all destrucotrs are called before opengl is erased
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         stbi_set_flip_vertically_on_load(true);
+
+        // During init, enable debug output
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback(debugMessageCallback, 0);
+        // glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, 0, GL_TRUE);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, 0, GL_FALSE);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, 0, GL_FALSE);
 
         bool isRunning = true;
 
@@ -90,8 +103,6 @@ int main() {
         vector<DirectionalLight> directionalLightsForUniform = lightManager.getDirectionalLights();
         vector<PointLight> pointLightsForUniform = lightManager.getPointLights();
 
-        program1.setUniform(1, {0.5, 0, 0, 0});
-
         sf::Clock clock;
         clock.restart();
 
@@ -104,7 +115,7 @@ int main() {
 
         int width = 0, height = 0, channels = 0;
 
-        unsigned char *imageData = stbi_load("./images/small.png", &width, &height, &channels, 0);
+        unsigned char* imageData = stbi_load("./images/small.png", &width, &height, &channels, 0);
 
         if (!imageData) {
             cout << "failed to load image" << endl;
@@ -172,6 +183,7 @@ int main() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             lightManager.sendBatchToShader(0);
+
             cube.render();
 
             // // additoinal passes, enable blend

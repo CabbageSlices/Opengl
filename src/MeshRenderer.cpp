@@ -21,22 +21,6 @@ MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData)
     initializeVertexArrayObject();
 }
 
-bool MeshRenderer::loadFromFile(const std::string &filename) {
-    if (vao.getVao() != 0 || attributeBuffer.isUsed()) {
-        cout << "Already storing a previous mesh, please delete the mesh before loading" << endl;
-        return false;
-    }
-
-    // load data
-    if (!(meshData = loadFromObj(filename))) return false;
-
-    initializeAttributeBuffers();
-    initializeIndexBuffer();
-    initializeVertexArrayObject();
-
-    return true;
-}
-
 void MeshRenderer::render() {
     vao.bindToContext();
 

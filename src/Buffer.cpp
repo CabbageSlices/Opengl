@@ -7,7 +7,6 @@ using std::endl;
 
 bool Buffer::create(const Buffer::BufferType &type, const void *pointerToData, GLsizeiptr bufferSize,
                     const Buffer::UsageType &usageType) {
-    glGetError();
     if (buffer == 0) {
         glCreateBuffers(1, &buffer);
     }
@@ -17,7 +16,7 @@ bool Buffer::create(const Buffer::BufferType &type, const void *pointerToData, G
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
-        cout << "ERROR CREAITING BUFF" << endl;
+        cout << "ERROR CREATING BUFF: " << error << endl;
         cout << error << endl;
         return false;
     }
@@ -26,7 +25,6 @@ bool Buffer::create(const Buffer::BufferType &type, const void *pointerToData, G
 }
 
 bool Buffer::updateData(const void *pointerToData, GLsizeiptr dataSize, GLintptr offsetIntoBuffer) {
-    glGetError();
     if (buffer == 0) {
         cout << "Error, no buffer created" << endl;
         return false;

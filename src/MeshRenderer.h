@@ -21,8 +21,6 @@ class MeshRenderer {
 
     ~MeshRenderer() { deleteMeshData(); }
 
-    bool loadFromFile(const std::string &filename);
-
     void deleteMeshData() {
         attributeBuffer.deleteBuffer();
         indexBuffer.deleteBuffer();

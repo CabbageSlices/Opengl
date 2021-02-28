@@ -1,6 +1,7 @@
 #pragma once
 #include "Enums.h"
 #include "Includes.h"
+#include "TextureProperties.hpp"
 
 /**
  * @brief Store texture data inside an opengl texture object. Allows people to manipulate opengl textur objects.
@@ -65,6 +66,7 @@ class GLTextureObject {
     static void unbindTextureAtUnit(unsigned textureUnit) { glBindTextureUnit(textureUnit, 0); }
 
   private:
+    TextureProperties properties;
     TextureType textureType;
     GLuint textureObject;
 };
