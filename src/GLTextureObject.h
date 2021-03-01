@@ -1,7 +1,7 @@
 #pragma once
 #include "Enums.h"
 #include "Includes.h"
-#include "TextureProperties.hpp"
+#include "TextureProperties.h"
 
 /**
  * @brief Store texture data inside an opengl texture object. Allows people to manipulate opengl textur objects.
@@ -25,7 +25,7 @@ class GLTextureObject {
         textureObject = 0;
     }
 
-    GLuint getTextureObject() { return textureObject; }
+    GLuint getTextureObject() const { return textureObject; }
     /**
      * @brief Create the storage for the texture, and fill the lowest level of the mipmap layers (level 0) with the specified
      * data The given data must be in the formats specified, with the given dimensions

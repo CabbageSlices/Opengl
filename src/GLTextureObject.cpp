@@ -7,16 +7,16 @@ GLTextureObject::GLTextureObject(TextureType _textureType) : textureType(_textur
 bool GLTextureObject::create(unsigned numMipMapLevels, SizedColourFormats sizedColorFormat, unsigned width, unsigned height,
                              ColourFormats colourFormat, DataType dataType, void *dataAtLowestLevel) {
     if (height == 0 || width == 0) {
-        cout << "Could not create gltextureobject; width or height are not valid";
+        cout << "Could not create gltextureobject; width or height are not valid" << endl;
         return false;
     }
 
     if (!dataAtLowestLevel) {
-        cout << "supplied empty data, texture storage created but object has no data";
+        cout << "supplied empty data, texture storage created but object has no data" << endl;
     }
 
     if (numMipMapLevels == 0) {
-        cout << "Error creating texture object; num mip map levels cannot be 0";
+        cout << "Error creating texture object; num mip map levels cannot be 0" << endl;
         return false;
     }
 

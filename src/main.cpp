@@ -10,6 +10,7 @@
 #include "Camera/Camera.h"
 #include "Camera/CameraController.h"
 #include "Entity/Entity.h"
+#include "GLFrameBufferObject.h"
 #include "GLTextureObject.h"
 #include "Includes.h"
 #include "Lights/LightManager.h"
@@ -63,7 +64,6 @@ int main() {
         // During init, enable debug output
         glEnable(GL_DEBUG_OUTPUT);
         glDebugMessageCallback(debugMessageCallback, 0);
-        // glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, 0, GL_TRUE);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, 0, GL_FALSE);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, 0, GL_FALSE);
 
@@ -125,15 +125,17 @@ int main() {
         GLuint vao;
         glGenVertexArrays(1, &vao);
 
-        // GLuint framebuffer = 0;
-        // glCreateFramebuffers(1, &framebuffer);
-        // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-        // GLTextureObject framebufferTexture(TextureType::TEXTURE_2D);
-        // framebufferTexture.create(1, SizedColourFormats::RGBA_8, 800, 600, ColourFormats::RGBA, DataType::FLOAT, 0);
+        GLTextureObject framebufferTexture(TextureType::TEXTURE_2D);
+        framebufferTexture.create(1, SizedColourFormats::RGBA_8, 800, 600, ColourFormats::RGBA, DataType::FLOAT, 0);
 
         // glNamedFramebufferTexture(framebuffer, GL_COLOR_ATTACHMENT0, framebufferTexture.getTextureObject(), 0);
         // glNamedFramebufferDrawBuffer(framebuffer, GL_COLOR_ATTACHMENT0);
+
+        GLFramebufferObject fbo;
+        fbo.create();
+        fbo.attachTexture(FramebufferColorAttachment::COLOR_ATTACHMENT1, framebufferTexture, 0);
+
+        // fbo.enableDrawingToAttachments({FramebufferColorAttachment::COLOR_ATTACHMENT1});
 
         // loads the mesh data, materials, textures, and creates the shaders
         // ResourceManager::getInstance().loadFromObj("mesh.obj");
@@ -174,6 +176,7 @@ int main() {
                                     sizeof(glm::mat4) * 2);
 
             // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+            fbo.bindToTarget(FramebufferTarget::FRAMEBUFFER);
 
             glDisable(GL_BLEND);  // first pass disable blend because when you render, if a triangle is rendered in the
                                   // background, and then something renders on top of it, the background and
@@ -201,19 +204,18 @@ int main() {
             //     cout << "ERROR: " << err << endl;
             // }
 
-            // glDisable(GL_BLEND);
+            glDisable(GL_BLEND);
 
             // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            // framebufferTexture.unbindTextureAtUnit(0);
-            // framebufferTexture.bindToTextureUnit(0);
-            // glClearBufferfv(GL_COLOR, 0, black);
-            // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            GLFramebufferObject::clearFramebufferAtTarget(FramebufferTarget::FRAMEBUFFER);
+            framebufferTexture.bindToTextureUnit(0);
+            GLfloat black[] = {0, 0, 0, 0};
+            glClearBufferfv(GL_COLOR, 0, black);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            // glBindVertexArray(vao);
-            // texturedRect.useProgram();
-            // glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(vao);
+            texturedRect.useProgram();
+            glDrawArrays(GL_TRIANGLES, 0, 6);
 
             window.display();
         }

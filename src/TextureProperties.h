@@ -1,7 +1,6 @@
 #include "Enums.h"
 #include "GraphicsWrapper.h"
 
-
 struct TextureProperties {
     unsigned numMipMapLevels;
     SizedColourFormats sizedColorFormat;
