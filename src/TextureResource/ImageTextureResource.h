@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Enums.h"
+#include "GLTextureObject.h"
 #include "Includes.h"
-
-class GLTextureObject;
 
 /**
  * @brief Deleter for stbi objects
@@ -67,13 +66,13 @@ class ImageTextureResource {
     Channels getLoadedChannels() const { return loadedChannels; }
 
     SizedColourFormats getSizedColourFormat() const;
-    ColourFormats getColourFormat() const;
+    PixelDataFormat getPixelDataFormat() const;
 
     const stbi_uc *getData() const { return data.get(); }
 
   private:
     static const std::map<Channels, SizedColourFormats> ChannelsToSizedColourFormatMap;
-    static const std::map<Channels, ColourFormats> ChannelsToColourFormatMap;
+    static const std::map<Channels, PixelDataFormat> ChannelsToPixelDataFormatMap;
 
     std::unique_ptr<stbi_uc, decltype(&deleteStbiImage)> data;
 

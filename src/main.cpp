@@ -107,6 +107,7 @@ int main() {
         clock.restart();
 
         glEnable(GL_DEPTH_TEST);
+        glClearDepth(1.0);
         glEnable(GL_BLEND);
         glDepthFunc(GL_LEQUAL);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -125,17 +126,21 @@ int main() {
         GLuint vao;
         glGenVertexArrays(1, &vao);
 
-        GLTextureObject framebufferTexture(TextureType::TEXTURE_2D);
-        framebufferTexture.create(1, SizedColourFormats::RGBA_8, 800, 600, ColourFormats::RGBA, DataType::FLOAT, 0);
-
-        // glNamedFramebufferTexture(framebuffer, GL_COLOR_ATTACHMENT0, framebufferTexture.getTextureObject(), 0);
-        // glNamedFramebufferDrawBuffer(framebuffer, GL_COLOR_ATTACHMENT0);
+        GLTextureObject depthTexture(TextureType::TEXTURE_2D);
+        depthTexture.create(1, TextureInternalStorageFormat::DEPTH_COMPONENT32, 1024, 1024, PixelDataFormat::DEPTH_COMPONENT,
+                            DataType::FLOAT, 0);
 
         GLFramebufferObject fbo;
         fbo.create();
-        fbo.attachTexture(FramebufferColorAttachment::COLOR_ATTACHMENT1, framebufferTexture, 0);
+        fbo.attachTexture(FramebufferNonColorAttachment::DEPTH_ATTACHMENT, depthTexture, 0);
 
-        // fbo.enableDrawingToAttachments({FramebufferColorAttachment::COLOR_ATTACHMENT1});
+        depthTexture.setParameter(TextureParameterType::MIN_FILTER, TextureFilteringModes::LINEAR);
+        depthTexture.setParameter(TextureParameterType::MAG_FILTER, TextureFilteringModes::LINEAR);
+
+        depthTexture.setParameter(TextureParameterType::TEXTURE_WRAP_S, TextureWrapModes::CLAMP_TO_EDGE);
+        depthTexture.setParameter(TextureParameterType::TEXTURE_WRAP_T, TextureWrapModes::CLAMP_TO_EDGE);
+
+        glNamedFramebufferDrawBuffer(fbo.getFramebufferObject(), GL_NONE);
 
         // loads the mesh data, materials, textures, and creates the shaders
         // ResourceManager::getInstance().loadFromObj("mesh.obj");
@@ -175,7 +180,7 @@ int main() {
             cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().getPosition()), sizeof(glm::vec4),
                                     sizeof(glm::mat4) * 2);
 
-            // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+            // glBindFramebuffer(GL_FRAMEBUFFER, fbo);
             fbo.bindToTarget(FramebufferTarget::FRAMEBUFFER);
 
             glDisable(GL_BLEND);  // first pass disable blend because when you render, if a triangle is rendered in the
@@ -183,34 +188,27 @@ int main() {
             // the triangle on top will be blended together.
             program1.useProgram();
 
+            glViewport(0, 0, 1024, 1024);
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             lightManager.sendBatchToShader(0);
 
             cube.render();
 
-            // // additoinal passes, enable blend
+            // additoinal passes, enable blend
             glEnable(GL_BLEND);
             for (int i = 1; i < lightManager.getBatchCount(); ++i) {
                 lightManager.sendBatchToShader(i);
                 cube.render();
             }
 
-            // glBindVertexArray(vao);
-            // glDrawArrays(GL_TRIANGLES, 0, 3);
-
-            // GLenum err = glGetError();
-            // if (err != GL_NO_ERROR) {
-            //     cout << "ERROR: " << err << endl;
-            // }
-
             glDisable(GL_BLEND);
 
-            // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, 800, 600);
             GLFramebufferObject::clearFramebufferAtTarget(FramebufferTarget::FRAMEBUFFER);
-            framebufferTexture.bindToTextureUnit(0);
-            GLfloat black[] = {0, 0, 0, 0};
-            glClearBufferfv(GL_COLOR, 0, black);
+            depthTexture.bindToTextureUnit(0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glBindVertexArray(vao);

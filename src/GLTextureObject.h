@@ -32,16 +32,16 @@ class GLTextureObject {
      * DOES NOT CHECK FOR OPENGL ERRORS
      *
      * @param numMipMapLevels
-     * @param sizedColorFormat
+     * @param sizedColorFormat format of the data internally in the open gl texture object
      * @param width
      * @param height
-     * @param colourFormat
+     * @param dataFormat format of the given pointer of data
      * @param data
      * @return true when texture data successfully created
      * @return false there is an error with the data values.
      */
-    bool create(unsigned numMipMapLevels, SizedColourFormats sizedColorFormat, unsigned width, unsigned height,
-                ColourFormats colourFormat, DataType, void *dataAtLowestLevel);
+    bool create(unsigned numMipMapLevels, TextureInternalStorageFormat internalFormat, unsigned width, unsigned height,
+                PixelDataFormat colourFormat, DataType, void *dataAtLowestLevel);
 
     /**
      * @brief Automatically generate the mipmap levels for everything but the base level (level 0)
@@ -57,6 +57,9 @@ class GLTextureObject {
      * @param textureUnit  texture unit to bind this texture to
      */
     void bindToTextureUnit(unsigned textureUnit);
+
+    void setParameter(const TextureParameterType &parameterType, const TextureFilteringModes &parameterValue);
+    void setParameter(const TextureParameterType &parameterType, const TextureWrapModes &parameterValue);
 
     /**
      * @brief Clears whatever texture is currently bound to the given texture unit. Essentially sets the bound texture to 0

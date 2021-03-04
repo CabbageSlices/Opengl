@@ -22,6 +22,14 @@ uniform sampler2D s;
 
 #include "Lighting.frag"
 
+float near = 0.01;
+float far = 30.0;
+
+float LinearizeDepth(float depth) {
+    float z = depth * 2.0 - 1.0;  // back to NDC
+    return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
 // TODO send material data to lighting calculation so that diffuse color isn't used for specular highlight
 void main(void) {
     vec3 normal = normalize(vs_Normal);
@@ -41,6 +49,8 @@ void main(void) {
 #endif
 
     fragOut = outputColor;
+    fragOut = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1);
+    fragOut = vec4(vec3(gl_FragCoord.z), 1);
     // fragOut = diffuseTextureSample;
     // fragOut = texture(s, vs_TexCoord) * outputColor;
     // fragOut = vec4(diffuseTextureSample, 0, 0, 1);

@@ -9,8 +9,8 @@ typedef ImageTextureResource::Channels Channels;
 const std::map<Channels, SizedColourFormats> ImageTextureResource::ChannelsToSizedColourFormatMap = {
     {Channels::RGB, SizedColourFormats::RGB_8}, {Channels::RGBA, SizedColourFormats::RGBA_8}};
 
-const std::map<Channels, ColourFormats> ImageTextureResource::ChannelsToColourFormatMap = {
-    {Channels::RGB, ColourFormats::RGB}, {Channels::RGBA, ColourFormats::RGBA}};
+const std::map<Channels, PixelDataFormat> ImageTextureResource::ChannelsToPixelDataFormatMap = {
+    {Channels::RGB, PixelDataFormat::RGB}, {Channels::RGBA, PixelDataFormat::RGBA}};
 
 ImageTextureResource::ImageTextureResource(const std::string &fileName,
                                            const ImageTextureResource::Channels &desiredChannels)
@@ -41,8 +41,8 @@ std::shared_ptr<GLTextureObject> ImageTextureResource::createGLTextureObject(uns
     std::shared_ptr<GLTextureObject> textureObject(new GLTextureObject(TextureType::TEXTURE_2D));
 
     try {
-        textureObject->create(1 + numAdditionalMipMapLevels, getSizedColourFormat(), width, height, getColourFormat(),
-                              DataType::UNSIGNED_BYTE, data.get());
+        textureObject->create(1 + numAdditionalMipMapLevels, (TextureInternalStorageFormat)getSizedColourFormat(), width,
+                              height, getPixelDataFormat(), DataType::UNSIGNED_BYTE, data.get());
     } catch (...) {
         cout << "Error creating texture resource" << endl;
         return nullptr;
@@ -64,9 +64,9 @@ SizedColourFormats ImageTextureResource::getSizedColourFormat() const {
     }
 }
 
-ColourFormats ImageTextureResource::getColourFormat() const {
+PixelDataFormat ImageTextureResource::getPixelDataFormat() const {
     try {
-        return ChannelsToColourFormatMap.at(loadedChannels);
+        return ChannelsToPixelDataFormatMap.at(loadedChannels);
     } catch (const std::out_of_range &error) {
         cout << "colour format not defined for this image channels" << endl;
         throw;
