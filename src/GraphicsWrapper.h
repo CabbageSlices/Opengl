@@ -12,6 +12,8 @@ extern function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
 extern function<void(GLuint, GLuint)> mockglBindTextureUnit;
 extern function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;
 
+extern bool activateMaterials;
+
 void clearAllMockFunctions();
 
 // void createBuffers(GLsizei n, GLuint *buffers);

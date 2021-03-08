@@ -24,7 +24,7 @@ struct Attribute {
 
 class Material {
   public:
-    static std::shared_ptr<ShaderProgram> createShaderProgramForDefaultMaterial();
+    static std::shared_ptr<ShaderProgram> getShaderProgramForDefaultMaterial();
     static std::shared_ptr<Material> createDefaultMaterial();
 
     Material(std::shared_ptr<ShaderProgram> &program, string materialNameInShader, bool prefixAttributeNameWithMaterialName);
@@ -159,6 +159,8 @@ class Material {
     int id;
 
     static int numMaterialsCreated;
+
+    static shared_ptr<ShaderProgram> programForDefaultMaterial;
 };
 
 void copyAttributes(const map<string, Attribute> &source, map<string, Attribute> &destination);

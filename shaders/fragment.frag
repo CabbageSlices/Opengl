@@ -15,6 +15,7 @@ layout(std140, binding = UNIFORM_TRANSFORM_MATRICES_BLOCK_BINDING_POINT) uniform
 out vec4 fragOut;
 
 in vec4 worldSpacePosition;
+in vec4 lightSpacePosition;
 in vec3 vs_Normal;
 in vec2 vs_TexCoord;
 
@@ -48,9 +49,12 @@ void main(void) {
     outputColor += COMPUTE_POINT_LIGHT_CONTRIBUTION(normal, material);
 #endif
 
+    // ambient light
+    outputColor += totalMaterialColor * vec4(0.1, 0.1, 0.1, 1);
+
     fragOut = outputColor;
-    fragOut = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1);
-    fragOut = vec4(vec3(gl_FragCoord.z), 1);
+    // fragOut = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1);
+    // fragOut = vec4(vec3(gl_FragCoord.z), 1);
     // fragOut = diffuseTextureSample;
     // fragOut = texture(s, vs_TexCoord) * outputColor;
     // fragOut = vec4(diffuseTextureSample, 0, 0, 1);

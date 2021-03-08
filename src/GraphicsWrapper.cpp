@@ -4,6 +4,8 @@ function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
 function<void(GLuint, GLuint)> mockglBindTextureUnit;
 function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;
 
+bool activateMaterials = true;
+
 void clearAllMockFunctions() {
     mockglBindBufferBase = nullptr;
     mockglBindTextureUnit = nullptr;

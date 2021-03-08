@@ -3,18 +3,21 @@
 std::string Material::materialTextureProvidedFlagPrefix = "_Provided";
 std::string Material::samplerTextureSamplerPrefix = "_Sampler";
 int Material::numMaterialsCreated = 0;
+shared_ptr<ShaderProgram> Material::programForDefaultMaterial = nullptr;
 
-std::shared_ptr<ShaderProgram> Material::createShaderProgramForDefaultMaterial() {
-    std::shared_ptr<ShaderProgram> defaultShaderProgram = std::make_shared<ShaderProgram>();
-    defaultShaderProgram->loadAndCompileShaders(
-        {{Shader::Type::Vertex, "vertex.vert"}, {Shader::Type::Fragment, "fragment.frag"}});
-    defaultShaderProgram->linkProgram();
+std::shared_ptr<ShaderProgram> Material::getShaderProgramForDefaultMaterial() {
+    if (!programForDefaultMaterial) {
+        programForDefaultMaterial = std::make_shared<ShaderProgram>();
+        programForDefaultMaterial->loadAndCompileShaders(
+            {{Shader::Type::Vertex, "vertex.vert"}, {Shader::Type::Fragment, "fragment.frag"}});
+        programForDefaultMaterial->linkProgram();
+    }
 
-    return defaultShaderProgram;
+    return programForDefaultMaterial;
 }
 
 std::shared_ptr<Material> Material::createDefaultMaterial() {
-    auto shaderProgram = createShaderProgramForDefaultMaterial();
+    auto shaderProgram = getShaderProgramForDefaultMaterial();
 
     auto material = std::make_shared<Material>(shaderProgram, "DiffuseMaterial", false);
     material->setAttribute("diffuseColor", glm::vec4(1, 1, 1, 1));

@@ -36,7 +36,7 @@ void MeshRenderer::render() {
         unsigned numIndicesPerFace = 3;
         unsigned numIndicesCurrentFaceset = faceset.size() * numIndicesPerFace;
 
-        mat->activate();
+        if (activateMaterials) mat->activate();
         glDrawElements(GL_TRIANGLES, numIndicesCurrentFaceset, GL_UNSIGNED_INT,
                        (void *)bytesAlreadyRead);  // wtf? convert integer directly to pointer and not the address
 

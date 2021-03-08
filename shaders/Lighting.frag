@@ -4,6 +4,7 @@
 #include "uniformLocations.vert"
 
 struct DirectionalLight {
+    vec4 position;
     vec3 direction;
     vec4 intensity;
 };
@@ -53,7 +54,17 @@ vec4 calculateDirectionalLightsContribution(vec3 surfaceNormal, Material materia
     vec4 lightTotal = vec4(0, 0, 0, 0);
 
     for (int i = 0; i < MAX_DIRECTIONAL_LIGHTS; ++i) {
-        lightTotal += calculateDirectionalLightIntensity(directionalLights[i], surfaceNormal, material);
+        vec4 contribution = calculateDirectionalLightIntensity(directionalLights[i], surfaceNormal, material);
+
+        if (i == 0) {
+            vec3 projCoordinates = lightSpacePosition.xyz / lightSpacePosition.w;
+            projCoordinates = projCoordinates * 0.5 + 0.5;
+            float closestDepth = texture(shadowMapSampler, projCoordinates.xy).r;
+            float currentDepth = projCoordinates.z - 0.005;
+
+            contribution *= currentDepth > closestDepth ? 0 : 1;
+        }
+        lightTotal += contribution;
     }
 
     return lightTotal;

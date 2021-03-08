@@ -108,23 +108,16 @@ inline void tinyobjAttributeIndicesToOpenglIndices(const MeshAttributes &origina
 }
 
 inline void tinyobjMaterialToCustomMaterial(const tinyobj::material_t &tinyobjMaterial, shared_ptr<Material> &material) {
-    // material->setAttribute<glm::vec4>("diffuseColor", {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1],
-    // tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve}); material
     material->setAttribute("diffuseColor", glm::vec4(tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1],
                                                      tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve));
     material->setAttribute("specularCoefficient", (float)tinyobjMaterial.shininess);
     material->setAttribute<bool>("diffuseTexture_Provided", false);
-
-    // material->setDiffuseColour(
-    //     {tinyobjMaterial.diffuse[0], tinyobjMaterial.diffuse[1], tinyobjMaterial.diffuse[2], tinyobjMaterial.dissolve});
-    // material->setSpecularCoefficient(tinyobjMaterial.shininess);
-    // material->name = tinyobjMaterial.name;
 }
 
 inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> &tinyobjMaterials,
                                               vector<shared_ptr<Material> > &convertedMaterials) {
     for (unsigned i = 0; i < tinyobjMaterials.size(); ++i) {
-        auto defaultProgram = Material::createShaderProgramForDefaultMaterial();
+        auto defaultProgram = Material::getShaderProgramForDefaultMaterial();
         shared_ptr<Material> convertedMaterial(new Material(defaultProgram, "DiffuseMaterial", false));
         tinyobjMaterialToCustomMaterial(tinyobjMaterials[i], convertedMaterial);
         convertedMaterials.push_back(convertedMaterial);

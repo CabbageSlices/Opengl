@@ -72,6 +72,11 @@ int main() {
         ShaderProgram program1;
         program1.loadAndCompileShaders({{Shader::Type::Vertex, "vertex.vert"}, {Shader::Type::Fragment, "fragment.frag"}});
 
+        ShaderProgram shadowMapGeneratorProgram;
+        shadowMapGeneratorProgram.loadAndCompileShaders(
+            {{Shader::Type::Vertex, "shadowMapPass.vert"}, {Shader::Type::Fragment, "shadowMapPass.frag"}});
+        shadowMapGeneratorProgram.linkProgram();
+
         ShaderProgram texturedRect;
         texturedRect.loadAndCompileShaders(
             {{Shader::Type::Vertex, "texturedRect.vert"}, {Shader::Type::Fragment, "texturedRect.frag"}});
@@ -90,18 +95,20 @@ int main() {
         Entity cube;
         cube.addComponent(cubeMeshRendererComponent);
 
+        std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
+        Entity secondEntity;
+        secondEntity.addComponent(secondMeshRendererComponent);
+        secondEntity.setPosition({-1, -2, 0});
+
         CameraController cameraController({0, 0, 5}, {0, 0, 0});
 
         LightManager lightManager;
-        lightManager.createDirectionalLight({0, -1, 0, 0}, {1, 1, 1, 1});
-        lightManager.createDirectionalLight({0, 0, 1, 0}, {1, 1, 1, 1});
-        lightManager.createDirectionalLight({0, 0, -1, 0}, {1, 1, 1, 1});
-        lightManager.createPointLight({5, 0, 0, 1}, {0.7, 0.7, 0.7, 0.7}, 10);
+        lightManager.createDirectionalLight({1, 20, 0, 1}, {-0.2, -1, 0, 0}, {1, 1, 1, 1});
+        // lightManager.createDirectionalLight({0, 0, 1, 0}, {1, 1, 1, 1});
+        // lightManager.createDirectionalLight({0, 0, -1, 0}, {1, 1, 1, 1});
+        // lightManager.createPointLight({5, 0, 0, 1}, {0.7, 0.7, 0.7, 0.7}, 10);
 
         lightManager.connectLightDataToShader();
-
-        vector<DirectionalLight> directionalLightsForUniform = lightManager.getDirectionalLights();
-        vector<PointLight> pointLightsForUniform = lightManager.getPointLights();
 
         sf::Clock clock;
         clock.restart();
@@ -180,21 +187,50 @@ int main() {
             cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().getPosition()), sizeof(glm::vec4),
                                     sizeof(glm::mat4) * 2);
 
+            //******************************************************************
+            // SHADOW PASS
+
+            lightManager.setLightMatrixForBatch(0);
+
+            activateMaterials = false;
+
+            shadowMapGeneratorProgram.useProgram();
+
             // glBindFramebuffer(GL_FRAMEBUFFER, fbo);
             fbo.bindToTarget(FramebufferTarget::FRAMEBUFFER);
 
+            glDisable(GL_BLEND);
+            glViewport(0, 0, 1024, 1024);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            cube.render();
+            secondEntity.render();
+
+            //******************************************************************
+            // regular pass
+            activateMaterials = true;
+            cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().calculateWorldToClipMatrix()),
+                                    sizeof(glm::mat4), 0);
+            cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().getWorldToCameraMatrix()), sizeof(glm::mat4),
+                                    sizeof(glm::mat4));
+            cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().getPosition()), sizeof(glm::vec4),
+                                    sizeof(glm::mat4) * 2);
+            GLFramebufferObject::clearFramebufferAtTarget(FramebufferTarget::FRAMEBUFFER);
             glDisable(GL_BLEND);  // first pass disable blend because when you render, if a triangle is rendered in the
                                   // background, and then something renders on top of it, the background and
             // the triangle on top will be blended together.
             program1.useProgram();
 
-            glViewport(0, 0, 1024, 1024);
+            glViewport(0, 0, 800, 600);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             lightManager.sendBatchToShader(0);
 
+            // bind depth map
+            depthTexture.bindToTextureUnit(2);
+
             cube.render();
+            secondEntity.render();
 
             // additoinal passes, enable blend
             glEnable(GL_BLEND);
@@ -203,17 +239,19 @@ int main() {
                 cube.render();
             }
 
-            glDisable(GL_BLEND);
+            //******************************************************************
+            // random blit pass
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glViewport(0, 0, 800, 600);
-            GLFramebufferObject::clearFramebufferAtTarget(FramebufferTarget::FRAMEBUFFER);
-            depthTexture.bindToTextureUnit(0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            // glDisable(GL_BLEND);
 
-            glBindVertexArray(vao);
-            texturedRect.useProgram();
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            // // view depth buffer
+            // GLFramebufferObject::clearFramebufferAtTarget(FramebufferTarget::FRAMEBUFFER);
+            // depthTexture.bindToTextureUnit(0);
+            // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // glBindVertexArray(vao);
+            // texturedRect.useProgram();
+            // glDrawArrays(GL_TRIANGLES, 0, 6);
 
             window.display();
         }
