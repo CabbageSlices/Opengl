@@ -4,6 +4,7 @@ function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
 function<void(GLuint, GLuint)> mockglBindTextureUnit;
 function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;
 
+RenderingPass currentRenderingPass = RenderingPass::REGULAR_PASS;
 bool activateMaterials = true;
 
 void clearAllMockFunctions() {

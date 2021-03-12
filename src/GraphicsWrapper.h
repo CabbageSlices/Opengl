@@ -12,6 +12,13 @@ extern function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
 extern function<void(GLuint, GLuint)> mockglBindTextureUnit;
 extern function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;
 
+enum class RenderingPass {
+    DEPTH_PASS,
+    REGULAR_PASS,
+};
+
+extern RenderingPass currentRenderingPass;
+
 extern bool activateMaterials;
 
 void clearAllMockFunctions();

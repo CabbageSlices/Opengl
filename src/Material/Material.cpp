@@ -271,7 +271,7 @@ bool Material::activate() {
         return false;
     }
 
-    program->useProgram();
+    // program->useProgram();
     buffer.bindToTargetBindingPoint(bindingIndexInShader);
     activateTextures();
 

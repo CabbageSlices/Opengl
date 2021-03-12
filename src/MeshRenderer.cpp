@@ -11,8 +11,10 @@
 using std::cout;
 using std::endl;
 
-MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData)
-    : meshData(_meshData),
+MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData,
+                           const std::map<RenderingPass, std::shared_ptr<ShaderProgram> > &shaderForPasses)
+    : ObjectRenderer(shaderForPasses),
+      meshData(_meshData),
       vao(),
       attributeBuffer(),
       indexBuffer() {
@@ -21,7 +23,7 @@ MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData)
     initializeVertexArrayObject();
 }
 
-void MeshRenderer::render() {
+void MeshRenderer::renderInternal() {
     vao.bindToContext();
 
     // render faceset of each material
@@ -36,7 +38,7 @@ void MeshRenderer::render() {
         unsigned numIndicesPerFace = 3;
         unsigned numIndicesCurrentFaceset = faceset.size() * numIndicesPerFace;
 
-        if (activateMaterials) mat->activate();
+        mat->activate();
         glDrawElements(GL_TRIANGLES, numIndicesCurrentFaceset, GL_UNSIGNED_INT,
                        (void *)bytesAlreadyRead);  // wtf? convert integer directly to pointer and not the address
 

@@ -4,6 +4,7 @@
 #include "GraphicsWrapper.h"
 #include "Includes.h"
 #include "MeshData.h"
+#include "ObjectRenderer/ObjectRenderer.h"
 #include "ShaderProgram/shaderprogram.h"
 #include "VertexArrayObject.h"
 
@@ -14,12 +15,19 @@
  * not send any data to the opengl shaders related to the position/projection matrices.
  *
  */
-class MeshRenderer {
+class MeshRenderer : public ObjectRenderer {
   public:
-    MeshRenderer() : meshData(), vao(), attributeBuffer(), indexBuffer(){};
-    MeshRenderer(const shared_ptr<MeshData> &_meshData);
+    MeshRenderer(const std::map<RenderingPass, std::shared_ptr<ShaderProgram> > &shaderForPasses)
+        : ObjectRenderer(shaderForPasses),
+          meshData(),
+          vao(),
+          attributeBuffer(),
+          indexBuffer(){};
 
-    ~MeshRenderer() { deleteMeshData(); }
+    MeshRenderer(const shared_ptr<MeshData> &_meshData,
+                 const std::map<RenderingPass, std::shared_ptr<ShaderProgram> > &shaderForPasses);
+
+    virtual ~MeshRenderer() { deleteMeshData(); }
 
     void deleteMeshData() {
         attributeBuffer.deleteBuffer();
@@ -31,9 +39,8 @@ class MeshRenderer {
         // meshData->clear();
     }
 
-    void render();
-
   private:
+    virtual void renderInternal() override;
     bool initializeAttributeBuffers();
     bool initializeIndexBuffer();
     void initializeVertexArrayObject();

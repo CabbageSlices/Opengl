@@ -77,6 +77,11 @@ int main() {
             {{Shader::Type::Vertex, "shadowMapPass.vert"}, {Shader::Type::Fragment, "shadowMapPass.frag"}});
         shadowMapGeneratorProgram.linkProgram();
 
+        shared_ptr<ShaderProgram> shadowMapGeneratorProgram1(new ShaderProgram());
+        shadowMapGeneratorProgram1->loadAndCompileShaders(
+            {{Shader::Type::Vertex, "shadowMapPass.vert"}, {Shader::Type::Fragment, "shadowMapPass.frag"}});
+        shadowMapGeneratorProgram1->linkProgram();
+
         ShaderProgram texturedRect;
         texturedRect.loadAndCompileShaders(
             {{Shader::Type::Vertex, "texturedRect.vert"}, {Shader::Type::Fragment, "texturedRect.frag"}});
@@ -90,12 +95,16 @@ int main() {
         glPointSize(20);
 
         std::shared_ptr<MeshData> cubeMeshData = loadFromObj("smoothsphere.obj");
-        std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
+        std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(
+            cubeMeshData, {{RenderingPass::DEPTH_PASS, shadowMapGeneratorProgram1},
+                           {RenderingPass::REGULAR_PASS, Material::getShaderProgramForDefaultMaterial()}}));
 
         Entity cube;
         cube.addComponent(cubeMeshRendererComponent);
 
-        std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
+        std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(
+            cubeMeshData, {{RenderingPass::DEPTH_PASS, shadowMapGeneratorProgram1},
+                           {RenderingPass::REGULAR_PASS, Material::getShaderProgramForDefaultMaterial()}}));
         Entity secondEntity;
         secondEntity.addComponent(secondMeshRendererComponent);
         secondEntity.setPosition({-1, -2, 0});
@@ -160,6 +169,12 @@ int main() {
         // vector<weak_ptr<meshData>> meshs = ResourceManager::load("blah.obj");
         // meshs[0]->materials[0]->setShader(program1);
 
+        // Material testMat(MaterialPropertiesQueryInfo);
+        // MaterialCollection matCollection;
+        // matCollection.addMaterial(RenderingPass::REGULAR_PASS, testMat);
+        // matCollection.addMaterial(RenderingPass::DEPTH_PASS, depthMat);
+        // bool hasMaterial = matCollection.activateForPass(RenderingPass::DEPTH_PASS);
+
         Buffer cameraBuffer;
         GLuint bufferSize = sizeof(glm::mat4) * 2 + sizeof(glm::vec4);
         cameraBuffer.create(Buffer::BufferType::UniformBuffer, 0, bufferSize, Buffer::UsageType::StreamDraw);
@@ -189,12 +204,13 @@ int main() {
 
             //******************************************************************
             // SHADOW PASS
+            currentRenderingPass = RenderingPass::DEPTH_PASS;
 
             lightManager.setLightMatrixForBatch(0);
 
             activateMaterials = false;
 
-            shadowMapGeneratorProgram.useProgram();
+            // shadowMapGeneratorProgram.useProgram();
 
             // glBindFramebuffer(GL_FRAMEBUFFER, fbo);
             fbo.bindToTarget(FramebufferTarget::FRAMEBUFFER);
@@ -207,6 +223,8 @@ int main() {
 
             //******************************************************************
             // regular pass
+            currentRenderingPass = RenderingPass::REGULAR_PASS;
+
             activateMaterials = true;
             cameraBuffer.updateData(glm::value_ptr(cameraController.getCamera().calculateWorldToClipMatrix()),
                                     sizeof(glm::mat4), 0);
@@ -218,7 +236,7 @@ int main() {
             glDisable(GL_BLEND);  // first pass disable blend because when you render, if a triangle is rendered in the
                                   // background, and then something renders on top of it, the background and
             // the triangle on top will be blended together.
-            program1.useProgram();
+            // program1.useProgram();
 
             glViewport(0, 0, 800, 600);
 
