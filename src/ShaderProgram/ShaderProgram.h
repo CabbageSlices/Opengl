@@ -17,6 +17,7 @@ using std::weak_ptr;
 enum UniformBlockProperty : GLenum {
     UniformBlockBindingIndex = GL_UNIFORM_BLOCK_BINDING,
     UniformBlockSizeInBytes = GL_UNIFORM_BLOCK_DATA_SIZE,
+    UniformBlockNumberOfActiveUniforms = GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS,
 };
 
 // TODO when resourse manager is made, move shader array out of shader program and into resource manager
@@ -128,6 +129,16 @@ class ShaderProgram {
     std::map<std::string, GLint> getUniformOffsetForAttributes(const vector<string> &attributeNames);
 
     /**
+     * @brief for each of the given attribute uniform index, get the offset to that attribute within its uniform block
+     * if there is an error, it will return an empty map. so be sure to check. If the given attribute doesn't have an offset,
+     * it will not be included in the returned map
+     *
+     * @param attributeUniformIndices
+     * @return std::map<std::string, GLint>
+     */
+    std::map<GLuint, GLint> getUniformOffsetForAttributes(const vector<GLuint> &attributeUniformIndices);
+
+    /**
      * @brief get the index of the uniform lbock with the given name. this is NOT the binding index, the block index is a
      * unique identifier f or the block within the shader. returns GL_INVALID_INDEX if there is an error
      *
@@ -145,6 +156,20 @@ class ShaderProgram {
      * @return GLint
      */
     GLint getUniformBlockProperty(GLuint uniformBlockIndex, UniformBlockProperty property);
+
+    // query the name, type, and nuumber of array elements (will be 1 for on array) of each uniform at the specified indices
+    void queryUniformAttributeDataFromIndex(const std::vector<GLuint> &uniformIndices,
+                                            std::map<GLint, string> &uniformIndexToAttributeName,
+                                            std::map<GLint, GLenum> &uniformIndexToType,
+                                            std::map<GLint, GLint> &uniformIndexToNumberOfElementsIfArray);
+
+    /**
+     * @brief Returns an array containing the uniform indices of each uniform variable in the given uniform block.
+     *
+     * @param uniformBlockIndex
+     * @return vector<GLint>
+     */
+    vector<GLuint> getUniformBlockActiveUniformIndices(GLuint uniformBlockIndex);
 
     GLuint getShaderProgram() { return shaderProgram; }
 

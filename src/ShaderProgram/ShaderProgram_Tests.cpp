@@ -49,6 +49,84 @@ TEST_F(ShaderProgramTests, uniformBlockHasValidIndex) {
     EXPECT_NE(index, GL_INVALID_INDEX);
 }
 
+TEST_F(ShaderProgramTests, correctNumberOfActiveUniformsAreReturned) {
+    string blockName = "TestBlock";
+
+    auto index = shader.getUniformBlockIndex(blockName);
+    GLint numberOfIndices = shader.getUniformBlockProperty(index, UniformBlockProperty::UniformBlockNumberOfActiveUniforms);
+
+    EXPECT_EQ(numberOfIndices, 5) << "Correct number of uniform attribtue indices not returned.";
+}
+
+TEST_F(ShaderProgramTests, uniformIndicesForAttributesInBlockAreReturned) {
+    string blockName = "TestBlock";
+
+    auto index = shader.getUniformBlockIndex(blockName);
+
+    auto uniformIndices = shader.getUniformBlockActiveUniformIndices(index);
+
+    EXPECT_EQ(uniformIndices.size(), 5) << "Correct number of uniform attribtue indices not returned.";
+}
+
+TEST_F(ShaderProgramTests, canQueryUniformAttributeDataFromIndices) {
+    string blockName = "TestBlock";
+
+    auto index = shader.getUniformBlockIndex(blockName);
+
+    auto uniformIndices = shader.getUniformBlockActiveUniformIndices(index);
+
+    std::map<GLint, string> expectedUniformIndexToAttributeName{
+        {0, "dat1"}, {1, "dat2"}, {2, "dat3"}, {3, "dat4"}, {4, "dat5"}};
+    std::map<GLint, GLenum> expectedUniformIndexToType{
+        {0, GL_FLOAT_VEC4}, {1, GL_FLOAT_VEC3}, {2, GL_INT}, {3, GL_FLOAT}, {4, GL_FLOAT_VEC4}};
+    std::map<GLint, GLint> expectedUniformIndexToNumberOfElementsIfArray{{0, 1}, {1, 1}, {2, 1}, {3, 1}, {4, 1}};
+
+    std::map<GLint, string> uniformIndexToAttributeName;
+    std::map<GLint, GLenum> uniformIndexToType;
+    std::map<GLint, GLint> uniformIndexToNumberOfElementsIfArray;
+
+    shader.queryUniformAttributeDataFromIndex(uniformIndices, uniformIndexToAttributeName, uniformIndexToType,
+                                              uniformIndexToNumberOfElementsIfArray);
+
+    for (GLuint index : uniformIndices) {
+        EXPECT_EQ(expectedUniformIndexToAttributeName[index], uniformIndexToAttributeName[index]);
+        EXPECT_EQ(expectedUniformIndexToType[index], uniformIndexToType[index]);
+        EXPECT_EQ(expectedUniformIndexToNumberOfElementsIfArray[index], uniformIndexToNumberOfElementsIfArray[index]);
+    }
+}
+
+TEST_F(ShaderProgramTests, uniformAttributesOffsetsByNameAndIndexAreEqual) {
+    string blockName = "TestBlock";
+
+    auto index = shader.getUniformBlockIndex(blockName);
+    auto uniformIndices = shader.getUniformBlockActiveUniformIndices(index);
+
+    auto returnedOffsetsByIndex = shader.getUniformOffsetForAttributes(uniformIndices);
+
+    std::map<GLint, string> uniformIndexToAttributeName;
+    std::map<GLint, GLenum> uniformIndexToType;
+    std::map<GLint, GLint> uniformIndexToNumberOfElementsIfArray;
+
+    shader.queryUniformAttributeDataFromIndex(uniformIndices, uniformIndexToAttributeName, uniformIndexToType,
+                                              uniformIndexToNumberOfElementsIfArray);
+
+    std::vector<string> names;
+    for (auto &pair : uniformIndexToAttributeName) {
+        names.push_back(pair.second);
+    }
+    auto returnedOffsetsByName = shader.getUniformOffsetForAttributes(names);
+
+    // offsets returne
+    for (auto &offset : returnedOffsetsByIndex) {
+        string name = uniformIndexToAttributeName[offset.first];
+
+        int offsetByName = returnedOffsetsByName[name];
+        int offsetByIndex = offset.second;
+
+        EXPECT_EQ(offsetByName, offsetByIndex);
+    }
+}
+
 TEST_F(ShaderProgramTests, nonExistantUniformBlockHasInvalidIndex) {
     string blockName = "MissingBlock";
 

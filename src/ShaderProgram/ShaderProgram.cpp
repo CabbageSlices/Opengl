@@ -121,6 +121,33 @@ map<string, GLint> ShaderProgram::getUniformOffsetForAttributes(const vector<str
     return results;
 }
 
+map<GLuint, GLint> ShaderProgram::getUniformOffsetForAttributes(const vector<GLuint> &attributeUniformIndices) {
+    map<GLuint, GLint> results;
+
+    if (shaderProgram == 0) {
+        return results;
+    }
+
+    // loaded indices, now load the offsets
+    GLint offsets[(int)attributeUniformIndices.size()] = {0};
+
+    glGetActiveUniformsiv(shaderProgram, attributeUniformIndices.size(), attributeUniformIndices.data(), GL_UNIFORM_OFFSET,
+                          offsets);
+
+    for (unsigned i = 0; i < attributeUniformIndices.size(); ++i) {
+        GLint offset = offsets[i];
+        GLuint index = attributeUniformIndices[i];
+
+        if (offset < 0) {
+            continue;
+        }
+
+        results[index] = offset;
+    }
+
+    return results;
+}
+
 GLuint ShaderProgram::getUniformBlockIndex(const string &uniformBlockName) {
     if (shaderProgram == 0) {
         return GL_INVALID_INDEX;
@@ -141,6 +168,49 @@ GLint ShaderProgram::getUniformBlockProperty(GLuint uniformBlockIndex, UniformBl
     GLint value = 0;
     glGetActiveUniformBlockiv(shaderProgram, uniformBlockIndex, (GLenum)property, &value);
     return value;
+}
+
+void ShaderProgram::queryUniformAttributeDataFromIndex(const std::vector<GLuint> &uniformIndices,
+                                                       std::map<GLint, string> &uniformIndexToAttributeName,
+                                                       std::map<GLint, GLenum> &uniformIndexToType,
+                                                       std::map<GLint, GLint> &uniformIndexToNumberOfElementsIfArray) {
+    if (shaderProgram == 0) {
+        throw PROGRAM_DOES_NOT_EXIST;
+    }
+
+    for (auto &index : uniformIndices) {
+        GLsizei bufferLength = 500;
+        GLchar nameBuffer[bufferLength] = {0};
+        GLint lengthIfArray = 0;
+        GLsizei bytesWrittenIntoBuffer = 0;
+        GLenum type = 0;
+
+        glGetActiveUniform(shaderProgram, index, bufferLength, &bytesWrittenIntoBuffer, &lengthIfArray, &type, nameBuffer);
+
+        string name(nameBuffer);
+
+        // no data laoded, something is invalid
+        if (bytesWrittenIntoBuffer == 0) {
+            continue;
+        }
+        uniformIndexToAttributeName[index] = name;
+        uniformIndexToType[index] = type;
+        uniformIndexToNumberOfElementsIfArray[index] = lengthIfArray;
+    }
+}
+
+vector<GLuint> ShaderProgram::getUniformBlockActiveUniformIndices(GLuint uniformBlockIndex) {
+    if (shaderProgram == 0) {
+        throw PROGRAM_DOES_NOT_EXIST;
+    }
+
+    GLint numberOfIndices =
+        getUniformBlockProperty(uniformBlockIndex, UniformBlockProperty::UniformBlockNumberOfActiveUniforms);
+    vector<GLuint> indices(numberOfIndices);
+
+    glGetActiveUniformBlockiv(shaderProgram, uniformBlockIndex, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES,
+                              (GLint *)indices.data());
+    return indices;
 }
 
 void ShaderProgram::getUniform(GLint location, GLint *output) { glGetUniformiv(shaderProgram, location, output); }
