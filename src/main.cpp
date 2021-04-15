@@ -210,7 +210,7 @@ int main() {
 
             activateMaterials = false;
 
-            // shadowMapGeneratorProgram.useProgram();
+            shadowMapGeneratorProgram.useProgram();
 
             // glBindFramebuffer(GL_FRAMEBUFFER, fbo);
             fbo.bindToTarget(FramebufferTarget::FRAMEBUFFER);
@@ -236,7 +236,7 @@ int main() {
             glDisable(GL_BLEND);  // first pass disable blend because when you render, if a triangle is rendered in the
                                   // background, and then something renders on top of it, the background and
             // the triangle on top will be blended together.
-            // program1.useProgram();
+            program1.useProgram();
 
             glViewport(0, 0, 800, 600);
 

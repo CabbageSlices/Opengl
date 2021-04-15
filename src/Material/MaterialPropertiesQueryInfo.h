@@ -1,43 +1,45 @@
-// #include <memory>
+#ifndef __MATERIALPROPERTIESQUERYINFO_H__
+#define __MATERIALPROPERTIESQUERYINFO_H__
 
-// #include "GraphicsWrapper.h"
-// #include "ShaderProgram/ShaderProgram.h"
+#include <memory>
 
-// class GLTextureObject;
+#include "./UniformBlockQueryInfo.h"
+#include "GraphicsWrapper.h"
+#include "ShaderProgram/ShaderProgram.h"
 
-// class MaterialPropertiesQueryInfo {
-//   public:
-//     MaterialPropertiesQueryInfo(std::shared_ptr<ShaderProgram> shaderToQueryFrom, string materialNameInShader);
+class GLTextureObject;
 
-//   private:
-//     void queryMaterialData();
+// block query but specifically for materials to support texture data
 
-//     GLsizei materialBlockSize;
-//     GLuint materialUniformBlockIndex;  // NOT BINDING INDEX
-//     GLint materialUniformBlockBindingIndexInShader;
+class MaterialPropertiesQueryInfo : public UniformBlockQueryInfo {
+  public:
+    MaterialPropertiesQueryInfo();
+    virtual ~MaterialPropertiesQueryInfo() = default;
+    void queryBlockData(std::shared_ptr<ShaderProgram> shaderToQueryFrom, string blockNameInShader) override;
+    void clearAllData() override;
+    bool isDataLoaded() override;
 
-//     std::map<std::string, GLint> attributeOffsets;
-//     std::map<std::string, GLint> textureSamplerTextureUnit;
+    vector<string> getTextureNames();
 
-//     std::shared_ptr<ShaderProgram> shaderUsedToQueryInfo;
-//     string materialBlockNameInShader;
-// };
+    // stores texture names, NOT suffixed by sampler
+    std::map<std::string, GLint> textureUnitForSamplerByTextureName;
 
-// /*
-// build mateiral properties query from a material block name as follows:
+    // need to know if a texture is provided to glsl or not.
+    // it is done by adding a flag to all material uniform blocks for a given texture to indicate if it's provided or not.
+    // in the ujniform block the texture attribute name will be {{textureName}}{{materialTextureProvidedFlagSuffix}}
+    // ex: if texture name is "diffuseTexture" and the suffix is "_Provided", then the attribute name should be
+    // "diffuseTexture_Provided" within the material block.
+    static const string materialTextureProvidedFlagSuffix;
 
-// use http://docs.gl/gl4/glGetUniformBlockIndex to get the block index
-// use http://docs.gl/gl4/glGetActiveUniformBlock to get the block binding point
-// use ^ to get block size (for buffer size)
-// use ^ to get the number o factive uniforms to initialize an array for the uniform indices
-// use ^ to get the indices of each attribute within the block
-// use http://docs.gl/gl4/glGetActiveUniformsiv to get the length of the name of each of the uniform attributes, that way we
-// can initialize a buffer for each name use http://docs.gl/gl4/glGetActiveUniform for each attribtue with the given name
-// buffer size to get the name, numer of elements (for arrays), and type of each attribute use
-// http://docs.gl/gl4/glGetActiveUniformsiv for each attribute to get the uniform offset to each attribute
+    // suffix to add to texture sampler for a given texture name. so final name of sampler within shader should be
+    //{{textureName}}{{textureSamplerSuffix}}
+    static std::string textureSamplerSuffix;
 
-// after all attribtues and uniform block info is loaded, need to laod texture sampler units.
-// every boolean attribute that is suffixed by _provided in the uniform block corresponds to the name of a texture.
-// use http://docs.gl/gl4/glGetUniformLocation with the texture sampler name to get the location of the texture sampler
-// use http://docs.gl/gl4/glGetUniform to get the value of the sampler, which is it's binding texture unit
-// */
+  private:
+    string extractTextureNameFromAttributeName(const string &uniformAttributeName);
+    string textureAttributeNameToSamplerName(const string &uniformAttributeName);
+
+    bool isTextureInfoLoaded;
+};
+
+#endif  // __MATERIALPROPERTIESQUERYINFO_H__

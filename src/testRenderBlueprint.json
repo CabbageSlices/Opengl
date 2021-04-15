@@ -1,0 +1,57 @@
+{
+    "materials": ["nameOfMaterial1", "nameOfMaterial2"],
+    "uniforms": {
+        "nameOfUniform": "uniformType(i.e vec4, int, etc)",
+        "nameOfUniform2": "type",
+
+        //custom texture type, combines sampler + boolean uniform to indicate if texture is provided
+        //it's up to the render blueprint interpreter to generate and set the booleans
+        "someName": "texture2D",
+    },
+    // "data": {
+    //     "uniformBlocks": {
+    //         "block1": {
+    //             "variableName": "Type",
+    //             "diffuseColor": "vec4",
+    //             "specularCoefficient": "float"
+    //         }
+    //     },
+    // },
+    //define all shader programs which are then listed in the passes below to indicate which one to use
+    "shaderPrograms": {
+        "defaultDepthShader": {
+            "vertex": "depth.vert",
+            "fragment": "depth.frag"
+        },
+        "somePassThatGeneratesFrameBuffer": {
+            "vertex": "a.vert",
+            "geometry": "a.geom",
+            "fragment": "a.frag"
+        },
+        "somePassThatUsesFrameBuffer": {
+            "vertex": "b.vert",
+            "geometry": "a.geom",
+            "fragment": "a.frag"
+        }
+    },
+    "passes": {
+        "depth": [{
+            "shaderProgram": "defaultDepthShader"
+        }],
+        "regular": [{
+            "pass": "1",
+            "customFramebuffer": ["COLOR_ATTACHMENT0", "COLOR_ATTACHMENT1", "DEPTH_ATTACHMENT"],
+            "shaderProgram": "somePassThatGeneratesFrameBuffer",
+            "material": "nameOfMaterial2"
+        },{
+            "pass": "final",
+            "previousPassFrameBufferTextureSamplerBinding": {
+                "COLOR_ATTACHMENT0": 1,
+                "COLOR_ATTACHMENT1": 2,
+                "DEPTH_ATTACHMENT": 3
+            },
+            "shaderProgram": "somePassThatUsesFrameBuffer",
+            "material": "nameOfMaterial1"
+        }]
+    }
+}

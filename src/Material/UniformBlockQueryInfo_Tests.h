@@ -1,8 +1,8 @@
-#ifndef __MATERIALPROPERTIESQUERY_TESTS_H__
-#define __MATERIALPROPERTIESQUERY_TESTS_H__
+#ifndef __UNIFORMBLOCKQUERY_TESTS_H__
+#define __UNIFORMBLOCKQUERY_TESTS_H__
 
 #include "Includes.h"
-#include "Material/MaterialPropertiesQueryInfo.h"
+#include "Material/UniformBlockQueryInfo.h"
 #include "Test/GraphicsTestFixture.h"
 #include "Test/OpenGLTestContext.h"
 #include "components/Component.h"
@@ -14,11 +14,11 @@
 using testing::Mock;
 using ::testing::MockFunction;
 
-class MaterialPropertiesQueryInfoTests : public GraphicsTest {
+class UniformBlockQueryInfoTests : public GraphicsTest {
   public:
-    MaterialPropertiesQueryInfoTests() : shader(new ShaderProgram()), info() {}
+    UniformBlockQueryInfoTests() : shader(new ShaderProgram()), info() {}
 
-    virtual ~MaterialPropertiesQueryInfoTests() = default;
+    virtual ~UniformBlockQueryInfoTests() = default;
 
     virtual void SetUp() {
         GraphicsTest::SetUp();
@@ -32,7 +32,7 @@ class MaterialPropertiesQueryInfoTests : public GraphicsTest {
 
   protected:
     shared_ptr<ShaderProgram> shader;
-    MaterialPropertiesQueryInfo info;
+    UniformBlockQueryInfo info;
 };
 
-#endif  // __MATERIALPROPERTIESQUERY_TESTS_H__
+#endif  // __UNIFORMBLOCKQUERY_TESTS_H__

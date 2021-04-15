@@ -118,7 +118,9 @@ inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> 
                                               vector<shared_ptr<Material> > &convertedMaterials) {
     for (unsigned i = 0; i < tinyobjMaterials.size(); ++i) {
         auto defaultProgram = Material::getShaderProgramForDefaultMaterial();
-        shared_ptr<Material> convertedMaterial(new Material(defaultProgram, "DiffuseMaterial", false));
+        shared_ptr<MaterialPropertiesQueryInfo> info(new MaterialPropertiesQueryInfo());
+        info->queryBlockData(defaultProgram, "DiffuseMaterial");
+        shared_ptr<Material> convertedMaterial(new Material(info));
         tinyobjMaterialToCustomMaterial(tinyobjMaterials[i], convertedMaterial);
         convertedMaterials.push_back(convertedMaterial);
     }

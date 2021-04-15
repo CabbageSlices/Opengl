@@ -154,7 +154,8 @@ TEST_F(MaterialTests, whenTextureIsAddedMaterialBooleansAreCreatedAndSetToTrue) 
     mat.setTexture("diffuseTexture", obj);
 
     try {
-        bool textureFlagInMaterial = mat.getAttribute<bool>("diffuseTexture" + Material::materialTextureProvidedFlagPrefix);
+        bool textureFlagInMaterial =
+            mat.getAttribute<bool>("diffuseTexture" + MaterialPropertiesQueryInfo::materialTextureProvidedFlagSuffix);
         EXPECT_EQ(textureFlagInMaterial, true);
     } catch (...) {
         FAIL() << "Failed to get the diffuseTexture flag from the material" << endl;
@@ -207,7 +208,7 @@ TEST_F(MaterialTests, copyingExistingMaterialToNewMaterialWillCopyDataAndUseSame
     mat.setAttribute("diffuseColor", diffuse);
     mat.setAttribute("specularCoefficient", specularCoefficient);
     mat.setTexture("diffuseTexture", obj);
-    mat.setAttribute("otherTexture" + Material::materialTextureProvidedFlagPrefix, false);
+    mat.setAttribute("otherTexture" + MaterialPropertiesQueryInfo::materialTextureProvidedFlagSuffix, false);
     mat.activate();
 
     MockFunction<void(GLuint, GLuint)> mockBindTextureUnit;
@@ -251,7 +252,7 @@ TEST_F(MaterialTests, copyingExistingMaterialToExistingMaterialWillCopyDataAndUs
     mat.setAttribute("diffuseColor", diffuse);
     mat.setAttribute("specularCoefficient", specularCoefficient);
     mat.setTexture("diffuseTexture", obj);
-    mat.setAttribute("otherTexture" + Material::materialTextureProvidedFlagPrefix, false);
+    mat.setAttribute("otherTexture" + MaterialPropertiesQueryInfo::materialTextureProvidedFlagSuffix, false);
     mat.activate();
 
     MockFunction<void(GLuint, GLuint)> mockBindTextureUnit;
@@ -262,7 +263,7 @@ TEST_F(MaterialTests, copyingExistingMaterialToExistingMaterialWillCopyDataAndUs
     auto bindBufferBaseFunc = mockBindTextureUnit.AsStdFunction();
     mockglBindTextureUnit = bindBufferBaseFunc;
 
-    Material otherMat("blah", true);
+    Material otherMat;
     otherMat = mat;
 
     const int bufferSize = 24;

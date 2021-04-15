@@ -1,5 +1,6 @@
 #include "Includes.h"
 #include "Material/Material.h"
+#include "Material/MaterialPropertiesQueryInfo.h"
 #include "Test/GraphicsTestFixture.h"
 #include "Test/OpenGLTestContext.h"
 #include "components/Component.h"
@@ -13,7 +14,10 @@ using ::testing::MockFunction;
 
 class MaterialTests : public GraphicsTest {
   public:
-    MaterialTests() : shader(new ShaderProgram()), mat("TestMaterial", false) {}
+    MaterialTests()
+        : shader(new ShaderProgram()),
+          materialQueryInfo(new MaterialPropertiesQueryInfo()),
+          mat(materialQueryInfo) {}
 
     virtual ~MaterialTests() = default;
 
@@ -23,12 +27,13 @@ class MaterialTests : public GraphicsTest {
                                        {Shader::Type::Fragment, "testing_resources/shaders/fragment.frag"}},
                                       false);
         shader->linkProgram();
-        mat.setShader(shader);
+        materialQueryInfo->queryBlockData(shader, "TestMaterial");
     }
 
     virtual void TearDown() { GraphicsTest::TearDown(); }
 
   protected:
     shared_ptr<ShaderProgram> shader;
+    shared_ptr<MaterialPropertiesQueryInfo> materialQueryInfo;
     Material mat;
 };
