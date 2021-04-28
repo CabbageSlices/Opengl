@@ -14,6 +14,17 @@ class UniformBlockQueryInfo {
     virtual ~UniformBlockQueryInfo() = default;
     virtual void queryBlockData(std::shared_ptr<ShaderProgram> shaderToQueryFrom, string blockNameInShader);
 
+    // checks if the uniform blocks have the same layout
+    // this means they have the same attributes and the attributes are in the same order so all hte offsets are the same
+    // HOWEVER this does not mean the lbock index/binding indices are teh same
+    virtual bool haveSameLayout(const UniformBlockQueryInfo &ref);
+
+    // checks if the binding indices of all items are the same between the two blocks.
+    // in uniform blocks this is just the block binding index. Inherited members might have more binding elements
+    // that need to be the same.
+    // again ISNT the block index
+    virtual bool haveSameBindings(const UniformBlockQueryInfo &ref);
+
     virtual bool isDataLoaded();
 
     virtual void clearAllData();

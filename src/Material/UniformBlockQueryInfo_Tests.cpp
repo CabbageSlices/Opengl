@@ -48,3 +48,12 @@ TEST_F(UniformBlockQueryInfoTests, UniformBlockQueryCorrectlyRetrievesAllBlockDa
     EXPECT_EQ(info.attributeOffsets["specularCoefficient1"], offsetToSpecular);
     EXPECT_EQ(info.blockNamePrefixRequiredForAttributeNames, blockNamePrefixRequiredForAttributeNames);
 }
+
+TEST_F(UniformBlockQueryInfoTests, throwsIfUniformBlockDoesntExistInShaderProgram) {
+    try {
+        info.queryBlockData(shader, "TestMaterial3");
+        FAIL() << "did not throw" << endl;
+    } catch (...) {
+        SUCCEED();
+    }
+}

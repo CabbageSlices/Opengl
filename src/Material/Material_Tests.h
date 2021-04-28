@@ -2,7 +2,6 @@
 #include "Material/Material.h"
 #include "Material/MaterialPropertiesQueryInfo.h"
 #include "Test/GraphicsTestFixture.h"
-#include "Test/OpenGLTestContext.h"
 #include "components/Component.h"
 #include "components/Component_Tests.h"
 #include "gmock/gmock-function-mocker.h"

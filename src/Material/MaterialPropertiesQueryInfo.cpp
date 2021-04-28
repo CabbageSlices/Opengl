@@ -1,5 +1,8 @@
 #include "MaterialPropertiesQueryInfo.h"
 
+using std::string;
+using std::vector;
+
 const string MaterialPropertiesQueryInfo::materialTextureProvidedFlagSuffix = "_Provided";
 std::string MaterialPropertiesQueryInfo::textureSamplerSuffix = "_Sampler";
 
@@ -24,6 +27,51 @@ void MaterialPropertiesQueryInfo::clearAllData() {
 }
 
 bool MaterialPropertiesQueryInfo::isDataLoaded() { return UniformBlockQueryInfo::isDataLoaded() && isTextureInfoLoaded; }
+
+bool MaterialPropertiesQueryInfo::haveSameLayout(const MaterialPropertiesQueryInfo &ref) {
+    if (!UniformBlockQueryInfo::haveSameLayout(ref)) {
+        return false;
+    }
+
+    if (!isTextureInfoLoaded || !ref.isTextureInfoLoaded) {
+        return false;
+    }
+
+    if (textureUnitForSamplerByTextureName.size() != ref.textureUnitForSamplerByTextureName.size()) {
+        return false;
+    }
+
+    // have the same textgures but not necessiraily in the asme units
+    for (const auto &pair : textureUnitForSamplerByTextureName) {
+        if (ref.textureUnitForSamplerByTextureName.count(pair.first) == 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool MaterialPropertiesQueryInfo::haveSameBindings(const MaterialPropertiesQueryInfo &ref) {
+    if (!isTextureInfoLoaded || !ref.isTextureInfoLoaded) {
+        return false;
+    }
+
+    if (textureUnitForSamplerByTextureName.size() != ref.textureUnitForSamplerByTextureName.size()) {
+        return false;
+    }
+
+    for (const auto &pair : textureUnitForSamplerByTextureName) {
+        if (ref.textureUnitForSamplerByTextureName.count(pair.first) == 0) {
+            return false;
+        }
+
+        if (ref.textureUnitForSamplerByTextureName.at(pair.first) != pair.second) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 vector<string> MaterialPropertiesQueryInfo::getTextureNames() {
     vector<string> textureNames;

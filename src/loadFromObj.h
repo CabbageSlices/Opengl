@@ -117,12 +117,22 @@ inline void tinyobjMaterialToCustomMaterial(const tinyobj::material_t &tinyobjMa
 inline void tinyobjMaterialsToCustomMaterials(const vector<tinyobj::material_t> &tinyobjMaterials,
                                               vector<shared_ptr<Material> > &convertedMaterials) {
     for (unsigned i = 0; i < tinyobjMaterials.size(); ++i) {
-        auto defaultProgram = Material::getShaderProgramForDefaultMaterial();
-        shared_ptr<MaterialPropertiesQueryInfo> info(new MaterialPropertiesQueryInfo());
-        info->queryBlockData(defaultProgram, "DiffuseMaterial");
-        shared_ptr<Material> convertedMaterial(new Material(info));
+        shared_ptr<Material> convertedMaterial(new Material());
         tinyobjMaterialToCustomMaterial(tinyobjMaterials[i], convertedMaterial);
         convertedMaterials.push_back(convertedMaterial);
+    }
+}
+
+// mesh is split into different sections by material, but it should be split by blueprint
+// so each material needs to become a blueprint.
+// and each of these blueprint will contain the asociated material as one of it's materials
+inline void createBlueprintsFromMaterials(vector<shared_ptr<Material> > &convertedMaterials,
+                                          vector<shared_ptr<RenderBlueprint> > &blueprints) {
+    for (unsigned i = 0; i < convertedMaterials.size(); ++i) {
+        shared_ptr<RenderBlueprint> defaultBlueprint = createDefaultBlueprint();
+        defaultBlueprint->setMaterial("DiffuseMaterial", convertedMaterials[i]);
+
+        blueprints.push_back(defaultBlueprint);
     }
 }
 
@@ -151,6 +161,36 @@ inline void generateMaterialFaceMap(const vector<unsigned int> &reorderedIndices
         }
         int id = materialForFace->getId();
         materialFaceMap[id].push_back(face);
+    }
+}
+
+inline void generateBlueprintFaceMap(const vector<unsigned int> &reorderedIndices, const vector<int> &meshMaterialIndices,
+                                     const vector<shared_ptr<RenderBlueprint> > &blueprints,
+                                     map<int, FaceSet> &blueprintFaceMap) {
+    // every 3 indices makes a face
+    for (unsigned i = 0; i < reorderedIndices.size(); i += 3) {
+        int faceId = i / 3;
+        Face face{reorderedIndices[i], reorderedIndices[i + 1], reorderedIndices[i + 2]};
+
+        int blueprintIndex = meshMaterialIndices[faceId];
+
+        // face has no blueprint assigned to it, assign it to whatever blueprint is available
+        if (blueprintIndex == -1) {
+            blueprintIndex = blueprints.size() - 1;
+        }
+
+        // TO-DO handle missing blueprints
+        assert((unsigned)blueprintIndex < blueprints.size());
+        shared_ptr<RenderBlueprint> blueprintForFace = blueprints[blueprintIndex];
+
+        int id = blueprintForFace->getId();
+
+        // faceset does not exist for this blueprint, create it
+        if (blueprintFaceMap.count(id) == 0) {
+            blueprintFaceMap[id] = FaceSet();
+        }
+
+        blueprintFaceMap[id].push_back(face);
     }
 }
 
@@ -195,6 +235,10 @@ inline shared_ptr<MeshData> loadFromObj(
     vector<shared_ptr<Material> > convertedMaterials;
     tinyobjMaterialsToCustomMaterials(materials, convertedMaterials);
 
+    // generate blueprints
+    vector<shared_ptr<RenderBlueprint> > blueprints;
+    createBlueprintsFromMaterials(convertedMaterials, blueprints);
+
     // add default material so every mesh always has some material
     if (convertedMaterials.size() == 0) convertedMaterials.push_back(Material::createDefaultMaterial());
 
@@ -202,16 +246,20 @@ inline shared_ptr<MeshData> loadFromObj(
     MeshAttributes reorderedAttributes;
     vector<unsigned int> reorderedIndices;
     map<int, FaceSet> materialFaceMap;
+    map<int, FaceSet> blueprintFaceMap;
 
     // reorganize vertex data so that position/normal/etec can be indexed with a single index instead of a unique index per
     // attribute
     tinyobjAttributeIndicesToOpenglIndices(originalAttributes, mesh.indices, reorderedAttributes, reorderedIndices);
     generateMaterialFaceMap(reorderedIndices, mesh.material_ids, convertedMaterials, materialFaceMap);
+    generateBlueprintFaceMap(reorderedIndices, mesh.material_ids, blueprints, blueprintFaceMap);
 
     meshData->numIndices = reorderedIndices.size();
     meshData->attributes = reorderedAttributes;
-    meshData->materialFaceMap = materialFaceMap;
-    meshData->materials = convertedMaterials;
+    // meshData->materialFaceMap = materialFaceMap;
+    // meshData->materials = convertedMaterials;
+    meshData->blueprintFacemap = blueprintFaceMap;
+    meshData->renderBlueprints = blueprints;
 
     return meshData;
 }

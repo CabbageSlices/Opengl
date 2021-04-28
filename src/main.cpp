@@ -1,3 +1,4 @@
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -43,6 +44,10 @@ void GLAPIENTRY debugMessageCallback(GLenum source, GLenum type, GLuint id, GLen
 #define FLOG cout << __FILE__ << ":" << __LINE__ << ":: "
 
 int main() {
+    std::set_terminate([]() {
+        cout << "Unhandled exception" << endl;
+        std::abort();
+    });
     cout << sizeof(bool) << endl;
     // setup opengl context with version 4.6 core
     sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default,
@@ -95,16 +100,12 @@ int main() {
         glPointSize(20);
 
         std::shared_ptr<MeshData> cubeMeshData = loadFromObj("smoothsphere.obj");
-        std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(
-            cubeMeshData, {{RenderingPass::DEPTH_PASS, shadowMapGeneratorProgram1},
-                           {RenderingPass::REGULAR_PASS, Material::getShaderProgramForDefaultMaterial()}}));
+        std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
 
         Entity cube;
         cube.addComponent(cubeMeshRendererComponent);
 
-        std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(
-            cubeMeshData, {{RenderingPass::DEPTH_PASS, shadowMapGeneratorProgram1},
-                           {RenderingPass::REGULAR_PASS, Material::getShaderProgramForDefaultMaterial()}}));
+        std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
         Entity secondEntity;
         secondEntity.addComponent(secondMeshRendererComponent);
         secondEntity.setPosition({-1, -2, 0});

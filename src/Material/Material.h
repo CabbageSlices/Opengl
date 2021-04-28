@@ -91,10 +91,17 @@ class Material {
 
     GLuint getBufferObject() { return buffer.getBufferObject(); }
 
-    void setQueryInfo(shared_ptr<MaterialPropertiesQueryInfo> &_queryInfo) {
+    void setQueryInfo(const shared_ptr<MaterialPropertiesQueryInfo> &_queryInfo, const bool &skipBufferUpdateCheck) {
+        if (!skipBufferUpdateCheck && queryInfo && _queryInfo && !queryInfo->haveSameLayout(*_queryInfo)) {
+            bufferRequiresUpdate = true;
+        }
         queryInfo = _queryInfo;
-        bufferRequiresUpdate = true;
     }
+
+    std::shared_ptr<MaterialPropertiesQueryInfo> getQueryInfo() { return queryInfo; }
+
+    bool isBufferUpdateRequired() const { return bufferRequiresUpdate; }
+    void requireBufferUpdate() { bufferRequiresUpdate = true; }
 
   private:
     // load information about the uniform block in the sahder such as the binding location, the index

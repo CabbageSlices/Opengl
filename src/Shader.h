@@ -2,6 +2,7 @@
 #define _SHADER_HPP_INCLUDED
 
 #include <iostream>
+#include <map>
 #include <string>
 
 #include "GraphicsWrapper.h"
@@ -10,6 +11,8 @@
 
 using std::cout;
 using std::endl;
+using std::map;
+using std::string;
 
 /**
  * @brief      Class to store opengl shader objects.
@@ -22,7 +25,9 @@ class Shader {
     /**
      * @brief   The different possible shader types supported by opengl
      */
-    enum Type : GLuint { Vertex = GL_VERTEX_SHADER, Fragment = GL_FRAGMENT_SHADER };
+    enum Type : GLuint { Vertex = GL_VERTEX_SHADER, Fragment = GL_FRAGMENT_SHADER, Geometry = GL_GEOMETRY_SHADER };
+
+    static const map<Type, string> SHADER_TYPE_TO_STRING;
 
     Shader() : shaderObject(0) {}
 

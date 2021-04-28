@@ -10,6 +10,8 @@ using std::endl;
 using std::string;
 using std::vector;
 
+const map<Shader::Type, string> Shader::SHADER_TYPE_TO_STRING{
+    {Shader::Vertex, "vertex"}, {Shader::Fragment, "fragment"}, {Shader::Geometry, "geomtery"}};
 string Shader::includeDirectory = "shaders/";
 string Shader::customPreprocessorDirectivePrefix = "#";
 

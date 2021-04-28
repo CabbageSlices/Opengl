@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "./Shader.h"
 #include "GraphicsWrapper.h"
@@ -12,6 +13,7 @@ using std::map;
 using std::pair;
 using std::shared_ptr;
 using std::string;
+using std::vector;
 using std::weak_ptr;
 
 enum UniformBlockProperty : GLenum {

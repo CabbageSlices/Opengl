@@ -86,9 +86,11 @@ bool Material::updateBuffer() {
         return false;
     }
 
-    unsigned char *data = new unsigned char[queryInfo->uniformBlockSize]();
+    const GLsizei blockSize = queryInfo->uniformBlockSize;
+
+    unsigned char *data = new unsigned char[blockSize]();
     for (auto &entry : attributes) {
-        GLsizei offset = queryInfo->attributeOffsets[entry.first];
+        GLsizei offset = queryInfo->attributeOffsets.at(entry.first);
         memcpy(data + offset, entry.second.data.get(), entry.second.size);
     }
 
@@ -100,6 +102,7 @@ bool Material::updateBuffer() {
     return true;
 }
 
+// TODO don't recreate entire buffer when updating texture, only update the flag
 void Material::setTexture(string name, shared_ptr<GLTextureObject> texture) {
     // store the texture
     textures[name] = texture;
@@ -113,7 +116,7 @@ void Material::activateTextures() {
         string name = texture.first;
         auto textureObj = texture.second;
 
-        GLint unit = queryInfo->textureUnitForSamplerByTextureName[name];
+        GLint unit = queryInfo->textureUnitForSamplerByTextureName.at(name);
         textureObj->bindToTextureUnit(unit);
     }
 }
@@ -129,7 +132,7 @@ bool Material::activate() {
 
     shared_ptr<ShaderProgram> program = queryInfo->getShader();
 
-    // program->useProgram();
+    program->useProgram();
     buffer.bindToTargetBindingPoint(queryInfo->uniformBlockBindingIndexInShader);
     activateTextures();
 

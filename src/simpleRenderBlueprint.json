@@ -1,0 +1,22 @@
+{
+    "materials": ["nameOfMaterial1", "nameOfMaterial2"],
+    "shaderPrograms": {
+        "defaultDepthShader": {
+            "vertex": "depth.vert",
+            "fragment": "depth.frag"
+        },
+        "regularRenderPass": {
+            "vertex": "vertex.vert",
+            "fragment": "fragment.frag"
+        }
+    },
+    "passes": {
+        "depth": {
+            "shaderProgram": "defaultDepthShader"
+        },
+        "regular": {
+            "shaderProgram": "somePassThatGeneratesFrameBuffer",
+            "materials": ["nameOfMaterial1"]
+        }
+    }
+}

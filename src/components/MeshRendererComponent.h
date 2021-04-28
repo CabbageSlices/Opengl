@@ -13,10 +13,7 @@
  */
 class MeshRendererComponent : public ComponentBase {
   public:
-    MeshRendererComponent(const shared_ptr<MeshData> &data,
-                          const std::map<RenderingPass, std::shared_ptr<ShaderProgram> > &shaderForPasses)
-        : ComponentBase(),
-          renderer(data, shaderForPasses) {}
+    MeshRendererComponent(const shared_ptr<MeshData> &data) : ComponentBase(), renderer(data) {}
 
     virtual ~MeshRendererComponent() = default;
     void render();

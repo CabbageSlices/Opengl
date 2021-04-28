@@ -54,7 +54,10 @@
     "codecvt": "cpp",
     "filesystem": "cpp",
     "ratio": "cpp",
-    "any": "cpp"
+    "any": "cpp",
+    "forward_list": "cpp",
+    "numeric": "cpp",
+    "valarray": "cpp"
 },
   "editor.formatOnSave": true,
   "editor.tabSize": 4,

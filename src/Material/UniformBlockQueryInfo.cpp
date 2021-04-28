@@ -31,6 +31,10 @@ void UniformBlockQueryInfo::queryBlockData(std::shared_ptr<ShaderProgram> shader
     // get uniform block index
     uniformBlockIndex = shaderUsedToQueryInfo->getUniformBlockIndex(uniformBlockNameInShader);
 
+    if (uniformBlockIndex == GL_INVALID_INDEX) {
+        throw "Uniform block " + uniformBlockNameInShader + " does not exist in the specified shader, failed to query info";
+    }
+
     // get material size data
     uniformBlockSize =
         shaderUsedToQueryInfo->getUniformBlockProperty(uniformBlockIndex, UniformBlockProperty::UniformBlockSizeInBytes);
@@ -76,6 +80,39 @@ void UniformBlockQueryInfo::clearAllData() {
     attributeOffsets.clear();
 
     blockNamePrefixRequiredForAttributeNames = false;
+}
+
+bool UniformBlockQueryInfo::haveSameLayout(const UniformBlockQueryInfo &ref) {
+    if (!isQueryInfoLoaded || !ref.isQueryInfoLoaded) {
+        return false;
+    }
+
+    if (uniformBlockSize != ref.uniformBlockSize) {
+        return false;
+    }
+
+    if (attributeOffsets.size() != ref.attributeOffsets.size()) {
+        return false;
+    }
+
+    for (const auto &pair : attributeOffsets) {
+        if (ref.attributeOffsets.count(pair.first) == 0) {
+            return false;
+        }
+
+        if (ref.attributeOffsets.at(pair.first) != pair.second) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool UniformBlockQueryInfo::haveSameBindings(const UniformBlockQueryInfo &ref) {
+    if (!isQueryInfoLoaded || !ref.isQueryInfoLoaded) {
+        return false;
+    }
+    return uniformBlockBindingIndexInShader == ref.uniformBlockBindingIndexInShader;
 }
 
 bool UniformBlockQueryInfo::isDataLoaded() { return isQueryInfoLoaded; }

@@ -1,0 +1,25 @@
+{
+  "materials": ["TestMaterial", "TestMaterial2", "TestBlock"],
+  "shaderPrograms": {
+    "shader1": {
+      "vertex": "testing_resources/shaders/vertex.vert",
+      "fragment": "testing_resources/shaders/fragment.frag",
+      "usingDefaultShaderDirectory": false
+    },
+    "shader2": {
+      "vertex": "testing_resources/shaders/vertex.vert",
+      "fragment": "testing_resources/shaders/fragment2.frag",
+      "usingDefaultShaderDirectory": false
+    }
+  },
+  "passes": {
+    "DEPTH_PASS": {
+      "shaderProgram": "shader1",
+      "materials": ["TestMaterial", "TestMaterial2"]
+    },
+    "REGULAR_PASS": {
+      "shaderProgram": "shader2",
+      "materials": ["TestMaterial", "TestBlock"]
+    }
+  }
+}

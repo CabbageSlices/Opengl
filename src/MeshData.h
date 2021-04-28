@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "Material/Material.h"
+#include "RenderBlueprint/RenderBlueprint.h"
 #include "glm\glm.hpp"
 
 struct MeshAttributes {
@@ -43,8 +43,8 @@ typedef std::vector<Face> FaceSet;
 
 // mesh data works as follows:
 /**
- * Entire mesh is split into groups of faces that share a single material, this group of faces is called a faceset.
- * each faceset is referenced by it's material id, so to get a group of faces you use the material ID.
+ * Entire mesh is split into groups of faces that share a single blueprint, this group of faces is called a faceset.
+ * each faceset is referenced by it's blueprint id, so to get a group of faces you use the blueprint ID.
  * A face has 3 verticies, so once you have a face set, you can index each individual face in the set.
  * A face is composed of 3 indices, 1 for each vertex. The index will simultaneously index into the postiion, normal, and
  * texcoord array. So a face with indices 0, 1, 2 means it uses position/normal/texcoord [0], [1], and [2] All mesh attribtue
@@ -54,17 +54,17 @@ struct MeshData {
     void clear() {
         attributes.clear();
 
-        materialFaceMap.clear();
+        blueprintFacemap.clear();
     }
 
     MeshAttributes attributes;
 
-    // map of material name to the faces that use that material
-    // maps material id to faceset
-    std::map<int, FaceSet> materialFaceMap;
+    // map of blueprint index to the faces that use that blueprint
+    // maps blueprint id to faceset
+    std::map<int, FaceSet> blueprintFacemap;
 
     // total number of indices so you don't have to iterate through the facemap
     int numIndices;
 
-    std::vector<std::shared_ptr<Material> > materials;
+    std::vector<std::shared_ptr<RenderBlueprint> > renderBlueprints;
 };

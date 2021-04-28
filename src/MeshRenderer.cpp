@@ -11,9 +11,8 @@
 using std::cout;
 using std::endl;
 
-MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData,
-                           const std::map<RenderingPass, std::shared_ptr<ShaderProgram> > &shaderForPasses)
-    : ObjectRenderer(shaderForPasses),
+MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData)
+    : ObjectRenderer(),
       meshData(_meshData),
       vao(),
       attributeBuffer(),
@@ -25,25 +24,47 @@ MeshRenderer::MeshRenderer(const shared_ptr<MeshData> &_meshData,
 
 void MeshRenderer::renderInternal() {
     vao.bindToContext();
-
-    // render faceset of each material
+    // render faceset of each blueprint
     unsigned int bytesAlreadyRead = 0 * sizeof(unsigned int);
 
-    for (unsigned i = 0; i < meshData->materials.size(); ++i) {
-        int materialId = meshData->materials[i]->getId();
-        auto mat = meshData->materials[i];
+    for (unsigned i = 0; i < meshData->renderBlueprints.size(); ++i) {
+        auto blueprint = meshData->renderBlueprints[i];
+        int blueprintId = blueprint->getId();
 
-        FaceSet faceset = meshData->materialFaceMap[materialId];
+        FaceSet faceset = meshData->blueprintFacemap[blueprintId];
 
-        unsigned numIndicesPerFace = 3;
+        static const unsigned numIndicesPerFace = 3;
         unsigned numIndicesCurrentFaceset = faceset.size() * numIndicesPerFace;
 
-        mat->activate();
-        glDrawElements(GL_TRIANGLES, numIndicesCurrentFaceset, GL_UNSIGNED_INT,
-                       (void *)bytesAlreadyRead);  // wtf? convert integer directly to pointer and not the address
+        // suporte for this pass so render this faceset
+        if (activateBlueprintForPass(blueprint, currentRenderingPass)) {
+            glDrawElements(GL_TRIANGLES, numIndicesCurrentFaceset, GL_UNSIGNED_INT,
+                           (void *)bytesAlreadyRead);  // wtf? convert integer directly to pointer and not the address
+        }
 
         bytesAlreadyRead += sizeof(Face) * faceset.size();
     }
+
+    vao.unbindFromContext();
+
+    // render faceset of each material
+    // unsigned int bytesAlreadyRead = 0 * sizeof(unsigned int);
+
+    // for (unsigned i = 0; i < meshData->materials.size(); ++i) {
+    //     int materialId = meshData->materials[i]->getId();
+    //     auto mat = meshData->materials[i];
+
+    //     FaceSet faceset = meshData->materialFaceMap[materialId];
+
+    //     unsigned numIndicesPerFace = 3;
+    //     unsigned numIndicesCurrentFaceset = faceset.size() * numIndicesPerFace;
+
+    //     mat->activate();
+    //     glDrawElements(GL_TRIANGLES, numIndicesCurrentFaceset, GL_UNSIGNED_INT,
+    //                    (void *)bytesAlreadyRead);  // wtf? convert integer directly to pointer and not the address
+
+    //     bytesAlreadyRead += sizeof(Face) * faceset.size();
+    // }
 
     vao.unbindFromContext();
 }
@@ -76,10 +97,10 @@ bool MeshRenderer::initializeIndexBuffer() {
     int dataOffset = 0;
 
     // add each faceset for each material to the index buffer
-    for (unsigned i = 0; i < meshData->materials.size(); ++i) {
+    for (unsigned i = 0; i < meshData->renderBlueprints.size(); ++i) {
         // current materials indices
-        int materialId = meshData->materials[i]->getId();
-        FaceSet faceset = meshData->materialFaceMap[materialId];
+        int materialId = meshData->renderBlueprints[i]->getId();
+        FaceSet faceset = meshData->blueprintFacemap[materialId];
 
         indexBuffer.updateData(faceset.data(), sizeof(Face) * faceset.size(), dataOffset);
 

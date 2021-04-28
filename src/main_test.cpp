@@ -15,6 +15,11 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
+    std::set_terminate([]() {
+        cout << "Unhandled exception" << endl;
+        std::abort();
+    });
+
     // deactiavate the context since we only needed it to laod opengl functions
     context.setActive(false);
 

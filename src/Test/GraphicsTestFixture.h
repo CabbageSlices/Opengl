@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include "GraphicsWrapper.h"
 #include "Includes.h"
 #include "SFML/OpenGL.hpp"
@@ -10,6 +12,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+using std::shared_ptr;
 using testing::Mock;
 using ::testing::MockFunction;
 

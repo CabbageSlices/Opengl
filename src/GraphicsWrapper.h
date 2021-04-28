@@ -1,25 +1,29 @@
 #pragma once
 
 #include <functional>
+#include <map>
+#include <string>
 
-#include "Test/OpenGLTestContext.h"
 #include "glad/glad.h"
 
 using std::function;
-
-// all of these mocks must be cleared manually after using
-extern function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
-extern function<void(GLuint, GLuint)> mockglBindTextureUnit;
-extern function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;
+using std::map;
+using std::string;
 
 enum class RenderingPass {
     DEPTH_PASS,
     REGULAR_PASS,
 };
 
+extern map<RenderingPass, string> renderPassNames;
 extern RenderingPass currentRenderingPass;
 
 extern bool activateMaterials;
+
+// all of these mocks must be cleared manually after using
+extern function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
+extern function<void(GLuint, GLuint)> mockglBindTextureUnit;
+extern function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;
 
 void clearAllMockFunctions();
 

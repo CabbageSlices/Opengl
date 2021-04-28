@@ -1,7 +1,6 @@
 #include "Includes.h"
 #include "ShaderProgram/ShaderProgram.h"
 #include "Test/GraphicsTestFixture.h"
-#include "Test/OpenGLTestContext.h"
 #include "gmock/gmock-function-mocker.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -17,8 +16,6 @@ class ShaderProgramTests : public GraphicsTest {
 
     virtual void SetUp() {
         GraphicsTest::SetUp();
-        auto context = OpenGLTestContext::getContext();
-        context->useRealOpenGL();
         shader.loadAndCompileShaders({{Shader::Type::Vertex, "testing_resources/shaders/vertex.vert"},
                                       {Shader::Type::Fragment, "testing_resources/shaders/fragment.frag"}},
                                      false);

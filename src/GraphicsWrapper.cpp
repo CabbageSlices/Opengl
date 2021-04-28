@@ -1,5 +1,8 @@
 #include "./GraphicsWrapper.h"
 
+map<RenderingPass, string> renderPassNames{{RenderingPass::DEPTH_PASS, "DEPTH_PASS"},
+                                           {RenderingPass::REGULAR_PASS, "REGULAR_PASS"}};
+
 function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
 function<void(GLuint, GLuint)> mockglBindTextureUnit;
 function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;

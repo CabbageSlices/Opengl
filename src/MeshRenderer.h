@@ -17,15 +17,9 @@
  */
 class MeshRenderer : public ObjectRenderer {
   public:
-    MeshRenderer(const std::map<RenderingPass, std::shared_ptr<ShaderProgram> > &shaderForPasses)
-        : ObjectRenderer(shaderForPasses),
-          meshData(),
-          vao(),
-          attributeBuffer(),
-          indexBuffer(){};
+    MeshRenderer() : ObjectRenderer(), meshData(), vao(), attributeBuffer(), indexBuffer(){};
 
-    MeshRenderer(const shared_ptr<MeshData> &_meshData,
-                 const std::map<RenderingPass, std::shared_ptr<ShaderProgram> > &shaderForPasses);
+    MeshRenderer(const shared_ptr<MeshData> &_meshData);
 
     virtual ~MeshRenderer() { deleteMeshData(); }
 
