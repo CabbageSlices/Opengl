@@ -15,7 +15,11 @@ void MaterialPropertiesQueryInfo::queryBlockData(std::shared_ptr<ShaderProgram> 
     vector<string> textureNames = getTextureNames();
 
     for (string &name : textureNames) {
-        textureUnitForSamplerByTextureName[name] = shaderToQueryFrom->getUniform<GLint>(name + textureSamplerSuffix);
+        try {
+            textureUnitForSamplerByTextureName[name] = shaderToQueryFrom->getUniform<GLint>(name + textureSamplerSuffix);
+        } catch (...) {
+            textureUnitForSamplerByTextureName[name] = -1;
+        }
     }
 
     isTextureInfoLoaded = true;

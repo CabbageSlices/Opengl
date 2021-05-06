@@ -1,18 +1,27 @@
 #include "GLTextureObject.h"
 
+const std::map<TextureType, TextureDimensions> TEXTURE_DIMENSIONALITY{{
+                                                                          TextureType::TEXTURE_2D,
+                                                                          TextureDimensions::TWO,
+                                                                      },
+                                                                      {
+                                                                          TextureType::TEXTURE_2D_ARRAY,
+                                                                          TextureDimensions::THREE,
+                                                                      },
+                                                                      {
+                                                                          TextureType::TEXTURE_CUBEMAP,
+                                                                          TextureDimensions::THREE,
+                                                                      }};
+
 GLTextureObject::GLTextureObject(TextureType _textureType) : textureType(_textureType), textureObject(0) {
     glCreateTextures(_textureType, 1, &textureObject);
 }
 
-bool GLTextureObject::create(unsigned numMipMapLevels, TextureInternalStorageFormat internalFormat, unsigned width,
-                             unsigned height, PixelDataFormat formatOfData, DataType dataType, void *dataAtLowestLevel) {
+bool GLTextureObject::create(unsigned numMipMapLevels, TextureInternalStorageFormat internalFormat, GLsizei width,
+                             GLsizei height) {
     if (height == 0 || width == 0) {
         cout << "Could not create gltextureobject; width or height are not valid" << endl;
         return false;
-    }
-
-    if (!dataAtLowestLevel) {
-        cout << "supplied empty data, texture storage created but object has no data" << endl;
     }
 
     if (numMipMapLevels == 0) {
@@ -26,16 +35,56 @@ bool GLTextureObject::create(unsigned numMipMapLevels, TextureInternalStorageFor
 
     glTextureStorage2D(textureObject, numMipMapLevels, (GLenum)internalFormat, width, height);
 
-    if (dataAtLowestLevel) {
-        glTextureSubImage2D(textureObject, 0, 0, 0, width, height, (GLenum)formatOfData, dataType, dataAtLowestLevel);
+    properties.numMipMapLevels = numMipMapLevels;
+    properties.internalFormat = internalFormat;
+    properties.width = width;
+    properties.height = height;
+
+    return true;
+}
+
+bool GLTextureObject::create(unsigned numMipMapLevels, TextureInternalStorageFormat internalFormat, GLsizei width,
+                             GLsizei height, GLsizei depth) {
+    if (height == 0 || width == 0) {
+        cout << "Could not create gltextureobject; width or height are not valid" << endl;
+        return false;
     }
+
+    if (numMipMapLevels == 0) {
+        cout << "Error creating texture object; num mip map levels cannot be 0" << endl;
+        return false;
+    }
+
+    if (textureObject == 0) {
+        glCreateTextures(textureType, 1, &textureObject);
+    }
+
+    glTextureStorage3D(textureObject, numMipMapLevels, (GLenum)internalFormat, width, height, depth);
 
     properties.numMipMapLevels = numMipMapLevels;
     properties.internalFormat = internalFormat;
     properties.width = width;
     properties.height = height;
-    properties.formatOfData = formatOfData;
-    properties.dataType = dataType;
+    properties.depth = depth;
+
+    return true;
+}
+
+bool GLTextureObject::setTextureDataAtMipMapLevel(GLint mipmapLevel, PixelDataFormat formatOfData, DataType dataType,
+                                                  void *data) {
+    if (textureObject == 0) {
+        cout << "No texture created, can't set data" << endl;
+        return false;
+    }
+
+    if (TEXTURE_DIMENSIONALITY.at(textureType) == TextureDimensions::TWO) {
+        glTextureSubImage2D(textureObject, mipmapLevel, 0, 0, properties.width, properties.height, (GLenum)formatOfData,
+                            dataType, data);
+    }
+    if (TEXTURE_DIMENSIONALITY.at(textureType) == TextureDimensions::THREE) {
+        glTextureSubImage3D(textureObject, mipmapLevel, 0, 0, 0, properties.width, properties.height, properties.depth,
+                            (GLenum)formatOfData, dataType, data);
+    }
 
     return true;
 }

@@ -6,6 +6,8 @@ enum DataType { FLOAT = GL_FLOAT, UNSIGNED_BYTE = GL_UNSIGNED_BYTE };
 
 enum TextureType {
     TEXTURE_2D = GL_TEXTURE_2D,
+    TEXTURE_CUBEMAP = GL_TEXTURE_CUBE_MAP,
+    TEXTURE_2D_ARRAY = GL_TEXTURE_2D_ARRAY
 };
 
 enum FramebufferColorAttachment : GLenum {

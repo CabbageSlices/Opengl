@@ -15,6 +15,10 @@ struct PointLight {
     vec4 range;  // only the x value is used for the range. Make vec4 in order to make array structure better
 };
 
+layout(std140, binding = UNIFORM_DIRECTIONAL_LIGHT_MATRIX_BLOCK_BINDING_POINT) uniform LightMatrices {
+    mat4[MAX_DIRECTIONAL_LIGHTS] worldToDirectionalLightClips;
+};
+
 // final material data after texutre sampling and stuff, send to lighting computations to
 // compute lighting using actual colour and material data
 struct Material {
@@ -56,14 +60,13 @@ vec4 calculateDirectionalLightsContribution(vec3 surfaceNormal, Material materia
     for (int i = 0; i < MAX_DIRECTIONAL_LIGHTS; ++i) {
         vec4 contribution = calculateDirectionalLightIntensity(directionalLights[i], surfaceNormal, material);
 
-        if (i == 0) {
-            vec3 projCoordinates = lightSpacePosition.xyz / lightSpacePosition.w;
-            projCoordinates = projCoordinates * 0.5 + 0.5;
-            float closestDepth = texture(shadowMapSampler, projCoordinates.xy).r;
-            float currentDepth = projCoordinates.z - 0.005;
+        vec4 lightSpacePosition = worldToDirectionalLightClips[i] * worldSpacePosition;
+        vec3 projCoordinates = lightSpacePosition.xyz / lightSpacePosition.w;
+        projCoordinates = projCoordinates * 0.5 + 0.5;
+        float closestDepth = texture(directionalLightsShadowMapsSampler, vec3(projCoordinates.xy, i)).r;
+        float currentDepth = projCoordinates.z;
 
-            contribution *= currentDepth > closestDepth ? 0 : 1;
-        }
+        contribution *= currentDepth > closestDepth ? 0 : 1;
         lightTotal += contribution;
     }
 

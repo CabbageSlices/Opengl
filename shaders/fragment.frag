@@ -15,7 +15,6 @@ layout(std140, binding = UNIFORM_TRANSFORM_MATRICES_BLOCK_BINDING_POINT) uniform
 out vec4 fragOut;
 
 in vec4 worldSpacePosition;
-in vec4 lightSpacePosition;
 in vec3 vs_Normal;
 in vec2 vs_TexCoord;
 
@@ -39,6 +38,7 @@ void main(void) {
 
     vec4 diffuseTextureSample = diffuseTexture_Provided == 1 ? texture(diffuseTexture_Sampler, vs_TexCoord) : vec4(1);
     vec4 totalMaterialColor = diffuseColor * diffuseTextureSample;
+    totalMaterialColor = vec4(1);
 
     Material material = Material(totalMaterialColor, specularCoefficient);
 #ifdef DIRECTIONAL

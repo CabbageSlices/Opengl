@@ -33,15 +33,18 @@ void LightManager::connectLightDataToShader() {
     pointLightBuffer.bindToTargetBindingPoint(POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
 }
 
-void LightManager::setLightMatrixForBatch(unsigned batchIndex) {
-    unsigned directionalLightBatchStart =
-        batchIndex < directionalLightClipMatrices.size() ? batchIndex : directionalLightClipMatrices.size();
+void LightManager::setLightMatrixForBatch(unsigned batchId) {
+    int indexFirstLightInBatchRaw = batchId * DIRECTIONAL_LIGHTS_PER_BATCH;
+    unsigned directionalLightBatchStart = indexFirstLightInBatchRaw;
 
-    // end of rance, NOT INCLUDED
-    unsigned directionalLightBatchEnd = batchIndex + DIRECTIONAL_LIGHTS_PER_BATCH <= directionalLightClipMatrices.size()
-                                            ? batchIndex + DIRECTIONAL_LIGHTS_PER_BATCH
-                                            : directionalLightClipMatrices.size();
-    unsigned numDirectionalLightsToSend = directionalLightBatchEnd - directionalLightBatchStart;
+    if (directionalLightBatchStart >= directionalLightClipMatrices.size()) {
+        return;
+    }
+
+    unsigned numDirectionalLightsToSend =
+        directionalLightBatchStart + DIRECTIONAL_LIGHTS_PER_BATCH <= directionalLightClipMatrices.size()
+            ? DIRECTIONAL_LIGHTS_PER_BATCH
+            : directionalLightClipMatrices.size() - directionalLightBatchStart;
 
     lightMatrixBuffer.updateData(directionalLightClipMatrices.data() + directionalLightBatchStart,
                                  numDirectionalLightsToSend * sizeof(glm::mat4), 0);
@@ -80,16 +83,18 @@ void LightManager::sendLightBatchToShader(int batchId, const std::vector<T> &lig
 template <typename T>
 std::vector<T> LightManager::getLightBatch(int batchId, const std::vector<T> &lightsCollection, const int maxLightInBatch,
                                            const T &dummyLight) {
-    int batchIndex = batchId * maxLightInBatch;
+    int indexFirstLightInBatchRaw = batchId * maxLightInBatch;
 
     vector<T> lightsInBatch;
 
     // make sure begin and end iterator is valid to avoid segfault
-    auto rangeStart = lightsCollection.size() < batchIndex ? lightsCollection.end() : lightsCollection.begin() + batchIndex;
+    auto rangeStart = lightsCollection.size() <= indexFirstLightInBatchRaw
+                          ? lightsCollection.end()
+                          : lightsCollection.begin() + indexFirstLightInBatchRaw;
 
-    auto rangeEnd = (lightsCollection.size() <= batchIndex + maxLightInBatch)
+    auto rangeEnd = (lightsCollection.size() <= indexFirstLightInBatchRaw + maxLightInBatch)
                         ? lightsCollection.end()
-                        : lightsCollection.begin() + batchIndex + maxLightInBatch;
+                        : lightsCollection.begin() + indexFirstLightInBatchRaw + maxLightInBatch;
 
     // get all the lights that actually exist, and add them to the batch
     lightsInBatch.insert(lightsInBatch.end(), rangeStart, rangeEnd);
@@ -129,5 +134,5 @@ void LightManager::initializeLightMatrixBuffer() {
     lightMatrixBuffer.create(Buffer::BufferType::UniformBuffer, data, direcitonalLightMatricesSize,
                              Buffer::UsageType::StaticDraw);
 
-    lightMatrixBuffer.bindToTargetBindingPoint(UNIFORM_LIGHT_MATRICES_BLOCK_BINDING_POINT);
+    lightMatrixBuffer.bindToTargetBindingPoint(UNIFORM_DIRECTIONAL_LIGHT_MATRIX_BLOCK_BINDING_POINT);
 }

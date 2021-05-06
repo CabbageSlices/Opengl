@@ -22,6 +22,8 @@ class GLFramebufferObject {
     void enableDrawingToAttachments(const std::vector<FramebufferColorAttachment> &attachments);
     void enableDrawingToAttachment(const FramebufferColorAttachment &attachment);
 
+    void disableDrawingToAttachments();
+
     GLuint getFramebufferObject() { return framebufferObject; }
 
     void bindToTarget(const FramebufferTarget &target);

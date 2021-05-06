@@ -2,12 +2,21 @@
   "materials": ["DiffuseMaterial"],
   "shaderPrograms": {
     "shader1": {
-      "vertex": "shadowMapPass.vert",
-      "fragment": "shadowMapPass.frag"
+      "vertex": "shadowMapPass1.vert",
+      "geometry": "shadowMapPass1.geom",
+      "fragment": "shadowMapPass1.frag"
+    },
+    "simpleShadow": {
+        "vertex": "simpleShadow.vert",
+        "fragment": "simpleShadow.frag"
     },
     "shader2": {
       "vertex": "vertex.vert",
       "fragment": "fragment.frag"
+    },
+    "simpleLighting": {
+        "vertex": "simpleLighting.vert",
+        "fragment": "simpleLighting.frag"
     }
   },
   "passes": {

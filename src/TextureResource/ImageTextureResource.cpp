@@ -42,7 +42,8 @@ std::shared_ptr<GLTextureObject> ImageTextureResource::createGLTextureObject(uns
 
     try {
         textureObject->create(1 + numAdditionalMipMapLevels, (TextureInternalStorageFormat)getSizedColourFormat(), width,
-                              height, getPixelDataFormat(), DataType::UNSIGNED_BYTE, data.get());
+                              height);
+        textureObject->setTextureDataAtMipMapLevel(0, getPixelDataFormat(), DataType::UNSIGNED_BYTE, data.get());
     } catch (...) {
         cout << "Error creating texture resource" << endl;
         return nullptr;

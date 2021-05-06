@@ -6,11 +6,6 @@
 
 layout(location = POSITION_ATTRIBUTE_LOCATION) in vec3 position;
 layout(location = NORMAL_ATTRIBUTE_LOCATION) in vec3 normal;
-layout(location = TEXCOORD_ATTRIBUTE_LOCATION) in vec2 texCoord;
-
-out vec4 worldSpacePosition;
-out vec3 vs_Normal;
-out vec2 vs_TexCoord;
 
 layout(std140, binding = UNIFORM_TRANSFORM_MATRICES_BLOCK_BINDING_POINT) uniform SharedMatrices {
     mat4 worldToClip;
@@ -22,8 +17,5 @@ layout(std140, binding = MODEL_TO_WORLD_UNIFORM_BLOCK_BINDING_POINT) uniform Mod
 
 void main(void) {
     vec3 pos = position;
-    worldSpacePosition = modelToWorld * vec4(pos, 1);
-    vs_Normal = normal;  // TODO multiply by inverse transpose
-    gl_Position = worldToClip * worldSpacePosition;
-    vs_TexCoord = texCoord;
+    gl_Position = modelToWorld * vec4(pos, 1);
 }

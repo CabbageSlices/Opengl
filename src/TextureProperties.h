@@ -37,11 +37,13 @@ enum class TextureParameterType : GLenum {
     MIN_FILTER = GL_TEXTURE_MIN_FILTER,
     MAG_FILTER = GL_TEXTURE_MAG_FILTER,
     TEXTURE_WRAP_S = GL_TEXTURE_WRAP_S,
-    TEXTURE_WRAP_T = GL_TEXTURE_WRAP_T
+    TEXTURE_WRAP_T = GL_TEXTURE_WRAP_T,
+    TEXTURE_WRAP_R = GL_TEXTURE_WRAP_R
 };
 
 enum class TextureFilteringModes : GLint {
     LINEAR = GL_LINEAR,
+    NEAREST = GL_NEAREST,
 };
 
 enum class TextureWrapModes : GLint { CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE };
@@ -49,10 +51,9 @@ enum class TextureWrapModes : GLint { CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE };
 struct TextureProperties {
     unsigned numMipMapLevels;
     TextureInternalStorageFormat internalFormat;
-    unsigned width;
-    unsigned height;
-    PixelDataFormat formatOfData;
-    DataType dataType;
+    GLsizei width;
+    GLsizei height;
+    GLsizei depth = 0;
 
     std::map<TextureParameterType, std::any> parameters;
 };

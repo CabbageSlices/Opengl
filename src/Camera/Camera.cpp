@@ -18,6 +18,7 @@
 using std::cout;
 using std::endl;
 
+// TODO fix this so that a camera with a different orientation on init has a correct up vector
 glm::vec3 Camera::determineUpVector(const float &angleAroundHorizontalAxis) {
     // calculate direction of the current up vector of the camera
     // if camera has rotated along the horizontal axis more than 90 degrees or less than -90 degrees,

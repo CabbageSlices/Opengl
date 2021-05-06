@@ -9,6 +9,7 @@ GLFramebufferObject::GLFramebufferObject() : framebufferObject(0) {}
 void GLFramebufferObject::create() {
     if (framebufferObject == 0) {
         glCreateFramebuffers(1, &framebufferObject);
+        disableDrawingToAttachments();
     }
 }
 
@@ -38,6 +39,13 @@ void GLFramebufferObject::enableDrawingToAttachment(const FramebufferColorAttach
     }
 
     glNamedFramebufferDrawBuffer(framebufferObject, attachment);
+}
+
+void GLFramebufferObject::disableDrawingToAttachments() {
+    if (framebufferObject == 0) {
+        throw "No framebuffer present";
+    }
+    glNamedFramebufferDrawBuffer(framebufferObject, GL_NONE);
 }
 
 void GLFramebufferObject::bindToTarget(const FramebufferTarget &target) { glBindFramebuffer(target, framebufferObject); }
