@@ -5,134 +5,189 @@
 
 using std::vector;
 
-const DirectionalLight LightManager::DUMMY_DIRECTIONAL_LIGHT = DirectionalLight{{0, 20, 0, 1}, {1, 0, 0, 0}, {0, 0, 0, 0}};
-
-const PointLight LightManager::DUMMY_POINT_LIGHT = PointLight{{0, 0, 0, 0}, {0, 0, 0, 0}, 0, {0, 0, 0}};
-
-LightManager::LightManager() {
-    pointLightBuffer.create(Buffer::BufferType::UniformBuffer, nullptr, sizeof(PointLight) * POINT_LIGHTS_PER_BATCH,
-                            Buffer::UsageType::StreamDraw);
-    directionalLightBuffer.create(Buffer::BufferType::UniformBuffer, nullptr,
-                                  sizeof(DirectionalLight) * DIRECTIONAL_LIGHTS_PER_BATCH, Buffer::UsageType::StreamDraw);
-    initializeLightMatrixBuffer();
+LightManager::LightManager(int _numDirectionalLightsPerBatch, int _numPointLightsPerBatch)
+    : numDirectionalLightsPerBatch(_numDirectionalLightsPerBatch),
+      numPointLightsPerBatch(_numPointLightsPerBatch) {
+    createBuffers();
 }
 
 void LightManager::createDirectionalLight(const glm::vec4 &position, const glm::vec4 &direction,
                                           const glm::vec4 &intensity) {
-    DirectionalLight light({position, direction, intensity});
+    Light light = Light::CreateDirectionalLight(position, direction, intensity);
     directionalLights.push_back(light);
-    createLightMatrix(light);
+
+    createDirectionalLightMatrix(light);
 }
 
 void LightManager::createPointLight(const glm::vec4 &position, const glm::vec4 &intensity, const float &range) {
-    pointLights.push_back({position, intensity, range});
+    Light light = Light::CreatePointLight(position, intensity, range);
+    pointLights.push_back(light);
+
+    createPointLightMatrices(light);
 }
 
-void LightManager::connectLightDataToShader() {
+void LightManager::connectBuffersToShader() {
     directionalLightBuffer.bindToTargetBindingPoint(DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
     pointLightBuffer.bindToTargetBindingPoint(POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT);
+
+    directionalLightMatrixBuffer.bindToTargetBindingPoint(UNIFORM_DIRECTIONAL_LIGHT_MATRIX_BLOCK_BINDING_POINT);
+    pointLightMatrixBuffer.bindToTargetBindingPoint(UNIFORM_POINT_LIGHT_MATRICES_BLOCK_BINDING_POINT);
+
+    lightBatchInfoBuffer.bindToTargetBindingPoint(LIGHT_BATCH_INFO_UNIFORM_BLOCK_BINDING_POINT);
 }
 
-void LightManager::setLightMatrixForBatch(unsigned batchId) {
-    int indexFirstLightInBatchRaw = batchId * DIRECTIONAL_LIGHTS_PER_BATCH;
-    unsigned directionalLightBatchStart = indexFirstLightInBatchRaw;
-
-    if (directionalLightBatchStart >= directionalLightClipMatrices.size()) {
-        return;
+bool LightManager::sendLightMatrixBatchToShader(unsigned batchIndex) {
+    if (batchIndex >= getBatchCount()) {
+        return false;
     }
 
-    unsigned numDirectionalLightsToSend =
-        directionalLightBatchStart + DIRECTIONAL_LIGHTS_PER_BATCH <= directionalLightClipMatrices.size()
-            ? DIRECTIONAL_LIGHTS_PER_BATCH
-            : directionalLightClipMatrices.size() - directionalLightBatchStart;
+    setDirectionalLightMatricesForBatch(batchIndex);
 
-    lightMatrixBuffer.updateData(directionalLightClipMatrices.data() + directionalLightBatchStart,
-                                 numDirectionalLightsToSend * sizeof(glm::mat4), 0);
+    LightBatchInfo batchInfo = generateInfoForBatch(batchIndex);
+
+    lightBatchInfoBuffer.updateData(&batchInfo, sizeof(LightBatchInfo), 0);
+
+    return true;
 }
 
+void LightManager::setDirectionalLightMatricesForBatch(unsigned batchIndex) {
+    int numMatricesToSend =
+        calculateNumberOfLightsInBatch(directionalLights.size(), numDirectionalLightsPerBatch, batchIndex);
+
+    int indexFirstMatrix = batchIndex * numDirectionalLightsPerBatch;
+
+    size_t sizeOfDataToSend = numMatricesToSend * sizeof(glm::mat4);
+
+    if (numMatricesToSend > 0) {
+        directionalLightMatrixBuffer.updateData(directionalLightMatrices.data() + indexFirstMatrix, sizeOfDataToSend, 0);
+    }
+}
+
+void LightManager::setPointLightMatricesForBatch(unsigned batchIndex) {}
+
 int LightManager::getBatchCount() {
-    int direcitonalLightBatches = ceil((float)directionalLights.size() / DIRECTIONAL_LIGHTS_PER_BATCH);
-    int pointLightBatches = ceil((float)pointLights.size() / POINT_LIGHTS_PER_BATCH);
+    int direcitonalLightBatches = ceil((float)directionalLights.size() / numDirectionalLightsPerBatch);
+    int pointLightBatches = ceil((float)pointLights.size() / numPointLightsPerBatch);
 
     return glm::max(direcitonalLightBatches, pointLightBatches);
 }
 
-void LightManager::sendBatchToShader(int batchId) {
+bool LightManager::sendLightBatchToShader(int batchIndex) {
     // not enough batches, indicate failure
-    if (batchId >= getBatchCount()) {
-        return;
+    if (batchIndex >= getBatchCount()) {
+        return false;
     }
 
-    sendLightBatchToShader(batchId, directionalLights, directionalLightBuffer, DIRECTIONAL_LIGHTS_PER_BATCH,
-                           DUMMY_DIRECTIONAL_LIGHT);
-    sendLightBatchToShader(batchId, pointLights, pointLightBuffer, POINT_LIGHTS_PER_BATCH, DUMMY_POINT_LIGHT);
+    sendLightBatchToShader(batchIndex, numDirectionalLightsPerBatch, directionalLights, directionalLightBuffer);
+    sendLightBatchToShader(batchIndex, numPointLightsPerBatch, pointLights, pointLightBuffer);
 
-    return;
+    LightBatchInfo batchInfo = generateInfoForBatch(batchIndex);
+
+    lightBatchInfoBuffer.updateData(&batchInfo, sizeof(LightBatchInfo), 0);
+
+    return true;
 }
 
-// TODO refactor so light batch is computed elsewhere
-template <typename T>
-void LightManager::sendLightBatchToShader(int batchId, const std::vector<T> &lightsCollection, Buffer &lightBuffer,
-                                          const int maxLightInBatch, const T &dummyLight) {
-    std::vector<T> lightsToSend = getLightBatch(batchId, lightsCollection, maxLightInBatch, dummyLight);
+void LightManager::setDirectionalLightsPerBatch(int numLights) {
+    // disabling for now until i figure out a way to have a config file for all these
+    // defines, that way when testing i can have this be a larger number
+    // if (numLights > MAX_DIRECTIONAL_LIGHTS) {
+    //     throw "Can't send more direcitonal lights than limit defined in shaders";
+    // }
 
-    // put into light buffer which is connected to the shader uniform block
-    lightBuffer.updateData(lightsToSend.data(), sizeof(T) * lightsToSend.size(), 0);
+    numDirectionalLightsPerBatch = numLights;
+    createDirectionalLightBuffers();
+    clearLightBatchInfoBuffer();
 }
 
-template <typename T>
-std::vector<T> LightManager::getLightBatch(int batchId, const std::vector<T> &lightsCollection, const int maxLightInBatch,
-                                           const T &dummyLight) {
-    int indexFirstLightInBatchRaw = batchId * maxLightInBatch;
-
-    vector<T> lightsInBatch;
-
-    // make sure begin and end iterator is valid to avoid segfault
-    auto rangeStart = lightsCollection.size() <= indexFirstLightInBatchRaw
-                          ? lightsCollection.end()
-                          : lightsCollection.begin() + indexFirstLightInBatchRaw;
-
-    auto rangeEnd = (lightsCollection.size() <= indexFirstLightInBatchRaw + maxLightInBatch)
-                        ? lightsCollection.end()
-                        : lightsCollection.begin() + indexFirstLightInBatchRaw + maxLightInBatch;
-
-    // get all the lights that actually exist, and add them to the batch
-    lightsInBatch.insert(lightsInBatch.end(), rangeStart, rangeEnd);
-
-    // determine if you need to use dummy lights for batch
-    // if you don't have enough lights to fill current batch, you will need dummy lights
-    int numDummyLights = glm::clamp<int>(maxLightInBatch - lightsInBatch.size(), 0, maxLightInBatch);
-
-    // add dummy directional lights
-    lightsInBatch.insert(lightsInBatch.end(), numDummyLights, dummyLight);
-
-    return lightsInBatch;
+void LightManager::setPointLightsPerBatch(int numLights) {
+    // if (numLights > MAX_DIRECTIONAL_LIGHTS) {
+    //     throw "Can't send more point lights than limit defined in shaders";
+    // }
+    numPointLightsPerBatch = numLights;
+    createPointLightBuffers();
+    clearLightBatchInfoBuffer();
 }
 
-const vector<DirectionalLight> &LightManager::getDirectionalLights() { return directionalLights; }
+void LightManager::sendLightBatchToShader(int batchIndex, int maxLightsPerBatch, const std::vector<Light> &lights,
+                                          Buffer &lightBufferToUpdate) {
+    int numLightsToSend = calculateNumberOfLightsInBatch(lights.size(), maxLightsPerBatch, batchIndex);
 
-const vector<PointLight> &LightManager::getPointLights() { return pointLights; }
+    int indexFirstLight = batchIndex * maxLightsPerBatch;
 
-void LightManager::createLightMatrix(const DirectionalLight &light) {
+    size_t sizeOfDataToSend = numLightsToSend * sizeof(Light);
+
+    if (numLightsToSend > 0) {
+        lightBufferToUpdate.updateData(lights.data() + indexFirstLight, sizeOfDataToSend, 0);
+    }
+}
+
+void LightManager::createDirectionalLightMatrix(const Light &light) {
+    glm::vec4 direction = light.getDirection();
+    glm::vec4 position = light.getPosition();
+
     // ensure that light vector isn't parallel to global up
-    glm::vec3 kindOfNormalToLightDirection(light.direction.y, light.direction.x, light.direction.z);
-    glm::vec3 up = glm::normalize(glm::cross(glm::vec3(light.direction), kindOfNormalToLightDirection));
-    glm::mat4 worldToLight =
-        glm::lookAt(glm::vec3(light.position), glm::vec3(light.position + light.direction * 100.0f), up);
+    glm::vec3 kindOfNormalToLightDirection(direction.y, direction.x, direction.z);
+    glm::vec3 up = glm::normalize(glm::cross(glm::vec3(direction), kindOfNormalToLightDirection));
+    glm::mat4 worldToLight = glm::lookAt(glm::vec3(position), glm::vec3(position + direction * 100.0f), up);
 
     glm::mat4 lightToClip = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    directionalLightClipMatrices.push_back(lightToClip * worldToLight);
+    directionalLightMatrices.push_back(lightToClip * worldToLight);
 }
 
-void LightManager::initializeLightMatrixBuffer() {
-    if (lightMatrixBuffer.isUsed()) {
-        return;
+void LightManager::createPointLightMatrices(const Light &light) {}
+
+const vector<Light> &LightManager::getDirectionalLights() { return directionalLights; }
+
+const vector<Light> &LightManager::getPointLights() { return pointLights; }
+
+LightBatchInfo LightManager::generateInfoForBatch(unsigned batchIndex) {
+    return LightBatchInfo{
+        .numDirectionalLightsInBatch =
+            calculateNumberOfLightsInBatch(directionalLights.size(), numDirectionalLightsPerBatch, batchIndex),
+        .numPointLightsInBatch = calculateNumberOfLightsInBatch(pointLights.size(), numPointLightsPerBatch, batchIndex),
+        .batchIndex = (int)batchIndex,
+    };
+}
+
+void LightManager::clearLightBatchInfoBuffer() {
+    LightBatchInfo batchInfo{0, 0, 0};
+    lightBatchInfoBuffer.updateData(&batchInfo, sizeof(LightBatchInfo), 0);
+}
+
+void LightManager::createBuffers() {
+    createDirectionalLightBuffers();
+    createPointLightBuffers();
+
+    lightBatchInfoBuffer.create(Buffer::BufferType::UniformBuffer, nullptr, sizeof(LightBatchInfo),
+                                Buffer::UsageType::DynamicDraw);
+
+    clearLightBatchInfoBuffer();
+}
+
+void LightManager::createDirectionalLightBuffers() {
+    directionalLightBuffer.create(Buffer::BufferType::UniformBuffer, nullptr, sizeof(Light) * numDirectionalLightsPerBatch,
+                                  Buffer::UsageType::DynamicDraw);
+
+    directionalLightMatrixBuffer.create(Buffer::BufferType::UniformBuffer, nullptr,
+                                        sizeof(glm::mat4) * numDirectionalLightsPerBatch, Buffer::UsageType::DynamicDraw);
+}
+
+void LightManager::createPointLightBuffers() {
+    pointLightBuffer.create(Buffer::BufferType::UniformBuffer, nullptr, sizeof(Light) * numPointLightsPerBatch,
+                            Buffer::UsageType::DynamicDraw);
+    pointLightMatrixBuffer.create(Buffer::BufferType::UniformBuffer, nullptr,
+                                  sizeof(PointLightMatrices) * numPointLightsPerBatch, Buffer::DynamicDraw);
+}
+
+int calculateNumberOfLightsInBatch(int totalLightCount, int maxLightsPerBatch, int batchNumber) {
+    int indexFirstLight = batchNumber * maxLightsPerBatch;
+
+    if (indexFirstLight >= totalLightCount) {
+        return 0;
     }
 
-    constexpr unsigned direcitonalLightMatricesSize = sizeof(glm::mat4) * DIRECTIONAL_LIGHTS_PER_BATCH;
-    char data[direcitonalLightMatricesSize] = {0};
-    lightMatrixBuffer.create(Buffer::BufferType::UniformBuffer, data, direcitonalLightMatricesSize,
-                             Buffer::UsageType::StaticDraw);
+    int indexLastLight = indexFirstLight + maxLightsPerBatch - 1;
 
-    lightMatrixBuffer.bindToTargetBindingPoint(UNIFORM_DIRECTIONAL_LIGHT_MATRIX_BLOCK_BINDING_POINT);
+    return indexLastLight >= totalLightCount ? totalLightCount - indexFirstLight : maxLightsPerBatch;
 }

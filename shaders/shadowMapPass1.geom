@@ -22,10 +22,16 @@ layout(std140, binding = UNIFORM_POINT_LIGHT_MATRICES_BLOCK_BINDING_POINT) unifo
     vec4 lightPos;
 };
 
+layout(std140, binding = LIGHT_BATCH_INFO_UNIFORM_BLOCK_BINDING_POINT) uniform LightBatchInfo {
+    int numDirectionalLightsInBatch;
+    int numPointLightsInBatch;
+    int batchIndex;
+};
+
 void main() {
     // directional light, output one face per directional light layer
 
-    for (int light = 0; light < MAX_DIRECTIONAL_LIGHTS; ++light) {
+    for (int light = 0; light < numDirectionalLightsInBatch; ++light) {
         for (int i = 0; i < 3; ++i) {
             gl_Layer = light;
             worldSpacePosition = gl_in[i].gl_Position;

@@ -1,4 +1,8 @@
 #pragma once
+#include <math.h>
+
+#include <vector>
+
 #include "GraphicsWrapper.h"
 
 class Buffer {
@@ -13,7 +17,8 @@ class Buffer {
     enum UsageType : GLenum {
 
         StaticDraw = GL_STATIC_DRAW,
-        StreamDraw = GL_STREAM_DRAW
+        StreamDraw = GL_STREAM_DRAW,
+        DynamicDraw = GL_DYNAMIC_DRAW
     };
 
     Buffer() : buffer(0), bufferType(None) {}
@@ -41,7 +46,7 @@ class Buffer {
      * @return true if the buffer is created successfully
      * @return false otherewise
      */
-    bool create(const BufferType &type, const void *pointerToData, GLsizeiptr bufferSize, const UsageType &usageType);
+    bool create(const BufferType &type, const void *pointerToData, GLsizeiptr _bufferSize, const UsageType &usageType);
     bool updateData(const void *pointerToData, GLsizeiptr dataSize, GLintptr offsetIntoBuffer);
 
     bool isUsed() { return buffer != 0; }
@@ -68,9 +73,42 @@ class Buffer {
      */
     void bindToTargetBindingPoint(int bindingIndex);
 
+    GLsizeiptr getBufferSize() const { return bufferSize; }
+
     GLuint getBufferObject() const { return buffer; }
+
+    /**
+     * @brief reads data from this buffer into the given destination pointer.
+     *
+     * @param destination wehre to store the data
+     * @param offset offset into the buffer to begin reading from
+     * @param amountToRead how much data to read. if ommitted, reads till the end of the buffer
+     * @return True if successfully read, False if failure
+     */
+    bool read(void *destination, GLsizeiptr offset, GLsizeiptr amountToRead) const;
+    bool read(void *destination, GLsizeiptr offset = 0) const;
+
+    /**
+     * @brief reads data from this buffer into the desination. Usees the vectors data pointer to write to it.
+     * The vector WILL BE CLEARED before writing. It will automatically be reized to fit the required data.
+     *
+     * @tparam T
+     * @param destination
+     * @param offset
+     * @return true
+     * @return false
+     */
+    template <typename T>
+    bool read(std::vector<T> &destination, GLsizeiptr offset = 0) const {
+        GLsizeiptr amountToRead = bufferSize - offset;
+
+        const int numElements = ceil((double)amountToRead / sizeof(T));
+        destination.resize(numElements);
+        return read(destination.data(), offset, amountToRead);
+    }
 
   private:
     GLuint buffer;
     BufferType bufferType;
+    GLsizeiptr bufferSize;
 };

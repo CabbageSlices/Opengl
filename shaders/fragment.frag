@@ -50,7 +50,7 @@ void main(void) {
 #endif
 
     // ambient light
-    outputColor += totalMaterialColor * vec4(0.1, 0.1, 0.1, 1);
+    // outputColor += totalMaterialColor * vec4(0.1, 0.1, 0.1, 1);
 
     fragOut = outputColor;
     // fragOut = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1);

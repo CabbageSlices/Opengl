@@ -5,7 +5,7 @@ map<RenderingPass, string> renderPassNames{{RenderingPass::DEPTH_PASS, "DEPTH_PA
 
 function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
 function<void(GLuint, GLuint)> mockglBindTextureUnit;
-function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;
+function<void(GLuint, GLsizeiptr, const GLvoid*, GLenum)> mockglNamedBufferData;
 
 RenderingPass currentRenderingPass = RenderingPass::REGULAR_PASS;
 bool activateMaterials = true;
@@ -13,7 +13,7 @@ bool activateMaterials = true;
 void clearAllMockFunctions() {
     mockglBindBufferBase = nullptr;
     mockglBindTextureUnit = nullptr;
-    mockNamedBufferData = nullptr;
+    mockglNamedBufferData = nullptr;
 }
 
 void bindBufferBase(GLenum target, GLuint index, GLuint buffer) {
@@ -33,11 +33,11 @@ void bindTextureUnit(GLuint textureUnit, GLuint textureObject) {
     glBindTextureUnit(textureUnit, textureObject);
 }
 
-void namedBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) {
-    if (mockNamedBufferData) {
-        mockNamedBufferData(target, size, data, usage);
+void namedBufferData(GLuint buffer, GLsizeiptr size, const GLvoid* data, GLenum usage) {
+    if (mockglNamedBufferData) {
+        mockglNamedBufferData(buffer, size, data, usage);
         return;
     }
 
-    glNamedBufferData(target, size, data, usage);
+    glNamedBufferData(buffer, size, data, usage);
 }

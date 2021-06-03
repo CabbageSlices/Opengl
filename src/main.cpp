@@ -114,7 +114,7 @@ int main() {
         // lightManager.createDirectionalLight({0, 0, -1, 0}, {1, 1, 1, 1});
         // lightManager.createPointLight({5, 0, 0, 1}, {0.7, 0.7, 0.7, 0.7}, 10);
 
-        lightManager.connectLightDataToShader();
+        lightManager.connectBuffersToShader();
 
         sf::Clock clock;
         clock.restart();
@@ -194,6 +194,11 @@ int main() {
         cameraBuffer.create(Buffer::BufferType::UniformBuffer, 0, bufferSize, Buffer::UsageType::StreamDraw);
         cameraBuffer.bindToTargetBindingPoint(UNIFORM_TRANSFORM_MATRICES_BLOCK_BINDING_POINT);
 
+        // GETTING SHADOW ARTIFACTS when lightsPerBatch != limit set by shader
+        // this is because the depth texture doesn't have data proplery written for one of the lights
+        // ALSO ADDITIONAL PASSES WILL HAVE FUCKED UP DETPH BUFFER SINCE I"M NOT WRITING TO DEPTH BUFFER IN EACH PASS
+        // lightManager.setDirectionalLightsPerBatch(1);
+
         while (isRunning) {
             sf::Event event;
 
@@ -213,7 +218,7 @@ int main() {
             // SHADOW PASS
             currentRenderingPass = RenderingPass::DEPTH_PASS;
 
-            lightManager.setLightMatrixForBatch(0);
+            lightManager.sendLightMatrixBatchToShader(0);
 
             activateMaterials = false;
 
@@ -254,7 +259,7 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            lightManager.sendBatchToShader(0);
+            lightManager.sendLightBatchToShader(0);
 
             // bind depth map
             depthTexture.bindToTextureUnit(DIRECTIONAL_LIGHTS_SHADOWMAP_TEXTURE_UNIT);
@@ -266,7 +271,7 @@ int main() {
             // additoinal passes, enable blend
             glEnable(GL_BLEND);
             for (int i = 1; i < lightManager.getBatchCount(); ++i) {
-                lightManager.sendBatchToShader(i);
+                lightManager.sendLightBatchToShader(i);
                 cube.render();
                 secondEntity.render();
                 entity3.render();

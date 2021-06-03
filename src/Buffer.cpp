@@ -5,14 +5,15 @@
 using std::cout;
 using std::endl;
 
-bool Buffer::create(const Buffer::BufferType &type, const void *pointerToData, GLsizeiptr bufferSize,
+bool Buffer::create(const Buffer::BufferType &type, const void *pointerToData, GLsizeiptr _bufferSize,
                     const Buffer::UsageType &usageType) {
     if (buffer == 0) {
         glCreateBuffers(1, &buffer);
     }
 
-    namedBufferData(buffer, bufferSize, pointerToData, usageType);
+    namedBufferData(buffer, _bufferSize, pointerToData, usageType);
     bufferType = type;
+    bufferSize = _bufferSize;
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
@@ -51,3 +52,28 @@ void Buffer::bindToTarget() { glBindBuffer(bufferType, buffer); }
 void Buffer::unbindFromTarget() { glBindBuffer(bufferType, 0); }
 
 void Buffer::bindToTargetBindingPoint(int bindingIndex) { bindBufferBase(bufferType, bindingIndex, buffer); }
+
+bool Buffer::read(void *destination, GLsizeiptr offset, GLsizeiptr amountToRead) const {
+    if (buffer == 0) {
+        cout << "Error, no buffer created" << endl;
+        return false;
+    }
+
+    if (bufferSize == 0) {
+        cout << "buffer has no size" << endl;
+        return false;
+    }
+
+    if (amountToRead <= 0 || offset < 0 || offset + amountToRead > bufferSize) {
+        cout << "invalid data range when reading from buffer" << endl;
+        return false;
+    }
+    glGetNamedBufferSubData(buffer, offset, amountToRead, destination);
+
+    return true;
+}
+
+bool Buffer::read(void *destination, GLsizeiptr offset) const {
+    GLsizeiptr amountToRead = bufferSize - offset;
+    return read(destination, offset, amountToRead);
+}

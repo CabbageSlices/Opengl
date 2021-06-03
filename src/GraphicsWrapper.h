@@ -23,7 +23,7 @@ extern bool activateMaterials;
 // all of these mocks must be cleared manually after using
 extern function<void(GLenum, GLuint, GLuint)> mockglBindBufferBase;
 extern function<void(GLuint, GLuint)> mockglBindTextureUnit;
-extern function<void(GLenum, GLsizeiptr, const GLvoid*, GLenum)> mockNamedBufferData;
+extern function<void(GLuint, GLsizeiptr, const GLvoid*, GLenum)> mockglNamedBufferData;
 
 void clearAllMockFunctions();
 
@@ -33,7 +33,7 @@ void clearAllMockFunctions();
 // void bindBuffer(GLenum target, GLuint buffer);
 void bindBufferBase(GLenum target, GLuint index, GLuint buffer);
 void bindTextureUnit(GLuint textureUnit, GLuint textureObject);
-void namedBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+void namedBufferData(GLuint target, GLsizeiptr size, const GLvoid* data, GLenum usage);
 // void getShaderiv
 // void deleteShader
 // shaderSource
