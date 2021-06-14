@@ -102,6 +102,17 @@ class GLTextureObject {
     void setParameter(const TextureParameterType &parameterType, const TextureWrapModes &parameterValue);
 
     /**
+     * @brief set multiple parameters at once. each group corresponds to multiple parameter types.
+     *
+     * @param parameterGroup
+     * @param parameterValue
+     */
+    // this could be written as setParameter that acceps an array, but i don't wanna have to list all the parameters each
+    // time
+    void setParameterGroup(const TextureParameterGroup &parameterGroup, const TextureFilteringModes &parameterValue);
+    void setParameterGroup(const TextureParameterGroup &parameterGroup, const TextureWrapModes &parameterValue);
+
+    /**
      * @brief Clears whatever texture is currently bound to the given texture unit. Essentially sets the bound texture to 0
      *
      * @param textureUnit

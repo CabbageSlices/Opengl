@@ -94,7 +94,8 @@ int main() {
 
         Entity cube;
         cube.addComponent(cubeMeshRendererComponent);
-        cube.setPosition({0, 0, 0});
+        // cube.setPosition({0, 0, 0});
+        cube.setPosition({-2, 0, -1});
 
         std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
         Entity secondEntity;
@@ -109,10 +110,11 @@ int main() {
 
         LightManager lightManager;
         lightManager.createDirectionalLight({0, 15, 0, 1}, {0, -1, 0, 0}, {1, 0, 0, 1});
-        lightManager.createDirectionalLight({-20, 0, 0, 1}, {1, 0, 0, 0}, {0, 1, 0, 1});
+        // lightManager.createDirectionalLight({-20, 0, 0, 1}, {-1, 0, 0, 0}, {0, 1, 0, 1});
         // lightManager.createDirectionalLight({0, 0, 1, 0}, {1, 1, 1, 1});
         // lightManager.createDirectionalLight({0, 0, -1, 0}, {1, 1, 1, 1});
-        // lightManager.createPointLight({5, 0, 0, 1}, {0.7, 0.7, 0.7, 0.7}, 10);
+        lightManager.createPointLight({-2, 0, -3, 1}, {0.7, 0.7, 0.7, 0.7}, 15);
+        lightManager.createPointLight({-2, 0, 4, 1}, {0.7, 0.7, 0.7, 0.7}, 15);
 
         lightManager.connectBuffersToShader();
 
@@ -147,30 +149,33 @@ int main() {
         // GLTextureObject depthTexture(TextureType::TEXTURE_2D);
         // depthTexture.create(1, TextureInternalStorageFormat::DEPTH_COMPONENT32F, mapSize, mapSize);
 
-        depthTexture.setParameter(TextureParameterType::MIN_FILTER, TextureFilteringModes::NEAREST);
-        depthTexture.setParameter(TextureParameterType::MAG_FILTER, TextureFilteringModes::NEAREST);
+        depthTexture.setParameterGroup(TextureParameterGroup::ZOOM, TextureFilteringModes::NEAREST);
+        depthTexture.setParameterGroup(TextureParameterGroup::TEXTURE_WRAP, TextureWrapModes::CLAMP_TO_EDGE);
 
-        depthTexture.setParameter(TextureParameterType::TEXTURE_WRAP_S, TextureWrapModes::CLAMP_TO_EDGE);
-        depthTexture.setParameter(TextureParameterType::TEXTURE_WRAP_T, TextureWrapModes::CLAMP_TO_EDGE);
-        depthTexture.setParameter(TextureParameterType::TEXTURE_WRAP_R, TextureWrapModes::CLAMP_TO_EDGE);
+        GLTextureObject pointlightDepthTexture(TextureType::TEXTURE_CUBEMAP_ARRAY);
 
-        GLTextureObject colourTexture(TextureType::TEXTURE_2D_ARRAY);
-        colourTexture.create(1, TextureInternalStorageFormat::RGBA_8, mapSize, mapSize, MAX_DIRECTIONAL_LIGHTS);
+        /*must be number of layer faces, not layers. divisible by 6
+         * https://www.khronos.org/opengl/wiki/Cubemap_Texture#Cubemap_array_textures*/
+        pointlightDepthTexture.create(1, TextureInternalStorageFormat::DEPTH_COMPONENT32F, mapSize, mapSize,
+                                      MAX_POINT_LIGHTS * 6);
+        pointlightDepthTexture.setParameterGroup(TextureParameterGroup::ZOOM, TextureFilteringModes::NEAREST);
+        pointlightDepthTexture.setParameterGroup(TextureParameterGroup::TEXTURE_WRAP, TextureWrapModes::CLAMP_TO_EDGE);
 
-        colourTexture.setParameter(TextureParameterType::MIN_FILTER, TextureFilteringModes::NEAREST);
-        colourTexture.setParameter(TextureParameterType::MAG_FILTER, TextureFilteringModes::NEAREST);
+        // GLTextureObject colourTexture(TextureType::TEXTURE_2D_ARRAY);
+        // colourTexture.create(1, TextureInternalStorageFormat::RGBA_8, mapSize, mapSize, MAX_DIRECTIONAL_LIGHTS);
 
-        colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_S, TextureWrapModes::CLAMP_TO_EDGE);
-        colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_T, TextureWrapModes::CLAMP_TO_EDGE);
-        colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_R, TextureWrapModes::CLAMP_TO_EDGE);
+        // colourTexture.setParameter(TextureParameterType::MIN_FILTER, TextureFilteringModes::NEAREST);
+        // colourTexture.setParameter(TextureParameterType::MAG_FILTER, TextureFilteringModes::NEAREST);
+
+        // colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_S, TextureWrapModes::CLAMP_TO_EDGE);
+        // colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_T, TextureWrapModes::CLAMP_TO_EDGE);
+        // colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_R, TextureWrapModes::CLAMP_TO_EDGE);
 
         GLFramebufferObject fbo;
         fbo.create();
         fbo.attachTexture(FramebufferNonColorAttachment::DEPTH_ATTACHMENT, depthTexture, 0);
-        fbo.attachTexture(FramebufferColorAttachment::COLOR_ATTACHMENT0, colourTexture, 0, true);
-
-        GLTextureObject depthCubeMap(TextureType::TEXTURE_CUBEMAP);
-        depthCubeMap.create(1, TextureInternalStorageFormat::DEPTH_COMPONENT32F, mapSize, mapSize);
+        fbo.enableDrawingToAttachment(FramebufferColorAttachment::NONE);
+        // fbo.attachTexture(FramebufferColorAttachment::COLOR_ATTACHMENT0, colourTexture, 0, true);
 
         // loads the mesh data, materials, textures, and creates the shaders
         // ResourceManager::getInstance().loadFromObj("mesh.obj");
@@ -183,16 +188,15 @@ int main() {
         // vector<weak_ptr<meshData>> meshs = ResourceManager::load("blah.obj");
         // meshs[0]->materials[0]->setShader(program1);
 
-        // Material testMat(MaterialPropertiesQueryInfo);
-        // MaterialCollection matCollection;
-        // matCollection.addMaterial(RenderingPass::REGULAR_PASS, testMat);
-        // matCollection.addMaterial(RenderingPass::DEPTH_PASS, depthMat);
-        // bool hasMaterial = matCollection.activateForPass(RenderingPass::DEPTH_PASS);
-
         Buffer cameraBuffer;
         GLuint bufferSize = sizeof(glm::mat4) * 2 + sizeof(glm::vec4);
         cameraBuffer.create(Buffer::BufferType::UniformBuffer, 0, bufferSize, Buffer::UsageType::StreamDraw);
         cameraBuffer.bindToTargetBindingPoint(UNIFORM_TRANSFORM_MATRICES_BLOCK_BINDING_POINT);
+
+        Buffer shadowMapFlagsBuffer;
+        bufferSize = sizeof(int);
+        shadowMapFlagsBuffer.create(Buffer::BufferType::UniformBuffer, 0, bufferSize, Buffer::UsageType::StreamDraw);
+        shadowMapFlagsBuffer.bindToTargetBindingPoint(UNIFORM_SHADOW_MAP_FLAGS_BINDING_POINT);
 
         // GETTING SHADOW ARTIFACTS when lightsPerBatch != limit set by shader
         // this is because the depth texture doesn't have data proplery written for one of the lights
@@ -216,13 +220,15 @@ int main() {
 
             //******************************************************************
             // SHADOW PASS
+
             currentRenderingPass = RenderingPass::DEPTH_PASS;
 
+            // send a light batch so they ahve access to light data as well in depth shaders
+            lightManager.sendLightBatchToShader(0);
             lightManager.sendLightMatrixBatchToShader(0);
 
             activateMaterials = false;
 
-            // glBindFramebuffer(GL_FRAMEBUFFER, fbo);
             fbo.bindToTarget(FramebufferTarget::FRAMEBUFFER);
 
             glCullFace(GL_FRONT);
@@ -231,6 +237,21 @@ int main() {
             glViewport(0, 0, mapSize, mapSize);
             glClearColor(0, 0, 1, 1);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            int shadowMapLightType = 0;  // direcitonal light shadow pass
+            shadowMapFlagsBuffer.updateData(&shadowMapLightType, sizeof(shadowMapLightType), 0);
+
+            cube.render();
+            secondEntity.render();
+            entity3.render();
+
+            // redraw for point lights
+            fbo.attachTexture(FramebufferNonColorAttachment::DEPTH_ATTACHMENT, pointlightDepthTexture, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            shadowMapLightType = 1;  // direcitonal light shadow pass
+            shadowMapFlagsBuffer.updateData(&shadowMapLightType, sizeof(shadowMapLightType), 0);
+
             cube.render();
             secondEntity.render();
             entity3.render();
@@ -263,6 +284,7 @@ int main() {
 
             // bind depth map
             depthTexture.bindToTextureUnit(DIRECTIONAL_LIGHTS_SHADOWMAP_TEXTURE_UNIT);
+            pointlightDepthTexture.bindToTextureUnit(POINT_LIGHTS_SHADOWMAP_TEXTURE_UNIT);
 
             cube.render();
             secondEntity.render();
@@ -280,11 +302,11 @@ int main() {
             //******************************************************************
             // random blit pass
 
-            glDisable(GL_BLEND);
+            // glDisable(GL_BLEND);
 
-            // view depth buffer
+            // // view depth buffer
             // GLFramebufferObject::clearFramebufferAtTarget(FramebufferTarget::FRAMEBUFFER);
-            // colourTexture.bindToTextureUnit(0);
+            // pointlightDepthTexture.bindToTextureUnit(0);
             // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // glBindVertexArray(vao);

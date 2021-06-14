@@ -67,7 +67,7 @@ vec4 calculateDirectionalLightsContribution(vec3 surfaceNormal, Material materia
         float closestDepth = texture(directionalLightsShadowMapsSampler, vec3(projCoordinates.xy, i)).r;
         float currentDepth = projCoordinates.z;
 
-        // contribution *= currentDepth > closestDepth ? 0 : 1;
+        contribution *= currentDepth > closestDepth ? 0 : 1;
         lightTotal += contribution;
     }
 
@@ -98,7 +98,19 @@ vec4 calculatePointLightsContribution(vec3 surfaceNormal, Material material) {
     vec4 lightTotal = vec4(0, 0, 0, 0);
 
     for (int i = 0; i < numPointLightsInBatch; ++i) {
-        lightTotal = lightTotal + calculatePointLightContribution(pointLights[i], surfaceNormal, material);
+        Light light = pointLights[i];
+
+        vec3 lightToFrag = (worldSpacePosition - light.position).xyz;
+        float nearestDepth = texture(pointLightsShadowMapsSampler, vec4(lightToFrag, i)).r;
+
+        float currentDepth =
+            length(lightToFrag) /
+            (light.rangeAndPadding.x *
+             2);  // depth is mapped to the range [0, lightRange * 2] in shadow map, so we need to do hte same to compare
+
+        float shadow = nearestDepth <= currentDepth ? 0 : 1;
+        lightTotal = lightTotal + calculatePointLightContribution(pointLights[i], surfaceNormal, material) * shadow;
+        // lightTotal = vec4(nearestDepth);
     }
 
     return lightTotal;

@@ -42,6 +42,7 @@ bool LightManager::sendLightMatrixBatchToShader(unsigned batchIndex) {
     }
 
     setDirectionalLightMatricesForBatch(batchIndex);
+    setPointLightMatricesForBatch(batchIndex);
 
     LightBatchInfo batchInfo = generateInfoForBatch(batchIndex);
 
@@ -63,7 +64,17 @@ void LightManager::setDirectionalLightMatricesForBatch(unsigned batchIndex) {
     }
 }
 
-void LightManager::setPointLightMatricesForBatch(unsigned batchIndex) {}
+void LightManager::setPointLightMatricesForBatch(unsigned batchIndex) {
+    int numMatricesToSend = calculateNumberOfLightsInBatch(pointLights.size(), numPointLightsPerBatch, batchIndex);
+
+    int indexFirstMatrix = batchIndex * numPointLightsPerBatch;
+
+    size_t sizeOfDataToSend = numMatricesToSend * sizeof(PointLightMatrices);
+
+    if (numMatricesToSend > 0) {
+        pointLightMatrixBuffer.updateData(pointLightMatrices.data() + indexFirstMatrix, sizeOfDataToSend, 0);
+    }
+}
 
 int LightManager::getBatchCount() {
     int direcitonalLightBatches = ceil((float)directionalLights.size() / numDirectionalLightsPerBatch);
@@ -135,7 +146,28 @@ void LightManager::createDirectionalLightMatrix(const Light &light) {
     directionalLightMatrices.push_back(lightToClip * worldToLight);
 }
 
-void LightManager::createPointLightMatrices(const Light &light) {}
+void LightManager::createPointLightMatrices(const Light &light) {
+    glm::mat4 lightToClip = glm::perspective(glm::radians(90.0f), 1.0f, 0.5f, 25.0f);
+
+    const glm::vec3 &position = light.getPosition();
+
+    PointLightMatrices matrices;
+
+    matrices.matrices[PointLightMatrices::LEFT] =
+        lightToClip * glm::lookAt(position, position + glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0));
+    matrices.matrices[PointLightMatrices::RIGHT] =
+        lightToClip * glm::lookAt(position, position + glm::vec3(1, 0, 0), glm::vec3(0, 1, 0));
+    matrices.matrices[PointLightMatrices::UP] =
+        lightToClip * glm::lookAt(position, position + glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
+    matrices.matrices[PointLightMatrices::DOWN] =
+        lightToClip * glm::lookAt(position, position + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1));
+    matrices.matrices[PointLightMatrices::FRONT] =
+        lightToClip * glm::lookAt(position, position + glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+    matrices.matrices[PointLightMatrices::BACK] =
+        lightToClip * glm::lookAt(position, position + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+
+    pointLightMatrices.push_back(matrices);
+}
 
 const vector<Light> &LightManager::getDirectionalLights() { return directionalLights; }
 

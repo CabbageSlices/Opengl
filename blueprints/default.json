@@ -6,10 +6,6 @@
       "geometry": "shadowMapPass1.geom",
       "fragment": "shadowMapPass1.frag"
     },
-    "simpleShadow": {
-        "vertex": "simpleShadow.vert",
-        "fragment": "simpleShadow.frag"
-    },
     "shader2": {
       "vertex": "vertex.vert",
       "fragment": "fragment.frag"

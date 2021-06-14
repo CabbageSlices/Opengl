@@ -119,4 +119,30 @@ void GLTextureObject::setParameter(const TextureParameterType &parameterType, co
     properties.parameters[parameterType] = parameterValue;
 }
 
+void GLTextureObject::setParameterGroup(const TextureParameterGroup &parameterGroup,
+                                        const TextureFilteringModes &parameterValue) {
+    if (textureObject == 0) {
+        throw "No texture created";
+    }
+
+    auto &textureParameterTypes = textureParametersInParameterGroup.at(parameterGroup);
+
+    for (const auto &type : textureParameterTypes) {
+        setParameter(type, parameterValue);
+    }
+}
+
+void GLTextureObject::setParameterGroup(const TextureParameterGroup &parameterGroup,
+                                        const TextureWrapModes &parameterValue) {
+    if (textureObject == 0) {
+        throw "No texture created";
+    }
+
+    auto &textureParameterTypes = textureParametersInParameterGroup.at(parameterGroup);
+
+    for (const auto &type : textureParameterTypes) {
+        setParameter(type, parameterValue);
+    }
+}
+
 void GLTextureObject::bindToTextureUnit(unsigned textureUnit) { bindTextureUnit(textureUnit, textureObject); }

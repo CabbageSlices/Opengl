@@ -1,8 +1,8 @@
 #pragma once
 #include <any>
 #include <map>
+#include <vector>
 
-#include "GLTextureObject.h"
 #include "GraphicsWrapper.h"
 
 enum class SizedColourFormats {
@@ -40,6 +40,15 @@ enum class TextureParameterType : GLenum {
     TEXTURE_WRAP_T = GL_TEXTURE_WRAP_T,
     TEXTURE_WRAP_R = GL_TEXTURE_WRAP_R
 };
+
+// groups together the above parameters to make it easier to set multiple parameters at once
+enum class TextureParameterGroup : GLint {
+    ZOOM,
+    TEXTURE_WRAP,
+};
+
+// what parameters belong to each group
+const extern std::map<TextureParameterGroup, std::vector<TextureParameterType>> textureParametersInParameterGroup;
 
 enum class TextureFilteringModes : GLint {
     LINEAR = GL_LINEAR,

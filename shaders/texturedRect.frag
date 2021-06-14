@@ -5,7 +5,7 @@ out vec4 fragOut;
 in vec2 texCoord;
 
 layout(binding = 1) uniform sampler2D s;
-layout(binding = 0) uniform sampler2DArray s1;
+layout(binding = 0) uniform samplerCubeArray s1;
 
 float near = 0.01;
 float far = 30.0;
@@ -23,5 +23,5 @@ void main(void) {
     // float depth = texture(s1, vec3(texCoord, 0)).r;
     // fragOut = vec4(vec3(LinearizeDepth(depth) / far), 1);
 
-    fragOut = texture(s, vec2(texCoord));
+    fragOut = texture(s1, vec4(texCoord.x, texCoord.y, -3, 0));
 }
