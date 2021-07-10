@@ -1,8 +1,6 @@
 #version 460 core
 #include "attributeIndices.vert"
 #include "defines.frag"
-#include "uniformBlockBindings.vert"
-#include "uniformLocations.vert"
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = MAX_POINT_LIGHTS * 6 * 3) out;

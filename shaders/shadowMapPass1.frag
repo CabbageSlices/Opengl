@@ -1,6 +1,5 @@
 #version 460 core
 #include "defines.frag"
-#include "uniformBlockBindings.vert"
 
 in flat int pointLightIndexForDepthCalculation;
 in vec4 worldSpacePosition;

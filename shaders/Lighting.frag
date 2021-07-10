@@ -1,7 +1,5 @@
 #ifdef FRAGMENT_BASE
 #include "defines.frag"
-#include "uniformBlockBindings.vert"
-#include "uniformLocations.vert"
 
 struct Light {
     vec4 position;

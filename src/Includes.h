@@ -11,14 +11,13 @@
 #include <vector>
 
 #include "./GraphicsWrapper.h"
+#include "defines.frag"
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtx/string_cast.hpp"
 #include "stb_image.h"
-#include "uniformBlockBindings.vert"
-#include "uniformLocations.vert"
 
 using std::cout;
 using std::endl;

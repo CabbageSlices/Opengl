@@ -1,7 +1,8 @@
 #ifndef DIFFUSE_MATERIAL
 #define DIFFUSE_MATERIAL
+#include "defines.frag"
 #include "samplerBindings.frag"
-#include "uniformBlockBindings.vert"
+
 
 layout(std140, binding = MATERIAL_UNIFORM_BLOCK_BINDING_POINT) uniform DiffuseMaterial {
     vec4 diffuseColor;            // offset 0

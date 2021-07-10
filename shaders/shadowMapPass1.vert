@@ -1,8 +1,6 @@
 #version 460 core
 #include "attributeIndices.vert"
 #include "defines.frag"
-#include "uniformBlockBindings.vert"
-#include "uniformLocations.vert"
 
 layout(location = POSITION_ATTRIBUTE_LOCATION) in vec3 position;
 layout(location = NORMAL_ATTRIBUTE_LOCATION) in vec3 normal;

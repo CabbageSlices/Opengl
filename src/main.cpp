@@ -229,6 +229,7 @@ int main() {
 
             activateMaterials = false;
 
+            fbo.attachTexture(FramebufferNonColorAttachment::DEPTH_ATTACHMENT, depthTexture, 0);
             fbo.bindToTarget(FramebufferTarget::FRAMEBUFFER);
 
             glCullFace(GL_FRONT);
@@ -249,7 +250,7 @@ int main() {
             fbo.attachTexture(FramebufferNonColorAttachment::DEPTH_ATTACHMENT, pointlightDepthTexture, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            shadowMapLightType = 1;  // direcitonal light shadow pass
+            shadowMapLightType = 1;  // point light shadow pass
             shadowMapFlagsBuffer.updateData(&shadowMapLightType, sizeof(shadowMapLightType), 0);
 
             cube.render();
