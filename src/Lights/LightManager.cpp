@@ -147,24 +147,26 @@ void LightManager::createDirectionalLightMatrix(const Light &light) {
 }
 
 void LightManager::createPointLightMatrices(const Light &light) {
-    glm::mat4 lightToClip = glm::perspective(glm::radians(90.0f), 1.0f, 0.5f, 25.0f);
+    glm::mat4 lightToClip = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, light.getRange() * 2);
 
     const glm::vec3 &position = light.getPosition();
 
     PointLightMatrices matrices;
 
-    matrices.matrices[PointLightMatrices::LEFT] =
-        lightToClip * glm::lookAt(position, position + glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0));
+    // https://stackoverflow.com/questions/11685608/convention-of-faces-in-opengl-cubemapping/11690553#11690553
+    // cube map axes, up direction in diagram correspond to up vector for projection
     matrices.matrices[PointLightMatrices::RIGHT] =
-        lightToClip * glm::lookAt(position, position + glm::vec3(1, 0, 0), glm::vec3(0, 1, 0));
+        lightToClip * glm::lookAt(position, position + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
+    matrices.matrices[PointLightMatrices::LEFT] =
+        lightToClip * glm::lookAt(position, position + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
     matrices.matrices[PointLightMatrices::UP] =
-        lightToClip * glm::lookAt(position, position + glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
+        lightToClip * glm::lookAt(position, position + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
     matrices.matrices[PointLightMatrices::DOWN] =
-        lightToClip * glm::lookAt(position, position + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1));
+        lightToClip * glm::lookAt(position, position + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));
     matrices.matrices[PointLightMatrices::FRONT] =
-        lightToClip * glm::lookAt(position, position + glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+        lightToClip * glm::lookAt(position, position + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0));
     matrices.matrices[PointLightMatrices::BACK] =
-        lightToClip * glm::lookAt(position, position + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+        lightToClip * glm::lookAt(position, position + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0));
 
     pointLightMatrices.push_back(matrices);
 }

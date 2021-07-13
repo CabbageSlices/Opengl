@@ -21,7 +21,7 @@ layout(std140, binding = MODEL_TO_WORLD_UNIFORM_BLOCK_BINDING_POINT) uniform Mod
 void main(void) {
     vec3 pos = position;
     worldSpacePosition = modelToWorld * vec4(pos, 1);
-    vs_Normal = normal;  // TODO multiply by inverse transpose
+    vs_Normal = (transpose(inverse(modelToWorld)) * vec4(normal, 0)).xyz;  // TODO multiply by inverse transpose
     gl_Position = worldToClip * worldSpacePosition;
     vs_TexCoord = texCoord;
 }

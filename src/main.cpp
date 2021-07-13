@@ -89,32 +89,54 @@ int main() {
 
         glPointSize(20);
 
-        std::shared_ptr<MeshData> cubeMeshData = loadFromObj("smoothsphere.obj");
-        std::shared_ptr<MeshRendererComponent> cubeMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
+        std::shared_ptr<MeshData> cubeMeshData = loadFromObj("cube.obj");
+        std::shared_ptr<MeshRendererComponent> cubeMeshRenderer(new MeshRendererComponent(cubeMeshData));
+
+        std::shared_ptr<MeshData> sphereMeshData = loadFromObj("smoothspherewhite.obj");
+        std::shared_ptr<MeshRendererComponent> sphereMeshRenderer(new MeshRendererComponent(sphereMeshData));
+
+        std::shared_ptr<MeshData> containerMeshData = loadFromObj("container.obj");
+        std::shared_ptr<MeshRendererComponent> containerMeshRenderer(new MeshRendererComponent(containerMeshData));
+
+        Entity container;
+        container.addComponent(containerMeshRenderer);
+        container.setRotation(0, 0, 90);
+
+        vector<Entity*> entities;
 
         Entity cube;
-        cube.addComponent(cubeMeshRendererComponent);
-        // cube.setPosition({0, 0, 0});
-        cube.setPosition({-2, 0, -1});
+        cube.addComponent(cubeMeshRenderer);
+        cube.setPosition({-6, -3.6, 0});
 
-        std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(cubeMeshData));
+        std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(sphereMeshData));
         Entity secondEntity;
         secondEntity.addComponent(secondMeshRendererComponent);
-        secondEntity.setPosition({-0.65, 5, 0});
+        secondEntity.setPosition({-1.8, -2.5, -2});
 
         Entity entity3;
         entity3.addComponent(secondMeshRendererComponent);
-        entity3.setPosition({-2, 0, 1});
+        entity3.setPosition({-7, -3.6, -3});
+
+        // entities.push_back(&cube);
+        entities.push_back(&secondEntity);
+        entities.push_back(&entity3);
+        entities.push_back(&container);
+
+        auto renderEntities = [&]() {
+            for (auto& entity : entities) {
+                entity->render();
+            }
+        };
 
         CameraController cameraController({0, 0, 5}, {0, 0, 0});
 
         LightManager lightManager;
-        lightManager.createDirectionalLight({0, 15, 0, 1}, {0, -1, 0, 0}, {1, 0, 0, 1});
+        // lightManager.createDirectionalLight({0, 20, 0, 1}, {0, -1, 0, 0}, {1, 1, 1, 1});
         // lightManager.createDirectionalLight({-20, 0, 0, 1}, {-1, 0, 0, 0}, {0, 1, 0, 1});
         // lightManager.createDirectionalLight({0, 0, 1, 0}, {1, 1, 1, 1});
         // lightManager.createDirectionalLight({0, 0, -1, 0}, {1, 1, 1, 1});
-        lightManager.createPointLight({-2, 0, -3, 1}, {0.7, 0.7, 0.7, 0.7}, 15);
-        lightManager.createPointLight({-2, 0, 4, 1}, {0.7, 0.7, 0.7, 0.7}, 15);
+        lightManager.createPointLight({-4.5, 1.5, -3, 1}, {0.8, 0.8, 0.8, 0.8}, 15);
+        // lightManager.createPointLight({-2, 0, 4, 1}, {0.7, 0.7, 0.7, 0.7}, 15);
 
         lightManager.connectBuffersToShader();
 
@@ -146,9 +168,6 @@ int main() {
         GLTextureObject depthTexture(TextureType::TEXTURE_2D_ARRAY);
         depthTexture.create(1, TextureInternalStorageFormat::DEPTH_COMPONENT32F, mapSize, mapSize, MAX_DIRECTIONAL_LIGHTS);
 
-        // GLTextureObject depthTexture(TextureType::TEXTURE_2D);
-        // depthTexture.create(1, TextureInternalStorageFormat::DEPTH_COMPONENT32F, mapSize, mapSize);
-
         depthTexture.setParameterGroup(TextureParameterGroup::ZOOM, TextureFilteringModes::NEAREST);
         depthTexture.setParameterGroup(TextureParameterGroup::TEXTURE_WRAP, TextureWrapModes::CLAMP_TO_EDGE);
 
@@ -160,16 +179,6 @@ int main() {
                                       MAX_POINT_LIGHTS * 6);
         pointlightDepthTexture.setParameterGroup(TextureParameterGroup::ZOOM, TextureFilteringModes::NEAREST);
         pointlightDepthTexture.setParameterGroup(TextureParameterGroup::TEXTURE_WRAP, TextureWrapModes::CLAMP_TO_EDGE);
-
-        // GLTextureObject colourTexture(TextureType::TEXTURE_2D_ARRAY);
-        // colourTexture.create(1, TextureInternalStorageFormat::RGBA_8, mapSize, mapSize, MAX_DIRECTIONAL_LIGHTS);
-
-        // colourTexture.setParameter(TextureParameterType::MIN_FILTER, TextureFilteringModes::NEAREST);
-        // colourTexture.setParameter(TextureParameterType::MAG_FILTER, TextureFilteringModes::NEAREST);
-
-        // colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_S, TextureWrapModes::CLAMP_TO_EDGE);
-        // colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_T, TextureWrapModes::CLAMP_TO_EDGE);
-        // colourTexture.setParameter(TextureParameterType::TEXTURE_WRAP_R, TextureWrapModes::CLAMP_TO_EDGE);
 
         GLFramebufferObject fbo;
         fbo.create();
@@ -232,8 +241,6 @@ int main() {
             fbo.attachTexture(FramebufferNonColorAttachment::DEPTH_ATTACHMENT, depthTexture, 0);
             fbo.bindToTarget(FramebufferTarget::FRAMEBUFFER);
 
-            glCullFace(GL_FRONT);
-
             glDisable(GL_BLEND);
             glViewport(0, 0, mapSize, mapSize);
             glClearColor(0, 0, 1, 1);
@@ -242,9 +249,7 @@ int main() {
             int shadowMapLightType = 0;  // direcitonal light shadow pass
             shadowMapFlagsBuffer.updateData(&shadowMapLightType, sizeof(shadowMapLightType), 0);
 
-            cube.render();
-            secondEntity.render();
-            entity3.render();
+            renderEntities();
 
             // redraw for point lights
             fbo.attachTexture(FramebufferNonColorAttachment::DEPTH_ATTACHMENT, pointlightDepthTexture, 0);
@@ -253,9 +258,7 @@ int main() {
             shadowMapLightType = 1;  // point light shadow pass
             shadowMapFlagsBuffer.updateData(&shadowMapLightType, sizeof(shadowMapLightType), 0);
 
-            cube.render();
-            secondEntity.render();
-            entity3.render();
+            renderEntities();
 
             //******************************************************************
             // regular pass
@@ -287,17 +290,14 @@ int main() {
             depthTexture.bindToTextureUnit(DIRECTIONAL_LIGHTS_SHADOWMAP_TEXTURE_UNIT);
             pointlightDepthTexture.bindToTextureUnit(POINT_LIGHTS_SHADOWMAP_TEXTURE_UNIT);
 
-            cube.render();
-            secondEntity.render();
-            entity3.render();
+            renderEntities();
 
             // additoinal passes, enable blend
             glEnable(GL_BLEND);
             for (int i = 1; i < lightManager.getBatchCount(); ++i) {
                 lightManager.sendLightBatchToShader(i);
-                cube.render();
-                secondEntity.render();
-                entity3.render();
+
+                renderEntities();
             }
 
             //******************************************************************

@@ -89,7 +89,7 @@ vec4 calculatePointLightContribution(Light pointLight, vec3 surfaceNormal, Mater
 
     float specularFactor = computeSpecularFactor(dirToLight, surfaceNormal, material.specularCoefficient);
     vec4 specularTerm = pointLight.intensity * specularFactor * step(0.001, nDotL);
-    return diffuseTerm + specularTerm;
+    return (diffuseTerm + specularTerm) * attenuation;
 }
 
 vec4 calculatePointLightsContribution(vec3 surfaceNormal, Material material) {
@@ -106,7 +106,7 @@ vec4 calculatePointLightsContribution(vec3 surfaceNormal, Material material) {
             (light.rangeAndPadding.x *
              2);  // depth is mapped to the range [0, lightRange * 2] in shadow map, so we need to do hte same to compare
 
-        float shadow = nearestDepth <= currentDepth ? 0 : 1;
+        float shadow = nearestDepth <= currentDepth - 0.005 ? 0 : 1;
         lightTotal = lightTotal + calculatePointLightContribution(pointLights[i], surfaceNormal, material) * shadow;
         // lightTotal = vec4(nearestDepth);
     }
