@@ -3,70 +3,33 @@
 #include <vector>
 
 #include "SFML\Window.hpp"
+#include "Transform.h"
 #include "glm\glm.hpp"
 #include "glm\gtc\quaternion.hpp"
 
 class Camera {
   public:
-    // angle is in radians
-    // angle is between 0 and 2pi
-    static glm::vec3 determineUpVector(const float &angleAroundHorizontalAxis);
-
     Camera();
-    Camera(glm::vec3 initialPosition, glm::vec3 initialFocalPoint);
+    Camera(glm::vec3 initialPosition);
 
-    void setPosition(float x, float y, float z);
-    void focusOnPoint(float x, float y, float z);
+    void setPosition(const glm::vec3 &position);
+    void translate(const glm::vec3 &offset);
+    void setOrientation(const glm::quat &orientation);
 
     glm::mat4 calculateWorldToClipMatrix() const;
     glm::mat4 getWorldToCameraMatrix() const;
     glm::vec3 getPosition() const;
 
+    const Transform &getTransform() { return transform; }
+    glm::vec3 getUpVector() const;
+    glm::vec3 getForwardVector() const;
+    glm::vec3 getRightVector() const;
+
     // zoom in out
     void changeFov(const float &fovDelta);
 
-    // move closer/away from target, moves along the forward direction by distance
-    void moveTowardsTarget(const float &distance);
-
-    // translate in a plane perpindcular to the screen
-    // that is, x axis moves left and right on the screen as viewed by hte user,
-    // y axis is up and down as viewed by the user
-    // offset is the offset in the 2d plane to move
-    void translateIn2DPlane(const glm::vec2 &offset);
-
-    // rotate around the currently focused target
-    // must be in radians
-    // delta x is rotation around the horizontal axis, y is rotation around vertical axis
-    void rotateAroundTarget(glm::vec2 rotationDelta);
-
-    // rotate camera around it's local origin
-    // must be in radians
-    // delta x is rotation around the horizontal axis, y is rotation around vertical axis
-    void rotate(glm::vec2 rotationDelta);
-
   private:
-    // if the forward vector aligns with global y axis then the camera wont be able to rotate around x axis anymore
-    // since they are perpindicular the cross product is 0 so you can't calculate the right vector.
-    // checks if the current orientation + the given delta will be at or cross 90 or -90 degres
-    // if so it will calculate a new rotation delta so that when the new delta is added to the current rotation it will not
-    // be 90 or -90, and will go in the direction that yo uare trying to rotate. returns true if the delta was changed, false
-    // other wise if this returns true you need to calculate a new up vector for hte camera
-    bool avoidAligningForwardToUp(float &horizontalRotationDelta);
-
-    // takes the given rotation delta and calculates a quaternion that will represent the given rotation
-    // rotationDelta should be rotation around the horizontal axis, and the up vector
-    // function will ensure the forward vector and global y axis are never aligned
-    glm::quat processRotationDelta(glm::vec2 rotationDelta);
-
-    glm::vec3 getForward();
-
-    glm::vec3 worldPos;
-
-    float angleAroundHorizontalAxis;
-
-    // point to revolve around when using revolve around target feature
-    glm::vec3 focalPoint;
-    const float defaultFocalPointDistance;
+    Transform transform;
 
     float fov;
     glm::mat4 projectionMatrix;

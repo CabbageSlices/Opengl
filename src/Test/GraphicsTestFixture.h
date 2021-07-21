@@ -20,7 +20,7 @@ using ::testing::MockFunction;
 // will reset the context between each test
 class GraphicsTest : public ::testing::Test {
   public:
-    GraphicsTest() : context(new sf::Context(sf::ContextSettings(24, 8, 4, 4, 6, sf::ContextSettings::Core), 800, 600)) {
+    GraphicsTest() : context(new sf::Context(sf::ContextSettings(24, 8, 4, 4, 6, sf::ContextSettings::Core), 1024, 768)) {
         context->setActive(true);
     }
 

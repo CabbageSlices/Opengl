@@ -48,9 +48,9 @@ int main() {
         cout << "Unhandled exception" << endl;
         std::abort();
     });
-    cout << sizeof(bool) << endl;
+
     // setup opengl context with version 4.6 core
-    sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default,
+    sf::Window window(sf::VideoMode(1024, 768), "OpenGL", sf::Style::Default,
                       sf::ContextSettings(24, 8, 4, 4, 6, sf::ContextSettings::Core));
 
     // activte the context
@@ -128,7 +128,7 @@ int main() {
             }
         };
 
-        CameraController cameraController({0, 0, 5}, {0, 0, 0});
+        CameraController cameraController({0, 0, 5});
 
         LightManager lightManager;
         // lightManager.createDirectionalLight({0, 20, 0, 1}, {0, -1, 0, 0}, {1, 1, 1, 1});
@@ -211,6 +211,7 @@ int main() {
         // this is because the depth texture doesn't have data proplery written for one of the lights
         // ALSO ADDITIONAL PASSES WILL HAVE FUCKED UP DETPH BUFFER SINCE I"M NOT WRITING TO DEPTH BUFFER IN EACH PASS
         // lightManager.setDirectionalLightsPerBatch(1);
+        glViewport(0, 0, 1024, 768);
 
         while (isRunning) {
             sf::Event event;
@@ -279,8 +280,6 @@ int main() {
             // the triangle on top will be blended together.
             program1.useProgram();
             glClearColor(0, 0, 0, 0);
-
-            glViewport(0, 0, 800, 600);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

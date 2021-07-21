@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 
 int main(int argc, char *argv[]) {
-    sf::Context context(sf::ContextSettings(24, 8, 4, 4, 6, sf::ContextSettings::Core), 800, 600);
+    sf::Context context(sf::ContextSettings(24, 8, 4, 4, 6, sf::ContextSettings::Core), 1024, 768);
 
     // load the extension functions since sfml doesn't do it for you
     if (!gladLoadGL()) {
