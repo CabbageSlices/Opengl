@@ -36,6 +36,7 @@ class RenderBlueprint {
     unsigned getId() const { return id; }
 
     void setMaterial(const std::string &materialName, const std::shared_ptr<Material> &material);
+    const std::shared_ptr<Material> getMaterial(const std::string &materialName);
 
   private:
     void parseJsonSchema(const std::string &blueprintJsonSchema);

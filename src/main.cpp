@@ -106,7 +106,7 @@ int main() {
 
         Entity cube;
         cube.addComponent(cubeMeshRenderer);
-        cube.setPosition({-6, -3.6, 0});
+        cube.setPosition({-4.7, -3.5, -3});
 
         std::shared_ptr<MeshRendererComponent> secondMeshRendererComponent(new MeshRendererComponent(sphereMeshData));
         Entity secondEntity;
@@ -117,7 +117,7 @@ int main() {
         entity3.addComponent(secondMeshRendererComponent);
         entity3.setPosition({-7, -3.6, -3});
 
-        // entities.push_back(&cube);
+        entities.push_back(&cube);
         entities.push_back(&secondEntity);
         entities.push_back(&entity3);
         entities.push_back(&container);
@@ -153,11 +153,16 @@ int main() {
 
         int width = 0, height = 0, channels = 0;
 
-        unsigned char* imageData = stbi_load("./images/small.png", &width, &height, &channels, 0);
+        unsigned char* imageData = stbi_load("./images/grasslands.jpg", &width, &height, &channels, 0);
 
         if (!imageData) {
             cout << "failed to load image" << endl;
         }
+
+        ImageTextureResource image("./images/grasslands.jpg");
+        auto imageGLObject = image.createGLTextureObject(0);
+
+        cubeMeshData->renderBlueprints[0]->getMaterial("DiffuseMaterial")->setTexture("diffuseTexture", imageGLObject);
 
         // TODO load image as texture
         GLuint vao;

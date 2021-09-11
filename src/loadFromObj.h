@@ -235,12 +235,12 @@ inline shared_ptr<MeshData> loadFromObj(
     vector<shared_ptr<Material> > convertedMaterials;
     tinyobjMaterialsToCustomMaterials(materials, convertedMaterials);
 
+    // add default material so every mesh always has some material
+    if (convertedMaterials.size() == 0) convertedMaterials.push_back(Material::createDefaultMaterial());
+
     // generate blueprints
     vector<shared_ptr<RenderBlueprint> > blueprints;
     createBlueprintsFromMaterials(convertedMaterials, blueprints);
-
-    // add default material so every mesh always has some material
-    if (convertedMaterials.size() == 0) convertedMaterials.push_back(Material::createDefaultMaterial());
 
     tinyobj::mesh_t mesh = shapes[0].mesh;
     MeshAttributes reorderedAttributes;

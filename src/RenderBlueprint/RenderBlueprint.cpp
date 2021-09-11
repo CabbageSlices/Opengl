@@ -103,6 +103,13 @@ void RenderBlueprint::setMaterial(const std::string &materialName, const std::sh
     material->requireBufferUpdate();
 }
 
+const std::shared_ptr<Material> RenderBlueprint::getMaterial(const std::string &materialName) {
+    if (materials.count(materialName) == 0) {
+        throw "Material \'" + materialName + "\' not part of the blueprint, cannot set material";
+    }
+    return materials[materialName];
+}
+
 void RenderBlueprint::parseJsonSchema(const string &blueprintJsonSchema) {
     json schema = json::parse(blueprintJsonSchema);
 
