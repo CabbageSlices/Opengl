@@ -1,5 +1,5 @@
 # Opengl
-Simple rendering engine made with C++ and OpenGL. Created to use as a testbed for various rendering effects.
+Rendering engine made with C++ and OpenGL. Created to use as a testbed for various rendering effects.
 Currently loads and renders a mesh from a .obj file with support for textures, point lights, direcitonal lights, and shadows (both point and directional).
 Uses a custom blueprint schema to specify material properties and shaders.
 
