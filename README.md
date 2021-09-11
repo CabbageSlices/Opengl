@@ -5,7 +5,7 @@ Uses a custom blueprint schema to specify material properties and shaders.
 
 Planned to add in the future:
 
-Deferred rendering
-Forward+ rendering
-multi render pass specification via blueprint
-Global illumination
+- Deferred rendering
+- Forward+ rendering
+- multi render pass specification via blueprint
+- Global illumination
